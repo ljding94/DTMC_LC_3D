@@ -46,17 +46,14 @@ int main(int argc, char const *argv[])
     N = membrane.mesh.size();
     if (argc == 11)
     {
-        // use "triangulation kar lam local" for local running
+        // use "prog name par* local" for local running
         // used for local running!
         std::cout << "running on local machine\n";
         folder = "../data/scratch_local";
 
         membrane.State_write(folder + "/State_" + finfo + "_init.txt");
         membrane.Thermal(0, int(N / (delta_s * delta_s)) + 1, 2, delta_s, delta_theta);
-        // membrane.O_MC_measure(5, 1, int(N / (ds * ds)) + 1, ds,
         membrane.O_MC_measure(20, 5, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, folder, finfo);
-        // membrane.O_MC_measure(2, 1, 0, delta_s, delta_theta, folder,
-        // finfo,bin_num_r);
         membrane.State_write(folder + "/State_" + finfo + ".txt");
 
         return 0;
@@ -65,12 +62,10 @@ int main(int argc, char const *argv[])
     {
         // ccv running
         folder = "/users/lding3/scratch";
-        // membrane.Thermal(500, N / (delta_s * delta_s), 10,
-        // delta_s,delta_theta);
         // used 2000, 4000 for manuscript
-        membrane.Thermal(1000, N / (delta_s * delta_s), 1, delta_s,
+        membrane.Thermal(1500, N / (delta_s * delta_s), 1, delta_s,
                          delta_theta);
-        membrane.O_MC_measure(2000, 50, N / (delta_s * delta_s) + 1, delta_s,
+        membrane.O_MC_measure(3000, 10, N / (delta_s * delta_s) + 1, delta_s,
                               delta_theta, folder, finfo);
         membrane.State_write(folder + "/State_" + finfo + ".txt");
 

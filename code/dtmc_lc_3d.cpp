@@ -499,6 +499,8 @@ void dtmc_lc::init_cylinder_shape(double d0_)
             }
         }
     }
+    // add edges if Ne>2
+    // TODO: add triangle edge bond
 }
 
 void dtmc_lc::push_neis_back(int i, std::vector<int> nei_dist)

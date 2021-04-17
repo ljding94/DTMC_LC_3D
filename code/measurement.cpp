@@ -581,4 +581,39 @@ std::vector<double> dtmc_lc::Gij_m()
     Gij[8] = Gij[8] / N - zc * zc;
     return Gij;
 }
+
+double dtmc_lc::D_edge_com_m()
+{
+    // only work for Ne=2 now
+    if (Ne != 2)
+    {
+        return 0;
+    }
+    // com of 2 edges
+    std::vector<double> Rc0{0, 0, 0};
+    std::vector<double> Rc1{0, 0, 0};
+    double D_edge = 0;
+    for (int i = 0; i < edge_lists[0].size(); i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            Rc0[j] += mesh[edge_lists[0][i]].R[j];
+        }
+    }
+    for (int i = 0; i < edge_lists[1].size(); i++)
+    {
+        for (int j = 0; j < 3; j++)
+        {
+            Rc1[j] += mesh[edge_lists[1][i]].R[j];
+        }
+    }
+    for (int j = 0; j < 3; j++)
+    {
+        Rc0[j] /= edge_lists[0].size();
+        Rc1[j] /= edge_lists[1].size();
+        D_edge += std::pow(Rc1[j] - Rc0[j], 2);
+    }
+    D_edge = std::sqrt(D_edge);
+    return D_edge;
+}
 #pragma endregion

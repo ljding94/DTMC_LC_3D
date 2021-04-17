@@ -200,6 +200,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<double> IK_all;
     std::vector<int> Bond_num_all;
 
+    std::vector<double> D_edge_all;
     std::vector<std::vector<double>> Gij_all;
 
     double bead_accept = 0;
@@ -246,6 +247,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         if (sweep_n % sweep_p_G == 0)
         {
             Gij_all.push_back(Gij_m());
+            D_edge_all.push_back(D_edge_com_m());
         }
     }
 
@@ -294,13 +296,13 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::ofstream fG(folder + "/Gij_" + finfo + ".txt");
     if (fG.is_open())
     {
-        fG << "Gxx,Gxy,Gxz,Gyx,Gyy,Gyz,Gzx,Gzy,Gzz\n";
+        fG << "D_edge_com,Gxx,Gxy,Gxz,Gyx,Gyy,Gyz,Gzx,Gzy,Gzz\n";
         for (int i = 0; i < Gij_all.size(); i++)
         {
-            fG << Gij_all[i][0] << ",";
-            for (int j = 1; j < Gij_all[0].size(); j++)
+            fG << D_edge_all[i];
+            for (int j = 0; j < Gij_all[0].size(); j++)
             {
-                fG << Gij_all[i][j] << ",";
+                fG << "," << Gij_all[i][j];
             }
             fG << "\n";
         }

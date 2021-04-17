@@ -126,6 +126,8 @@ public:
 
     // Gyration tensor measurement
     std::vector<double> Gij_m();
+    // seperation between 2 edges measurement
+    double D_edge_com_m();
     // normalized twist from center of mass measurement
     // (u(r)*nu)^2, how mush director twist about membrane nematic director
     std::vector<double> un2dis_m(int bin_num);
