@@ -105,7 +105,7 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
         #cbar=plt.colorbar(sm, ticks=[-0.1,-0.05,0])
         #cbar.ax.set_yticklabels(["-0.1","-0.05","0"])
     # edge bond
-    ecolors = ["blue","purple","green"]
+    ecolors = ["blue","purple","yellow","cyan"]
     for i in range(len(ens)):
         for j in range(len(en0)):
             if ens[i, j] != -1:
@@ -181,7 +181,7 @@ def config_plot3D(filename,mesh=0,rod=0,cvt_map="",cmap_smooth=0):
                     pass
                     ax.plot3D([x[i], x[int(ns[i, j])]], [y[i], y[int(ns[i, j])]], [z[i], z[int(ns[i, j])]], "-",  color="tomato")
 
-    ecolors = ["blue","purple","green"]
+    ecolors = ["blue","purple","yellow","cyan","red","green","black"]
     for i in range(len(ens)):
         for j in range(len(en0)):
             if ens[i, j] != -1:

@@ -30,25 +30,47 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     {
         edge_lists[n].clear();
     }
-    bond_list.clear();
+    bulk_bond_list.clear();
 
     // new way, assume (N+2)%L != 0
     // if L=sqrt(N), N can't be 700
     // determine initialization shape based on imod, TODO: will add mobius strip latter
+    int num_edge_exist; // number of edges already exist
+    int hole_pos;       // position of the hole to add
     if (imod == 1)
     {
         init_rhombus_shape(d0_);
+        num_edge_exist = 1;
     }
     else if (imod == 2)
     {
         init_disk_shape(d0_);
+        num_edge_exist = 1;
     }
     else if (imod == 3)
     {
         init_cylinder_shape(d0_);
+        num_edge_exist = 2;
+    }
+    std::cout << "adding holes?\n";
+    hole_pos = N / 4; // add hole at a random position
+    while (num_edge_exist < Ne)
+    {
+        //std::cout << "num_edge_exist," << num_edge_exist << std::endl;
+
+        if (add_hole_as_edge(hole_pos, num_edge_exist) == 1)
+        {
+            // successfully added a hole >.<
+            num_edge_exist += 1;
+            std::cout << "successfully added a hole NO." << num_edge_exist << "\n";
+            std::cout << "at hole_pos." << hole_pos << std::endl;
+        }
+        hole_pos += 4;
+        //std::cout << "hole_pos=" << hole_pos << std::endl;
     }
     // above shape setting take care of beads position
-    // bond_list (excluding edge bond) and edge_list
+
+    // bulk_bond_list (excluding edge bond) and edge_list
 
     // set inital observable value
     Ob_sys.E = 0;
@@ -65,7 +87,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     Ob_sys.IdA = 0;
     Ob_sys.I2H = 0;
     Ob_sys.IK = 0;
-    Ob_sys.Bond_num = 0.5 * bond_list.size();
+    Ob_sys.Bond_num = 0.5 * bulk_bond_list.size();
     for (int n = 0; n < Ne; n++)
     {
         Ob_sys.Bond_num += edge_lists[n].size();
@@ -286,6 +308,76 @@ void dtmc_lc::init_rhombus_shape(double d0_)
         }
     }
 }
+int dtmc_lc::if_near_edge(int b)
+{
+    // check if b is connected to a edge bead
+    int bn;
+    for (int i = 0; i < mesh[b].nei.size(); i++)
+    {
+        bn = mesh[b].nei[i];
+        if (mesh[bn].edge_num != -1)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
+{
+    // add a hole as edge[edge_num], and i0 is one of the edge beads.
+    int b1, b2; // another two beads to include for the new triangle edge
+    // check if b0 is near the edge, if yes, it can't be on the new edge
+    if (if_near_edge(b0))
+    {
+        //std::cout << "b0 is near an edge\n";
+        return 0;
+    }
+
+    int i_nei = 1; // position in mesh[b0].nei
+    while (i_nei < mesh[b0].nei.size())
+    {
+        b1 = mesh[b0].nei[i_nei - 1];
+        b2 = mesh[b0].nei[i_nei];
+        if (list_a_nei_b(mesh[b1].nei, b2) == -1)
+        {
+            // b1 b2 somehow not connected?
+            std::cout << "b1-b2 not connected, big issue on connection\n";
+            continue;
+        }
+        if (if_near_edge(b1) || if_near_edge(b2))
+        {
+            // if b1 or b2 is near another edge, can't use them
+            // TODO: this line of code can be optimized
+            continue;
+        }
+        else
+        { // found the b1 b2 candidate
+            break;
+        }
+        i_nei += 1;
+    }
+    // b0-b1-b2-b0 as new edge
+    if (i_nei == mesh[b0].nei.size())
+    {
+        // didn't find appropriate candidate around b0
+        return 0;
+    }
+    // add edge bond, but also keep the b0-b1-b2-b0 order
+    mesh[b0].edge_num = edgenum;
+    mesh[b0].edge_nei = {b2, b1};
+    edge_lists[edgenum].push_back(b0);
+    mesh[b1].edge_num = edgenum;
+    mesh[b1].edge_nei = {b0, b2};
+    edge_lists[edgenum].push_back(b1);
+    mesh[b2].edge_num = edgenum;
+    mesh[b2].edge_nei = {b1, b0};
+    edge_lists[edgenum].push_back(b2);
+    // delete these three edge bond from the bulk bulk_bond_list
+    delete_bulk_bond_list(b0, b1);
+    delete_bulk_bond_list(b1, b2);
+    delete_bulk_bond_list(b2, b0);
+    return 1;
+}
 
 void dtmc_lc::init_disk_shape(double d0_)
 {
@@ -499,8 +591,6 @@ void dtmc_lc::init_cylinder_shape(double d0_)
             }
         }
     }
-    // add edges if Ne>2
-    // TODO: add triangle edge bond
 }
 
 void dtmc_lc::push_neis_back(int i, std::vector<int> nei_dist)
@@ -524,21 +614,21 @@ void dtmc_lc::push_bneis_list(int i, std::vector<int> bnei_dist)
     {
         bond.first = i;
         bond.second = i + bnei_dist[j];
-        bond_list.push_back(bond);
+        bulk_bond_list.push_back(bond);
     }
 }
-void dtmc_lc::delete_bond_list(int ind_i, int ind_j)
+void dtmc_lc::delete_bulk_bond_list(int ind_i, int ind_j)
 {
     std::pair<int, int> bond0, bond1;
     bond0.first = ind_i;
     bond0.second = ind_j;
     bond1.first = ind_j;
     bond1.second = ind_i;
-    for (int i = 0; i < bond_list.size(); i++)
+    for (int i = 0; i < bulk_bond_list.size(); i++)
     {
-        if (bond_list[i] == bond0 || bond_list[i] == bond1)
+        if (bulk_bond_list[i] == bond0 || bulk_bond_list[i] == bond1)
         {
-            bond_list.erase(bond_list.begin() + i);
+            bulk_bond_list.erase(bulk_bond_list.begin() + i);
             i--;
         }
     }

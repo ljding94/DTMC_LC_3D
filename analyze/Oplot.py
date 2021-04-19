@@ -1,13 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import scipy.signal
-import scipy.fft
 from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,
                                AutoMinorLocator)
 from autocorrelation import *
 from analyze import *
 from scipy.optimize import curve_fit
 from scipy import stats
+import scipy.signal
+import scipy.fft
 
 def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
     colors, alphas = None, None
@@ -131,20 +131,22 @@ def Geig_pars_plot(foldername, pars,par_nm,par_dg, mode):
         data.append(np.loadtxt(filename, skiprows=1,delimiter=",", unpack=True))
         O_label.append(label)
     data = np.transpose(np.array(data), axes=(1, 0, 2))
-    cpar, Geig0_ave,Geig0_tau,Geig0_err,Geig1_ave,Geig1_tau,Geig1_err,Geig2_ave,Geig2_tau,Geig2_err = data
+    cpar,Dedge_ave,Dedge_tau,Dedge_err, Geig0_ave,Geig0_tau,Geig0_err,Geig1_ave,Geig1_tau,Geig1_err,Geig2_ave,Geig2_tau,Geig2_err = data
 
     ppi = 72
     plt.figure()
     plt.rc('text', usetex=True)
-    fig, axs = plt.subplots(4, 1, figsize=(
-        246 / ppi, 246 / ppi * 0.6*4 ),sharex=True,sharey=False)
-    ylim_min = np.amin(Geig0_ave-3*Geig0_err)
-    ylim_max = np.amax(Geig2_ave+3*Geig2_err)
+    fig, axs = plt.subplots(5, 1, figsize=(
+        246 / ppi, 246 / ppi * 0.6*5 ),sharex=True,sharey=False)
+    #ylim_min = np.amin(Geig0_ave-3*Geig0_err)
+    #ylim_max = np.amax(Geig2_ave+3*Geig2_err)
     O_cpar_plot(axs[0], Geig0_ave, Geig0_err, O_label, "Geig0", r"$\lambda_0^G$",cpar, colors, alphas)
     O_cpar_plot(axs[1], Geig1_ave, Geig1_err, O_label, "Geig1", r"$\lambda_1^G$",cpar, colors, alphas)
     O_cpar_plot(axs[2], Geig2_ave, Geig2_err, O_label, "Geig2", r"$\lambda_2^G$",cpar, colors, alphas)
     O_cpar_plot(axs[3], Geig0_ave+Geig1_ave+Geig2_ave, Geig0_err+Geig1_err+Geig2_err, O_label, "sum_Geigs", r"$\sum_{i=0}^2\lambda_i^G$",cpar, colors, alphas)
-    axs[3].set_xlabel(xLabel)
+    O_cpar_plot(axs[4], Dedge_ave, Dedge_err, O_label, "Dedge", r"$D_{e}$",cpar, colors, alphas)
+
+    axs[4].set_xlabel(xLabel)
     #axs[0].set_ylim = (ylim_min,ylim_max)
     #axs[0].xaxis.set_minor_locator(MultipleLocator(0.5))
     lgd = axs[0].legend(loc="upper center",bbox_to_anchor=(0.5, 0.7+0.25*len(axs)))
@@ -452,178 +454,6 @@ def un2below_pars_plot(foldername,pars,par_nm,par_dg,mode,head):
     ax.legend(loc="upper center",bbox_to_anchor=(0.5, 1.75))
     plt.tight_layout(pad=0.5)
     plt.savefig(foldername + "/O"+head+"_" + mode + ".pdf",format="pdf")
-    plt.close()
-
-
-
-
-def Cxx_stat_plot(foldername,Cmode, N_, Ne_, L_, kar_, lam_, karg_, B_, Bc_, tau0_, mode,p_int):
-
-    Cxxs_es= []
-    Cxxs_es_err= []
-    Lens_es = []
-    ave_xs_es = []
-    ave_xs_es_err = []
-    if (mode == "lam"):
-        cpar = lam_
-    elif (mode == "tau0"):
-        cpar = tau0_
-    elif (mode == "N"):
-        cpar = N_
-    elif (mode == "L"):
-        cpar = L_
-    elif (mode == "B"):
-        cpar = B_
-    elif (mode == "Bc"):
-        cpar = Bc_
-    for i in range(len(cpar)):
-        if(mode == "lam"):
-            N,Ne, L, kar, lam, karg, B, Bc, tau0 = N_, Ne_, L_, kar_, lam_[
-                i], karg_, B_, Bc_, tau0_
-        elif (mode == "tau0"):
-            N,Ne, L, kar, lam, karg, B, Bc, tau0 = N_, Ne_, L_, kar_, lam_, karg_, B_, Bc_, tau0_[i]
-        elif (mode == "N"):
-            N, Ne,L, kar, lam, karg, B, Bc, tau0 = N_[
-                i], Ne_,L_, kar_, lam_, karg_, B_, Bc_, tau0_
-        elif (mode == "L"):
-            N, Ne,L, kar, lam, karg, B, Bc, tau0 = N_, Ne_,L_[
-                i], kar_, lam_, karg_, B_, Bc_, tau0_
-        elif (mode == "B"):
-            N,Ne, L, kar, lam, karg, B, Bc, tau0 = N_, Ne_,L_, kar_, lam_, karg_, B_[
-                i], Bc_, tau0_
-        elif (mode == "Bc"):
-            N,Ne, L, kar, lam, karg, B, Bc, tau0 = N_, Ne_,L_, kar_, lam_, karg_, B_, Bc_[
-                i], tau0_
-
-        Cxxs_es.append([])
-        Cxxs_es_err.append([])
-        Lens_es.append([])
-        ave_xs_es.append([])
-        ave_xs_es_err.append([])
-
-        for e in range(Ne) :
-            print("autocorrelating ", N, Ne, L, kar, lam, karg, B, Bc, tau0)
-            file2read = foldername + "/C"+Cmode+"_MC_N%.0f_Ne%.0f_L%.0f_kar%.0f_lam%.1f_karg%.1f_B%.1f_Bc%.0f_tau0%.2f_e%d.txt" % (
-                N,Ne, L, kar, lam, karg, B, Bc, tau0,e)
-            # len(edge_list)
-            Len = np.genfromtxt(file2read, skip_header=1,
-                                delimiter=",", usecols=0, dtype=int)
-            Lens_es[i].append(np.average(Len))
-            #
-            # x = nc for ncnc
-            # x = r for rr
-            ave_x = np.genfromtxt(file2read, skip_header=1,
-                                    delimiter=",", usecols=1, dtype=float)
-            ave_xs_es[i].append(np.average(ave_x))
-            rho, cov0 = autocorrelation_function_fft(ave_x)
-            tau, tau_err = tau_int_cal_rho(rho,c=6)
-            ave_xs_es_err[i].append(np.sqrt(2 * tau / len(ave_x) * cov0))
-
-            # Cxx
-            ucol={"rr":2,"ncnc":2}
-            #Cxx = np.genfromtxt(file2read, skip_header=1,delimiter=",", usecols=range(min(Len)+2)[ucol[Cmode]:])
-            Cxx = np.genfromtxt(file2read, skip_header=1,
-                                delimiter=",", usecols=range(int(min(Len)/2)+1)[ucol[Cmode]:])
-            Cxx_err = np.std(Cxx, axis=0)/np.sqrt(len(Cxx))
-            Cxx = np.average(Cxx, axis=0)
-            Cxxs_es[i].append(Cxx)
-            Cxxs_es_err[i].append(Cxx_err)
-    # for i in range(len(Cxxs)):
-    # print(i, len(Cxxs[i]))
-    if(mode == "lam"):
-        savefile = foldername + "/C"+Cmode+"_MC_N%.0f_Ne%.0f_L%.0f_kar%.0f_lams_karg%.1f_B%.1f_Bc%.0f_tau0%.2f_plot.pdf" % (
-            N,Ne, L, kar, karg, B, Bc, tau0)
-    elif(mode == "tau0"):
-        savefile = foldername + "/C"+Cmode+"_MC_N%.0f_Ne%.0f_L%.0f_kar%.0f_lam%.1f_karg%.1f_B%.1f_Bc%.0f_tau0s_plot.pdf" % (
-            N,Ne, L, kar, lam, karg, B, Bc)
-    elif(mode == "N"):
-        savefile = foldername + \
-            "/C"+Cmode+"_MC_Ns_L%.0f_kar%.0f_lam%.1f_karg%.1f_B%.1f_Bc%.0f_tau0%.2f_plot.pdf" % (
-                Ne,L, kar, lam, karg, B, Bc, tau0)
-    elif(mode == "L"):
-        savefile = foldername + \
-            "/C"+Cmode+"_MC_N%.0f_Ne%.0f_Ls_kar%.0f_lam%.1f_karg%.1f_B%.1f_Bc%.0f_tau0%.2f_plot.pdf" % (
-                N,Ne, kar, lam, karg, B, Bc, tau0)
-    elif(mode == "B"):
-        savefile = foldername + \
-            "/C"+Cmode+"_MC_N%.0f_Ne%.0f_L%.0f_kar%.0f_lam%.1f_karg%.1f_Bs_Bc%.0f_tau0%.2f_plot.pdf" % (
-                N,Ne, L, kar, lam, karg, Bc, tau0)
-    elif(mode == "Bc"):
-        savefile = foldername + \
-            "/C"+Cmode+"_MC_N%.0f_Ne%.0f_L%.0f_kar%.0f_lam%.1f_karg%.1f_B%.1f_Bcs_tau0%.2f_plot.pdf" % (
-                N,Ne, L, kar, lam, karg, B, tau0)
-
-    Cxxs_es = np.array(Cxxs_es)
-    Cxxs_es_err = np.array(Cxxs_es_err)
-    Lens_es = np.array(Lens_es)
-    ave_xs_es = np.array(ave_xs_es)
-    ave_xs_es_err = np.array(ave_xs_es_err)
-    ppi = 72
-    # LineWidth, FontSize, LabelSize = 1, 9, 8
-    plt.figure()
-    plt.rc('text', usetex=True)
-    fig, axs = plt.subplots(max(Ne,2), 3, figsize=(
-        246 / ppi*max(3,Ne), 246 / ppi * 1.5))  # , sharex=True
-    print(np.shape(axs))
-    for e in range(Ne):
-        for i in range(len(Cxxs_es)):
-            if(i % p_int == 0):
-                if(Cmode=="ncnc"):
-                    axs[e,0].errorbar(range(len(Cxxs_es[i,e]))/Lens_es[i,e], Cxxs_es[i,e],
-                            yerr=Cxxs_es_err[i,e], label=mode+"=%.1f, edge%d" % (cpar[i],e))
-                    axs[e,0].set_xlabel("s/L")
-                elif(Cmode=="rr"):
-                    Cuu = Cxxs_es[i,e]-np.power(ave_xs_es[i,e],2)
-                    #axs[e,0].plot(range(len(Cuu))/Lens_es[i,e], np.ones(len(Cuu))*np.power(ave_xs_es[i],2),"--" , label=mode+"=%.1f, edge%d, <uu'>" % (cpar[i],e))
-                    #print("Cxxs_es[i,e],i,cpar[i]",Cxxs_es[i,e],i,cpar[i])
-                    axs[e,0].errorbar(range(len(Cxxs_es[i,e]))/Lens_es[i,e], Cuu,yerr=Cxxs_es_err[i,e], label=mode+"=%.1f, edge%d" % (cpar[i],e))
-                    #axs[e,0].errorbar(range(len(Cxxs_es[i,e]))/ave_xs_es[i], Cuu,yerr=Cxxs_es_err[i,e], label=mode+"=%.1f, edge%d" % (cpar[i],e))
-                    #axs[e,0].errorbar(range(len(Cxxs_es[i,e])), Cuu,yerr=Cxxs_es_err[i,e], label=mode+"=%.1f, edge%d" % (cpar[i],e))
-                    axs[e,0].set_xlabel("s/L")
-                    #axs[e,0].set_ylim(-0.7,1.6)
-                    #axs[e,0].set_xlim(0.0,0.45)
-
-                    uquq=scipy.fft.dct(Cuu)
-                    #uquq=np.fft.rfft(Cuu)#[:int(len(Cuu)/2)-1]
-                    #print("len(uquq),len(Cuu)",len(uquq),len(Cuu))
-                    #freq=np.fft.rfftfreq(len(Cuu),d=1.0/Lens_es[i,e])#[:int(len(Cuu)/2)-1]
-                    #freq=np.fft.rfftfreq(len(Cuu),d=1.0)#[:int(len(Cuu)/2)-1]
-                    #freq=scipy.fft.rfftfreq(len(Cuu),d=1.0/Lens_es[i,e])#[:int(len(Cuu)/2)-1]
-                    #print("len(Cuu),print(len(uquq)),print(len(freq))",len(Cuu),len(uquq),len(freq))
-                    freq = np.array(range(len(uquq)))*np.pi/len(uquq)*Lens_es[i,e]
-                    axs[e,1].plot(freq,uquq*np.power(freq,2),"+")
-                    axs[e,2].plot(freq,uquq,"+")
-                    axs[e,1].set_xlabel("qL")
-                    axs[e,2].set_xlabel("qL")
-                    axs[e,1].set_ylabel(r"$\left<u_q u_{-q}\right>(qL)^2$")
-                    axs[e,2].set_ylabel(r"$\left<u_q u_{-q}\right>$")
-                    axs[e,1].set_ylim(1,9e3)
-                    axs[e,2].set_ylim(1e-4,30)
-                    axs[e,1].set_xscale("log")
-                    axs[e,1].set_yscale("log")
-                    axs[e,2].set_xscale("log")
-                    axs[e,2].set_yscale("log")
-            # do the fourier transform
-
-        #axs[e,0].set_ylim(-0.1,1)
-        labelx = {"rr":r"$\left<\left<u(i)\cdot u(i+s)\right>_i\right>$","ncnc":r"$\left<\left<n_c(i)\cdot n_c(i+s)\right>_i\right>$"}
-        axs[e,0].set_ylabel(labelx[Cmode])
-        # plt.yscale("log")
-        axs[e,0].legend()
-        print("np.shape(cpar)",np.shape(cpar))
-        print("np.shape(ave_xs_es[:,e])",np.shape(ave_xs_es[:,e]))
-        if(Cmode=="ncnc"):
-            print(ave_xs_es[:,e])
-            axs[e,1].errorbar(cpar,ave_xs_es[:,e],yerr=ave_xs_es_err[:,e])
-            axs[e,1].set_xlabel(mode)
-            axs[e,1].set_ylim(0,1)
-            axs[e,1].set_ylabel(r"$\left<|\frac{\sum_{\partial\mathcal{M} \hat{n}_c }}{|\partial\mathcal{M}} |\right>$")
-            axs[e,2].remove()
-        if Ne==1:
-            for x in range(len(axs[1])):
-                axs[1,x].remove()
-
-    plt.savefig(savefile, format="pdf", bbox_inches='tight', transparent=True)
     plt.close()
 
 

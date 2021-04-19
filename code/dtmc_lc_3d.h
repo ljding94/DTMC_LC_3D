@@ -72,8 +72,8 @@ public:
     std::vector<vertex> mesh; // the mesh
     std::vector<std::vector<int>>
         edge_lists; // list of the edge beads sorted, linked
-    std::vector<std::pair<int, int>> bond_list;
-    // bond_list[i] is a pair of two bead connected in [bulk!}
+    std::vector<std::pair<int, int>> bulk_bond_list;
+    // bulk_bond_list[i] is a pair of two bead connected in [bulk!}
     // notice only bond in the bulk are included, and there will be on
     // repetition due to symmetry,
     std::vector<int> fixed_beads; // beads can't be moved
@@ -102,13 +102,14 @@ public:
     void init_rhombus_shape(double d0_);
     void init_disk_shape(double d0_);
     void init_cylinder_shape(double d0_);
+    int add_hole_as_edge(int b0, int edgenum); // return 0 if fail to do so with b0
 
     void reset_config();
     void push_neis_back(int i, std::vector<int> nei_dist);
     void push_eneis_back(int i, std::vector<int> enei_dist);
     void push_bneis_list(int i, std::vector<int> bnei_dist);
 
-    // bond in bulk to bond_list
+    // bond in bulk to bulk_bond_list
     // d0_ initial vertex-vertex distance
     // other parameters are the same as in the class
 
@@ -138,8 +139,8 @@ public:
     double distance(int ind_1, int ind_2);
     double distancefp(int ind_1, std::vector<double> p);
     double innerproduct(std::vector<double> a, std::vector<double> b);
-    void delete_bond_list(int ind_i, int ind_j);
-    // delete bond i-j, including both <i,j> and <j,i> in the bulk bond_list
+    void delete_bulk_bond_list(int ind_i, int ind_j);
+    // delete bond i-j, including both <i,j> and <j,i> in the bulk bulk_bond_list
 
     observable get_related_local_observables(std::vector<int> ind_list);
 
@@ -181,6 +182,7 @@ public:
     int energy_check(); // check if the energy set are correct, for debug use
     int sort_nei(int index);
     int list_a_nei_b(std::vector<int> a, int b);
+    int if_near_edge(int b); // check if b is connected to a edge bead
     int check_nei_connect();
     int check_duplication(int ind_i);
 };

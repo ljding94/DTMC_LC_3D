@@ -61,18 +61,25 @@ int dtmc_lc::sort_nei(int index)
     {
         return 0;
     }
-    /*
-    don't understand why I added this condition
-    if (mesh[index].nei.size() == 3)
+
+    //alternative way involves no while()
+    int count = 0;
+    for (int count = 0; count < mesh[index].nei.size(); count++)
     {
-        return 0;
+        mesh[index].nei.push_back(mesh[index].nei[0]);
+        mesh[index].nei.erase(mesh[index].nei.begin());
+        if (mesh[index].nei[0] == mesh[index].edge_nei[0])
+        {
+            break;
+        }
     }
-    */
+    /*
     while (mesh[index].nei[0] != mesh[index].edge_nei[0])
     {
         mesh[index].nei.push_back(mesh[index].nei[0]);
         mesh[index].nei.erase(mesh[index].nei.begin());
     }
+    */
     if (mesh[index].nei[1] == mesh[index].edge_nei[1])
     {
         mesh[index].nei.push_back(mesh[index].nei[0]);
@@ -80,7 +87,16 @@ int dtmc_lc::sort_nei(int index)
     }
     else if (mesh[index].nei.back() != mesh[index].edge_nei[1])
     {
-        std::cout << "wrong, can't sort neighbors!\n";
+        std::cout << "wrong, can't sort neighbors!" << index << "em(" << mesh[index].edge_num << " \n ";
+        std::cout << "nei size" << mesh[index].nei.size() << " are\n";
+        for (int k = 0; k < mesh[index].nei.size(); k++)
+        {
+            std::cout << "," << mesh[index].nei[k];
+            if (mesh[mesh[index].nei[k]].edge_num != -1)
+            {
+                std::cout << "(e)";
+            }
+        }
         return 0;
     }
     return 1;
@@ -103,9 +119,9 @@ int dtmc_lc::check_nei_connect()
     int j_next;
     for (int i = 0; i < mesh.size(); i++)
     {
-        for (int j = 0; j < mesh[i].nei.size(); j++)
+        if (mesh[i].edge_nei.size() != 0 && mesh[i].edge_nei.size() != 2)
         {
-            j_next = 0;
+            std::cout << "mesh[" << i << "].edge_nei.size()=" << mesh[i].edge_nei.size();
         }
     }
     return 0;
@@ -418,8 +434,8 @@ double dtmc_lc::dAK_m(int index)
     else
     {
         return 0;
-        K = PI;
-        sort_nei(index);
+        //K = PI;
+        //sort_nei(index);
     }
 
     for (int j = 0; j < mesh[index].nei.size(); j++)
@@ -469,9 +485,8 @@ std::vector<double> dtmc_lc::n_m(int index)
     double n_jk_abs;
     double theta_jk;
     std::vector<int> nei_original;
-    nei_original =
-        mesh[index].nei; // thus it has correct size from the beginning
-    if (mesh[index].edge_nei.size() != 0)
+    nei_original = mesh[index].nei; // thus it has correct size from the beginning
+    if (mesh[index].edge_num != -1)
     {
         on_edge = 1;
         sort_nei(index);

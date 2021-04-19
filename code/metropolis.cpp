@@ -238,13 +238,13 @@ int dtmc_lc::bond_metropolis()
     int b_nei_i, b_nei_o, b_nei_a;
 
 #pragma region : find update and related beads
-    if (bond_list.size() == 0)
+    if (bulk_bond_list.size() == 0)
     {
         return 0;
     }
-    bondlist_ind_i = int(bond_list.size() * rand_uni(gen));
-    ind_i = bond_list[bondlist_ind_i].first;
-    ind_o = bond_list[bondlist_ind_i].second;
+    bondlist_ind_i = int(bulk_bond_list.size() * rand_uni(gen));
+    ind_i = bulk_bond_list[bondlist_ind_i].first;
+    ind_o = bulk_bond_list[bondlist_ind_i].second;
 
     i_nei_o = list_a_nei_b(mesh[ind_i].nei, ind_o);
     i_nei_a = (i_nei_o + 1) % mesh[ind_i].nei.size();
@@ -385,15 +385,15 @@ int dtmc_lc::bond_metropolis()
     {
         // [accepted]
         Ob_sys_update(Ob_relate_new, Ob_relate_old);
-        // update bond_list
-        delete_bond_list(ind_i, ind_o);
+        // update bulk_bond_list
+        delete_bulk_bond_list(ind_i, ind_o);
         std::pair<int, int> bond0, bond1;
         bond0.first = ind_a;
         bond0.second = ind_b;
         bond1.first = ind_b;
         bond1.second = ind_a;
-        bond_list.push_back(bond0);
-        bond_list.push_back(bond1);
+        bulk_bond_list.push_back(bond0);
+        bulk_bond_list.push_back(bond1);
 
         return 1;
     }
@@ -601,20 +601,20 @@ int dtmc_lc::edge_metropolis()
             // update system observables
             Ob_sys_update(Ob_relate_new, Ob_relate_old);
 
-            // update bond_list, add i-j i-k as bulk bond
+            // update bulk_bond_list, add i-j i-k as bulk bond
             std::pair<int, int> bond1, bond2;
             bond1.first = ind_i;
             bond1.second = ind_j;
             bond2.first = ind_j;
             bond2.second = ind_i;
-            bond_list.push_back(bond1);
-            bond_list.push_back(bond2);
+            bulk_bond_list.push_back(bond1);
+            bulk_bond_list.push_back(bond2);
             bond1.first = ind_i;
             bond1.second = ind_k;
             bond2.first = ind_k;
             bond2.second = ind_i;
-            bond_list.push_back(bond1);
-            bond_list.push_back(bond2);
+            bulk_bond_list.push_back(bond1);
+            bulk_bond_list.push_back(bond2);
             return 1;
         }
         else
@@ -821,8 +821,8 @@ int dtmc_lc::edge_metropolis()
             Ob_sys_update(Ob_relate_new, Ob_relate_old);
 
             // these are edge bond now
-            delete_bond_list(ind_i, ind_j);
-            delete_bond_list(ind_i, ind_k);
+            delete_bulk_bond_list(ind_i, ind_j);
+            delete_bulk_bond_list(ind_i, ind_k);
             return 1;
         }
         else

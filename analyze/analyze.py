@@ -193,6 +193,7 @@ def Gij_stat_ana(foldername,par,par_nm,par_dg,mode,tau_c=6):
     Geig0_ave, Geig0_tau, Geig0_err = [], [], []
     Geig2_ave, Geig1_tau, Geig1_err = [], [], []
     Geig1_ave, Geig2_tau, Geig2_err = [], [], []
+    Dedge_ave, Dedge_tau, Dedge_err= [], [], []
     cpar_ind = find_cpar_ind(par_nm,mode)
     cpar = par[cpar_ind]
     for i in range(len(cpar)):
@@ -204,9 +205,17 @@ def Gij_stat_ana(foldername,par,par_nm,par_dg,mode,tau_c=6):
             f2rtail+="_"+par_nm[j]+"%.*f"%(par_dg[j],par_dealing[j])
         f2rtail+=".txt"
         file2read = foldername +f2rtail
-        Gdata = np.loadtxt(file2read, skiprows=1,usecols=range(9), delimiter=",", unpack=True)
+        Gdata = np.loadtxt(file2read, skiprows=1,usecols=range(10), delimiter=",", unpack=True)
+        # get edge-edge distance Dedge
+        Dedge= Gdata[0]
+        Dedge_ave.append(np.average(Dedge))
+        rho, cov0 = autocorrelation_function_fft(Dedge)
+        tau, tau_err = tau_int_cal_rho(rho,tau_c)
+        Dedge_tau.append(tau)
+        Dedge_err.append(np.sqrt(2 * tau / len(Dedge) * cov0))
+
         # get eigenvalues of Gij
-        Gijs = np.transpose(Gdata)
+        Gijs = np.transpose(Gdata[1:])
         Geigs=[]
         for Gij in Gijs:
             w,v = np.linalg.eig(np.reshape(Gij,(3,3)))
@@ -243,8 +252,8 @@ def Gij_stat_ana(foldername,par,par_nm,par_dg,mode,tau_c=6):
     savefile = foldername + f2stail
 
     with open(savefile, "w") as f:
-        f.write(mode+",Geig0_ave,Geig0_tau,Geig0_err,Geig1_ave,Geig1_tau,Geig1_err,Geig2_ave,Geig2_tau,Geig2_err\n")
+        f.write(mode+",Dedge_ave,Dedge_tau,Dedge_err,Geig0_ave,Geig0_tau,Geig0_err,Geig1_ave,Geig1_tau,Geig1_err,Geig2_ave,Geig2_tau,Geig2_err\n")
         for i in range(len(cpar)):
-            f.write("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n" % (cpar[i], Geig0_ave[i], Geig0_tau[i], Geig0_err[i], Geig1_ave[i], Geig1_tau[i], Geig1_err[i], Geig2_ave[i], Geig2_tau[i], Geig2_err[i]))
+            f.write("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n" % (cpar[i], Dedge_ave[i],Dedge_tau[i],Dedge_err[i],Geig0_ave[i], Geig0_tau[i], Geig0_err[i], Geig1_ave[i], Geig1_tau[i], Geig1_err[i], Geig2_ave[i], Geig2_tau[i], Geig2_err[i]))
 
 
