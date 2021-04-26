@@ -29,6 +29,11 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
     p2uu_ave, p2uu_tau, p2uu_err = [], [], []
     uuc_ave, uuc_tau, uuc_err = [], [], []
     un2_ave,un2_tau,un2_err = [],[],[]
+    # find Ne
+    for i in range(len(par_nm)):
+        if(par_num[i]=="Ne"):
+            Ne=par[i]
+            break
     if(Ne==2):
         Ledif_ave,Ledif_tau,Ledif_err=[],[],[]
     cpar_ind = find_cpar_ind(par_nm,mode)

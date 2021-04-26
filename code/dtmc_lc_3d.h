@@ -18,14 +18,25 @@ struct observable
     double Tp2uu;
     double Tuuc;
     // coupling
-    double Tun2;
-    double IKun2;
+    double Tun2;  // tilt coupling
+    double Tun2p; // coupling of Cnp directors
+    double IKun2; // coupling between Gaussian curvature and tilt, depletion-like
     // miscellany
     double IdA; // integral of dA
     double I2H; // integral of dA(2H)
     double IK;  // integral of dA(K)
 
     int Bond_num; // total number of bonds
+};
+//hamiltonion parameters
+struct E_parameter
+{
+    double kar;       // mean curvature bending stiffness
+    double lam;       // line tension coefficient
+    double Kd;        // liquid crystal interaction moduli
+    double q;         // liquid crystall twist constant
+    double Cn;        // liquid crystal to membrane normal moduli
+    double Cnp, rCnp; // Cn2: Cn for short rods, and rCn2 portion of Cn2 in total beads
 };
 struct vertex
 {
@@ -47,8 +58,9 @@ struct vertex
     // energy related (directly)
     double ds; // beads in bulk: 0 , beads on edge 0.5*(l_{i+}+l_{i-})
     // double dskg; // in bulk: 0, on edge: kg*ds
-    double dAK; // in bulk: K*dA, on edge: 0
-    double un2; // local un2
+    double dAK;      // in bulk: K*dA, on edge: 0
+    double un2;      // local un2
+    bool is_cnp = 0; // local Cn, if yes, local Cn is Cnp
 };
 class dtmc_lc
 {
@@ -80,6 +92,7 @@ public:
 
     void mesh_bead_info_update(std::vector<int> ind_relate);
 
+    E_parameter Epar;
     observable Ob_sys;
     observable Ob_m(std::vector<int> ind_relate,
                     std::vector<std::pair<int, int>> bond_relate);
@@ -94,9 +107,8 @@ public:
     std::uniform_real_distribution<> rand_uni; // uniform distribution
 
     // initialization
-    dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0_,
-            double kar_, double lam_, double Kd_, double Kt_, double Cn_,
-            double kard_);
+    dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0_, E_parameter Epar_);
+    //double kar_, double lam_, double Kd_, double Kt_, double Cn_,double kard_);
 
     // put the beads and bonds in to position accordingly
     void init_rhombus_shape(double d0_);
@@ -159,6 +171,10 @@ public:
 
     int edge_metropolis();
     // execute bond remove/add update
+    // return 1: accepted, 0: rejected
+
+    int swap_metropolis();
+    // swap two beads with different interaction parameters, like cn
     // return 1: accepted, 0: rejected
 
     // experiment

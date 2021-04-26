@@ -5,25 +5,28 @@
 #define PI 3.14159265358979323846
 
 // initialization
-dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0_, double kar_, double lam_, double Kd_, double Kt_, double Cn_, double kard_)
+dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0_, E_parameter Epar_)
+//double kar_, double lam_, double Kd_, double Kt_, double Cn_, double kard_)
 {
     // system related
     beta = beta_;
     N = N_;
+    int Np; // number of rod with tilt coupling Cnp
     imod = imod_;
     Ne = Ne_;
     l0 = l0_; // sigma0 is always 1;
 
-    // energy related
+    // set energy related
     // geometric
-    kar = kar_;
-    lam = lam_;
+    Epar.kar = Epar_.kar;
+    Epar.lam = Epar_.lam;
     // orientational
-    Kd = Kd_;
-    Kt = Kt_;
+    Epar.Kd = Epar_.Kd;
+    Epar.q = Epar_.q;
     // coupling
-    Cn = Cn_;
-    kard = kard_;
+    Epar.Cn = Epar_.Cn;
+    Epar.Cnp = Epar_.Cnp;
+    Epar.rCnp = Epar_.rCnp;
 
     edge_lists.resize(Ne);
     for (int n = 0; n < Ne; n++)
@@ -52,7 +55,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
         init_cylinder_shape(d0_);
         num_edge_exist = 2;
     }
-    std::cout << "adding holes?\n";
+    // N is updated based on initialization procedure, especially will decrease if using disk-shape
     hole_pos = N / 4; // add hole at a random position
     while (num_edge_exist < Ne)
     {
@@ -68,10 +71,13 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
         hole_pos += 4;
         //std::cout << "hole_pos=" << hole_pos << std::endl;
     }
+    // distribute cn based on (Cn,Cnp,rCnp)
+    // TODO: implement this
     // above shape setting take care of beads position
 
     // bulk_bond_list (excluding edge bond) and edge_list
 
+    Np = int(N * Epar.rCnp);
     // set inital observable value
     Ob_sys.E = 0;
     Ob_sys.I2H2 = 0;
@@ -83,6 +89,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     Ob_sys.Tp2uu = 0;
     Ob_sys.Tuuc = 0;
     Ob_sys.Tun2 = 0;
+    Ob_sys.Tun2p = 0;
     Ob_sys.IKun2 = 0;
     Ob_sys.IdA = 0;
     Ob_sys.I2H = 0;
@@ -102,6 +109,13 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
         mesh[i].un2 = un2_m(i);
         mesh[i].dAK = dAK_m(i);
     }
+
+    for (int i = 0; i < Np; i++)
+    {
+        // cn assignment for first Np rods
+        mesh[i].is_cnp = 1;
+    }
+
     // geometric energy related
     for (int i = 0; i < mesh.size(); i++)
     {
@@ -118,14 +132,22 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
             Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
         }
         // coupling related
-        Ob_sys.Tun2 += mesh[i].un2;
+        if (mesh[i].is_cnp)
+        {
+            Ob_sys.Tun2p += mesh[i].un2;
+        }
+        else
+        {
+            Ob_sys.Tun2 += mesh[i].un2;
+        }
+
         Ob_sys.IKun2 += mesh[i].dAK * mesh[i].un2;
         // miscellany
         Ob_sys.IdA += mesh[i].dAn2H[0];
         Ob_sys.I2H += mesh[i].dAn2H[1] * mesh[i].dAn2H[0];
         Ob_sys.IK += mesh[i].dAK;
     }
-    Ob_sys.E = 0.5 * Cn * N;
+    Ob_sys.E = 0.5 * Epar.Cn * (N - Np) * 0.5 * Epar.Cnp * Np;
     Ob_sys.E += E_m(Ob_sys);
 
     // set random number generators

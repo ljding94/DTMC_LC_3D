@@ -838,3 +838,86 @@ int dtmc_lc::edge_metropolis()
 #pragma endregion
     } // end add ind_i
 }
+
+int dtmc_lc::swap_metropolis()
+{
+    // since what's been changed is very simlple. I won't go through the entire process of storaging every related variables, instead I'll just update Ob_sys two un2 variable and the energy E.
+    int ind_i, ind_j; // swap i,j cn status
+    double Er_old, Er_new;
+    double Tun2r_old, Tun2r_new;
+    double Tun2pr_old, Tun2pr_new;
+#pragma region : find related beads and obserable
+    ind_i = rand_pos(gen);
+    ind_j = (ind_i + 1 + int((N - 1) * rand_uni(gen))) % N;
+    //if (ind_i == ind_j)
+    //{
+    //std::cout << "swap selection algorithm not working!\n";
+    //}
+
+    if (mesh[ind_i].is_cnp == mesh[ind_j].is_cnp)
+    {
+        return 1;
+    }
+    Er_old = 0;
+    Tun2r_old = 0;
+    Tun2pr_old = 0;
+    std::vector<int> inds{ind_i, ind_j};
+    for (int k = 0; k < 2; k++)
+    {
+        if (mesh[inds[k]].is_cnp)
+        {
+            Tun2r_old += mesh[inds[k]].un2;
+        }
+        else
+        {
+            Tun2pr_old += mesh[inds[k]].un2;
+        }
+    }
+    Er_old += Epar.Cn * Tun2r_old + Epar.Cnp * Tun2pr_old;
+
+#pragma endregion
+#pragma region : do swap update
+    //swap is_cnp parameter
+    int is_cnp_cache = mesh[ind_i].is_cnp;
+    mesh[ind_i].is_cnp = mesh[ind_j].is_cnp;
+    mesh[ind_j].is_cnp = is_cnp_cache;
+
+#pragma endregion
+#pragma region : get after update observables
+    Er_new = 0;
+    Tun2r_new = 0;
+    Tun2pr_new = 0;
+    for (int k = 0; k < 2; k++)
+    {
+        if (mesh[inds[k]].is_cnp)
+        {
+            Tun2r_new += mesh[inds[k]].un2;
+        }
+        else
+        {
+            Tun2pr_new += mesh[inds[k]].un2;
+        }
+    }
+    Er_new += Epar.Cn * Tun2r_new + Epar.Cnp * Tun2pr_new;
+
+#pragma endregion
+#pragma region : Metropolis
+    if (rand_uni(gen) < std::exp(-beta * (Er_new - Er_old)))
+    {
+        // pass the update
+        Ob_sys.Tun2 += Tun2r_new - Tun2r_old;
+        Ob_sys.Tun2p += Tun2pr_new - Tun2pr_old;
+        Ob_sys.E += Er_new - Er_old;
+        return 1;
+    }
+    else
+    {
+        // reject, swap back
+        is_cnp_cache = mesh[ind_i].is_cnp;
+        mesh[ind_i].is_cnp = mesh[ind_j].is_cnp;
+        mesh[ind_j].is_cnp = is_cnp_cache;
+        return 0;
+    }
+
+#pragma endregion
+}

@@ -26,7 +26,7 @@ void dtmc_lc::State_write(std::string filename)
         f << "imod=" << imod << "\n";
         f << "l0=" << l0 << "\n";
         f << "max_nei_size=" << max_nei_size << "\n";
-        f << "x,y,z,ux,uy,uz,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
+        f << "x,y,z,ux,uy,uz,dA,2H,ds,dAK,un2,is_cnp,edge_num,edge_neibs,neibs";
         for (int i = 0; i < mesh.size(); i++)
         {
             f << "\n"
@@ -34,7 +34,7 @@ void dtmc_lc::State_write(std::string filename)
             f << "," << mesh[i].u[0] << "," << mesh[i].u[1] << ","
               << mesh[i].u[2];
             f << "," << mesh[i].dAn2H[0] << "," << mesh[i].dAn2H[1] << ","
-              << mesh[i].ds << "," << mesh[i].dAK << "," << mesh[i].un2;
+              << mesh[i].ds << "," << mesh[i].dAK << "," << mesh[i].un2 << "," << mesh[i].is_cnp;
             f << "," << mesh[i].edge_num;
             for (int j = 0; j < mesh[i].edge_nei.size(); j++)
             {
@@ -194,6 +194,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<double> Tp2uu_all;
     std::vector<double> Tuuc_all;
     std::vector<double> Tun2_all;
+    std::vector<double> Tun2p_all;
     std::vector<double> IKun2_all;
     std::vector<double> IdA_all;
     std::vector<double> I2H_all;
@@ -207,6 +208,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     double spin_accept = 0;
     double bond_accept = 0;
     double edge_accept = 0;
+    double swap_accept = 0;
 
     bool fix_bead;
     if (fixed_beads.size() == 2)
@@ -227,6 +229,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             if (i % int(std::sqrt(N)) == 0)
             {
                 edge_accept += edge_metropolis();
+                swap_accept += swap_metropolis(); // leave the frequency the same as edge update for now
             }
         }
         E_all.push_back(Ob_sys.E);
@@ -238,6 +241,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         Tp2uu_all.push_back(Ob_sys.Tp2uu);
         Tuuc_all.push_back(Ob_sys.Tuuc);
         Tun2_all.push_back(Ob_sys.Tun2);
+        Tun2p_all.push_back(Ob_sys.Tun2p);
         IKun2_all.push_back(Ob_sys.IKun2);
         IdA_all.push_back(Ob_sys.IdA);
         I2H_all.push_back(Ob_sys.I2H);
@@ -278,7 +282,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         {
             f << "Les[" << e << "],";
         }
-        f << "IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2,IKun2\n";
+        f << "IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2,Tun2p,IKun2\n";
         for (int i = 0; i < E_all.size(); i++)
         {
             f << E_all[i] << ",";
@@ -288,12 +292,12 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             }
             f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << ","
               << IK_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << ","
-              << Bond_num_all[i] << "," << Tun2_all[i] << "," << IKun2_all[i]
+              << Bond_num_all[i] << "," << Tun2_all[i] << "," << Tun2p_all[i] << "," << IKun2_all[i]
               << "\n";
         }
     }
     f.close();
-    std::ofstream fG(folder + "/Gij_" + finfo + ".txt");
+    std::ofstream fG(folder + "/Gij_" + finfo + ".csv");
     if (fG.is_open())
     {
         fG << "D_edge_com,Gxx,Gxy,Gxz,Gyx,Gyy,Gyz,Gzx,Gzy,Gzz\n";

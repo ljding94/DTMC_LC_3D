@@ -177,6 +177,7 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
     Ob.Tp2uu = 0;
     Ob.Tuuc = 0;
     Ob.Tun2 = 0;
+    Ob.Tun2p = 0;
     Ob.IKun2 = 0;
     Ob.IdA = 0;
     Ob.I2H = 0;
@@ -190,7 +191,14 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         Ob.Les[mesh[ind].edge_num] += mesh[ind].ds;
         // crystalline terms
         // coupling terms
-        Ob.Tun2 += mesh[ind].un2;
+        if (mesh[ind].is_cnp)
+        {
+            Ob.Tun2p += mesh[ind].un2;
+        }
+        else
+        {
+            Ob.Tun2 += mesh[ind].un2;
+        }
         Ob.IKun2 += mesh[ind].dAK * mesh[ind].un2;
         // miscellany terms
         Ob.IdA += mesh[ind].dAn2H[0];
@@ -220,6 +228,7 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
     Ob_sys.Tp2uu += Ob_new.Tp2uu - Ob_old.Tp2uu;
     Ob_sys.Tuuc += Ob_new.Tuuc - Ob_old.Tuuc;
     Ob_sys.Tun2 += Ob_new.Tun2 - Ob_old.Tun2;
+    Ob_sys.Tun2p += Ob_new.Tun2p - Ob_old.Tun2p;
     Ob_sys.IKun2 += Ob_new.IKun2 - Ob_old.IKun2;
     Ob_sys.IdA += Ob_new.IdA - Ob_old.IdA;
     Ob_sys.I2H += Ob_new.I2H - Ob_old.I2H;
@@ -229,13 +238,14 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
 double dtmc_lc::E_m(observable Ob)
 {
     double E = 0;
-    E += 0.5 * kar * Ob.I2H2;
+    E += 0.5 * Epar.kar * Ob.I2H2;
     for (int e = 0; e < Ne; e++)
     {
-        E += lam * Ob.Les[e];
+        E += Epar.lam * Ob.Les[e];
     }
-    E += -Kd * Ob.Tp2uu - Kt * Ob.Tuuc;
-    E += -0.5 * Cn * Ob.Tun2 + kard * Ob.IKun2;
+    E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
+    E += -0.5 * (Epar.Cn * Ob.Tun2 + Epar.Cnp * Ob.Tun2p);
+    // + kard * Ob.IKun2;
     return E;
 }
 

@@ -72,8 +72,8 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
         for bond in bonds:
             pass
             a,b = bond
-            ax_xy.plot([x[a],x[b]], [y[a],y[b]], color="tomato",alpha=alpha_xy[a])
-            ax_zx.plot([z[a],z[b]], [x[a],x[b]], color="tomato",alpha=alpha_xy[a])
+            ax_xy.plot([x[a],x[b]], [y[a],y[b]], color="silver",alpha=alpha_xy[a])
+            ax_zx.plot([z[a],z[b]], [x[a],x[b]], color="silver",alpha=alpha_xy[a])
         #color mapping
     cmap = cm.get_cmap("jet_r")
     if(cvt_map=="Mean"):
@@ -105,13 +105,13 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
         #cbar=plt.colorbar(sm, ticks=[-0.1,-0.05,0])
         #cbar.ax.set_yticklabels(["-0.1","-0.05","0"])
     # edge bond
-    ecolors = ["blue","purple","yellow","cyan"]
+    ecolors = ["blue","green","crimson","indigo","cyan"]
     for i in range(len(ens)):
         for j in range(len(en0)):
             if ens[i, j] != -1:
                 ax_xy.plot([x[j], x[int(ens[i, j])]], [
                     y[j], y[int(ens[i, j])]], "-",linewidth=0.5, color=ecolors[int(enum[j])], alpha=alpha_xy[j])
-                ax_zx.plot([z[j], z[int(ens[i, j])]],[x[j], x[int(ens[i, j])]], "-",linewidth=0.5, color=ecolors[int(enum[j])], alpha=alpha_zx[j])
+                ax_zx.plot([z[j], z[int(ens[i, j])]],[x[j], x[int(ens[i, j])]], "-",linewidth=2, color=ecolors[int(enum[j])], alpha=alpha_zx[j])
     # spin vector
     nu=find_nu(sx,sy,sz)
     #nu=[0,0,1]
@@ -129,20 +129,21 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
     deg = np.arccos(np.sqrt(un2))
     cmap = cm.get_cmap("jet_r")
     if(rod):
+        ftail+="_rod"
         for i in range(len(x)):
             ax_xy.plot([x[i]-0.5*d*sx[i],x[i]+0.5*d*sx[i]],[y[i]-0.5*d*sy[i],y[i]+0.5*d*sy[i]],"-",linewidth=1.5,color=cmap(norm(deg[i])))
             ax_zx.plot([z[i]-0.5*d*sz[i],z[i]+0.5*d*sz[i]],[x[i]-0.5*d*sx[i],x[i]+0.5*d*sx[i]],"-",linewidth=1.5,color=cmap(norm(deg[i])))
-        sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
-        sm.set_array([])
-        cbar=plt.colorbar(sm, ticks=[0,0.25*np.pi,0.5*np.pi])
-        cbar.ax.set_yticklabels([r"$0$",r"$\pi/4$",r"$\pi/2$"])
+        #sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+        #sm.set_array([])
+        #cbar=plt.colorbar(sm, ticks=[0,0.25*np.pi,0.5*np.pi])
+        #cbar.ax.set_yticklabels([r"$0$",r"$\pi/4$",r"$\pi/2$"])
     #plot fixed bead (if have)
     if fix_index:
         ax_xy.plot([x[fix_index[0]], x[fix_index[1]]], [y[fix_index[0]], y[fix_index[1]]], marker="o",linestyle="None", color="purple")
         ax_zx.plot([z[fix_index[0]], z[fix_index[1]]], [x[fix_index[0]], x[fix_index[1]]], marker="o",linestyle="None", color="purple")
     ax_xy.set_xlim(x_min-2, x_max+2)
     ax_xy.set_ylim(y_min-2, y_max+2)
-    ax_xy.set_title("XY  "+tag+" smooth=%d"%cmap_smooth, fontsize=25)
+    #ax_xy.set_title("XY  "+tag+" smooth=%d"%cmap_smooth, fontsize=25)
     ax_zx.set_xlim(z_min-2, z_max+2)
     ax_zx.set_ylim(x_min-2, x_max+2)
     ax_zx.set_title("ZX")
@@ -179,15 +180,16 @@ def config_plot3D(filename,mesh=0,rod=0,cvt_map="",cmap_smooth=0):
             for j in range(len(ns[0])):
                 if ns[i, j] != -1:
                     pass
-                    ax.plot3D([x[i], x[int(ns[i, j])]], [y[i], y[int(ns[i, j])]], [z[i], z[int(ns[i, j])]], "-",  color="tomato")
+                    ax.plot3D([x[i], x[int(ns[i, j])]], [y[i], y[int(ns[i, j])]], [z[i], z[int(ns[i, j])]], "-",  color="silver")
 
-    ecolors = ["blue","purple","yellow","cyan","red","green","black"]
+    ecolors = ["blue","green","crimson","indigo","cyan","black"]
+    #ecolors = ["blue","purple","yellow","cyan","red","green","black"]
     for i in range(len(ens)):
         for j in range(len(en0)):
             if ens[i, j] != -1:
                 ax.plot3D([x[j], x[int(ens[i, j])]], [
                     y[j], y[int(ens[i, j])]], [
-                    z[j], z[int(ens[i, j])]], "-", color=ecolors[int(enum[j])], alpha=0.7)
+                    z[j], z[int(ens[i, j])]], "-",linewidth=2, color=ecolors[int(enum[j])], alpha=0.7)
     cmap = cm.get_cmap("jet_r")
     if(cvt_map=="Mean"):
         #ftail+="_mmap"

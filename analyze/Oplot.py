@@ -32,9 +32,10 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
         data.append(np.loadtxt(filename, skiprows=1,delimiter=",", unpack=True))
         O_label.append(label)
     data = np.transpose(np.array(data), axes=(1, 0, 2))
+    print("len(data)",len(data))
     cpar, E_ave, E_tau, E_err = data[:4]
     Les_ave,Les_tau,Les_err = [],[],[]
-    Ne = pars[0][1]
+    Ne = pars[0][2]
     for e in range(Ne):
         Les_ave.append(data[4+3*e])
         Les_tau.append(data[5+3*e])
@@ -42,6 +43,8 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
     Le_ave = np.sum(Les_ave,axis=0)
     Le_err = np.sqrt(np.sum(np.power(Les_err,2),axis=0))
     IdA_ave, IdA_tau, IdA_err,I2H_ave, I2H_tau, I2H_err,I2H2_ave, I2H2_tau, I2H2_err, IK_ave, IK_tau, IK_err, ss2_ave, ss2_tau, ss2_err,uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, IKun2_ave,IKun2_tau,IKun2_err = data[7+3*(Ne-1):31+3*(Ne-1)]
+    #Aprint("I2H2_ave-IK_ave",I2H2_ave-IK_ave)
+    print("data()IK_ave",IK_ave)
     F_ave,F_err=[],[]
     uuc_grad,uuc_grad_err = [],[]
     un2_grad,un2_grad_err = [],[]
@@ -84,10 +87,10 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
 
     O_cpar_plot(axs[2,0], IdA_ave, IdA_err, O_label, "IdA", r"$\int dA$",cpar, colors, alphas)
     O_cpar_plot(axs[3,0], I2H_ave, I2H_err, O_label, "I2H", r"$\int dA (2H)$",cpar, colors, alphas)
-
-    O_cpar_plot(axs[4,0], I2H2_ave/(16*np.pi), I2H2_err/(16*np.pi), O_label, "I2H2", r"$\int dA (2H)^2/(16\pi)$",
-                cpar, colors, alphas)
+    print("I2H_ave-I2H2_ave",I2H_ave-I2H2_ave)
+    O_cpar_plot(axs[4,0], I2H2_ave/(16*np.pi), I2H2_err/(16*np.pi), O_label, "I2H2", r"$\int dA (2H)^2/(16\pi)$",cpar, colors, alphas)
     O_cpar_plot(axs[5,0], IK_ave, IK_err, O_label, "IK", r"$\int dA K$",cpar, colors, alphas)
+
     O_cpar_plot(axs[6,0], ss2_ave, ss2_err, O_label, "ss2", r"$\left<1.5 (u_i\cdot u_j)^2-0.5\right>_{(i,j)}$",
                 cpar, colors, alphas)
     O_cpar_plot(axs[7,0], uuc_ave, uuc_err, O_label, "uuc", r"$u_c=\left<(u_i\times u_j)\cdot\hat{r}_{ij} (u_i\cdot u_j)\right>_{(i,j)}$",cpar, colors, alphas)
