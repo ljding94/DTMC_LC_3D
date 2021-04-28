@@ -866,11 +866,11 @@ int dtmc_lc::swap_metropolis()
     {
         if (mesh[inds[k]].is_cnp)
         {
-            Tun2r_old += mesh[inds[k]].un2;
+            Tun2pr_old += mesh[inds[k]].un2;
         }
         else
         {
-            Tun2pr_old += mesh[inds[k]].un2;
+            Tun2r_old += mesh[inds[k]].un2;
         }
     }
     Er_old += Epar.Cn * Tun2r_old + Epar.Cnp * Tun2pr_old;
@@ -891,11 +891,11 @@ int dtmc_lc::swap_metropolis()
     {
         if (mesh[inds[k]].is_cnp)
         {
-            Tun2r_new += mesh[inds[k]].un2;
+            Tun2pr_new += mesh[inds[k]].un2;
         }
         else
         {
-            Tun2pr_new += mesh[inds[k]].un2;
+            Tun2r_new += mesh[inds[k]].un2;
         }
     }
     Er_new += Epar.Cn * Tun2r_new + Epar.Cnp * Tun2pr_new;

@@ -17,23 +17,18 @@ def find_cpar_ind(par_nm,mode):
 def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
     E_ave, E_tau, E_err = [], [], []
     Ne = par[find_cpar_ind(par_nm,"Ne")]
+
     Les_ave, Les_tau, Les_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
     IdA_ave, IdA_tau, IdA_err = [], [], []
     I2H_ave, I2H_tau, I2H_err = [], [], []
     I2H2_ave, I2H2_tau, I2H2_err = [], [], []
     IK_ave, IK_tau, IK_err = [], [], []
-    Tp2uu_ave, Tp2uu_tau, Tp2uu_err = [], [], []
-    Tuuc_ave, Tuuc_tau, Tuuc_err = [], [], []
-    Tun2_ave, Tun2_tau, Tun2_err = [], [], []
-    IKun2_ave, IKun2_tau, IKun2_err = [], [], []
     p2uu_ave, p2uu_tau, p2uu_err = [], [], []
     uuc_ave, uuc_tau, uuc_err = [], [], []
     un2_ave,un2_tau,un2_err = [],[],[]
-    # find Ne
-    for i in range(len(par_nm)):
-        if(par_num[i]=="Ne"):
-            Ne=par[i]
-            break
+    un2p_ave,un2p_tau,un2p_err = [],[],[]
+    IKun2_ave, IKun2_tau, IKun2_err = [], [], []
+
     if(Ne==2):
         Ledif_ave,Ledif_tau,Ledif_err=[],[],[]
     cpar_ind = find_cpar_ind(par_nm,mode)
@@ -43,14 +38,13 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         par_dealing[cpar_ind] = par[cpar_ind][i]
         f2rtail = "MC"
         for j in range(len(par_dealing)):
-            #print("par_dealing[j]",j,par_dealing[j])
             f2rtail+="_"+par_nm[j]+"%.*f"%(par_dg[j],par_dealing[j])
-        f2rtail+=".txt"
+        f2rtail+=".csv"
         file2read = foldername + "/O_"+f2rtail
         data = np.loadtxt(file2read, skiprows=13, delimiter=",", unpack=True)
         E = data[0]
         Les = data[1:1+Ne]
-        IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2,IKun2 = data[1+Ne:]
+        IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2,Tun2p,IKun2 = data[1+Ne:]
         p2uu = Tp2uu/Bond_num
         uuc = Tuuc/Bond_num
         # N in file name is not real N
@@ -58,7 +52,10 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         Ndict={200:187,400:367,500:439,800:721,1000:823,1600:1459}
         if(mode!="L" and par[find_cpar_ind(par_nm,"L")]==-1):
             N=Ndict[N]
-        un2=Tun2/N
+        rCnp = par[find_cpar_ind(par_nm,"rCnp")]
+        Np = int(N*rCnp)
+        un2=Tun2/(N-Np)
+        un2p=Tun2p/Np
         # Ne2 case, need Ledif for additional info
         if(Ne==2):
             Ledif = np.abs(Les[0]-Les[1])
@@ -129,7 +126,6 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         IK_ave.append(np.average(IK))
         rho, cov0 = autocorrelation_function_fft(IK)
         tau, tau_err = tau_int_cal_rho(rho,tau_c)
-        # autocorrelation_plot(rho, tau, file2read[:-4] + "_autoIK.pdf")
         IK_tau.append(tau)
         IK_err.append(np.sqrt(2 * tau / len(IK) * cov0))
 
@@ -137,7 +133,6 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         p2uu_ave.append(np.average(p2uu))
         rho, cov0 = autocorrelation_function_fft(p2uu)
         tau, tau_err = tau_int_cal_rho(rho,tau_c)
-        # autocorrelation_plot(rho, tau, file2read[:-4] + "_autop2uu.pdf")
         p2uu_tau.append(tau)
         p2uu_err.append(np.sqrt(2 * tau / len(p2uu) * cov0))
 
@@ -145,7 +140,6 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         uuc_ave.append(np.average(uuc))
         rho, cov0 = autocorrelation_function_fft(uuc)
         tau, tau_err = tau_int_cal_rho(rho,tau_c)
-        # autocorrelation_plot(rho, tau, file2read[:-4] + "_autouuc.pdf")
         uuc_tau.append(tau)
         uuc_err.append(np.sqrt(2 * tau / len(uuc) * cov0))
 
@@ -153,19 +147,23 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         un2_ave.append(np.average(un2))
         rho, cov0 = autocorrelation_function_fft(un2)
         tau, tau_err = tau_int_cal_rho(rho,tau_c)
-        # autocorrelation_plot(rho, tau, file2read[:-4] + "_autoun2.pdf")
         un2_tau.append(tau)
         un2_err.append(np.sqrt(2 * tau / len(un2) * cov0))
+
+        #un2p
+        un2p_ave.append(np.average(un2p))
+        rho, cov0 = autocorrelation_function_fft(un2p)
+        tau, tau_err = tau_int_cal_rho(rho,tau_c)
+        un2p_tau.append(tau)
+        un2p_err.append(np.sqrt(2 * tau / len(un2p) * cov0))
 
         # IKun2
         IKun2_ave.append(np.average(IKun2))
         rho, cov0 = autocorrelation_function_fft(IKun2)
         tau, tau_err = tau_int_cal_rho(rho,tau_c)
-        # autocorrelation_plot(rho, tau, file2read[:-4] + "_autoIKun2.pdf")
         IKun2_tau.append(tau)
         IKun2_err.append(np.sqrt(2 * tau / len(IKun2) * cov0))
 
-    # only changed "lam" and "B" mode here, others waiting for further decision
     # generalize using par_nm list
     f2stail = "MC"
     for j in range(len(par)):
@@ -181,7 +179,7 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         f.write(mode+",E_ave,E_tau,E_err")
         for e in range(Ne):
             f.write(",Les_ave[%d],Les_tau[%d],Les_err[%d]"%(e,e,e))
-        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,IKun2_ave,IKun2_tau,IKun2_err")
+        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,un2p_ave,un2p_tau,un2p_err,IKun2_ave,IKun2_tau,IKun2_err")
         if(Ne==2):
             f.write(",Ledif_ave,Ledif_tau,Ledif_err")
         f.write("\n")
@@ -189,7 +187,7 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
             f.write("%f,%f,%f,%f" % (cpar[i], E_ave[i], E_tau[i], E_err[i]))
             for e in range(Ne):
                 f.write(",%f,%f,%f"%(Les_ave[e][i],Les_tau[e][i], Les_err[e][i]))
-            f.write(",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f"%(IdA_ave[i], IdA_tau[i], IdA_err[i],I2H_ave[i], I2H_tau[i], I2H_err[i],I2H2_ave[i], I2H2_tau[i], I2H2_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i],IKun2_ave[i],IKun2_tau[i],IKun2_err[i]))
+            f.write(",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f"%(IdA_ave[i], IdA_tau[i], IdA_err[i],I2H_ave[i], I2H_tau[i], I2H_err[i],I2H2_ave[i], I2H2_tau[i], I2H2_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i],un2p_ave[i], un2p_tau[i], un2p_err[i],IKun2_ave[i],IKun2_tau[i],IKun2_err[i]))
             if(Ne==2):
                 f.write(",%f,%f,%f"%(Ledif_ave[i], Ledif_tau[i], Ledif_err[i]))
             f.write("\n")
@@ -208,7 +206,7 @@ def Gij_stat_ana(foldername,par,par_nm,par_dg,mode,tau_c=6):
         for j in range(len(par_dealing)):
             #print("par_dealing[j]",j,par_dealing[j])
             f2rtail+="_"+par_nm[j]+"%.*f"%(par_dg[j],par_dealing[j])
-        f2rtail+=".txt"
+        f2rtail+=".csv"
         file2read = foldername +f2rtail
         Gdata = np.loadtxt(file2read, skiprows=1,usecols=range(10), delimiter=",", unpack=True)
         # get edge-edge distance Dedge

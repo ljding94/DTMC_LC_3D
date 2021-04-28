@@ -35,8 +35,8 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
     print("plotting",filename)
     ftail = "_xyz"
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
-    x,y,z,sx,sy,sz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:14]
-    d=1
+    x,y,z,sx,sy,sz,dA,d2H,ds,dAK,un2,is_cnp,enum, en0, en1 = data[:15]
+
     #sx,sy,sz=d*sx,d*sy,d*sz
     #x,y,z,sx,sy,sz, enum, en0, en1 = data[5:14]
     x_min, x_max = np.min(x),np.max(x)
@@ -75,35 +75,6 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
             ax_xy.plot([x[a],x[b]], [y[a],y[b]], color="silver",alpha=alpha_xy[a])
             ax_zx.plot([z[a],z[b]], [x[a],x[b]], color="silver",alpha=alpha_xy[a])
         #color mapping
-    cmap = cm.get_cmap("jet_r")
-    if(cvt_map=="Mean"):
-        ftail+="_mmap"
-        heat=dA*d2H*d2H
-        print("mean curvature heat",heat)
-        for m in range(cmap_smooth):
-            heat = mean_filter(heat,ns)
-        norm=Normalize(vmin=0,vmax=0.7)
-        ax_xy.scatter(x,y,c=cmap(norm(heat)))
-        ax_zx.scatter(z,x,c=cmap(norm(heat)))
-        sm = plt.cm.ScalarMappable(cmap=cmap,norm=norm)
-        sm.set_array([])
-        cbar=plt.colorbar(sm)
-        #cbar=plt.colorbar(sm, ticks=[0,0.5,0.7])
-        #cbar.ax.set_yticklabels(["0","0.5","0.7"])
-    elif(cvt_map=="Gaussian"):
-        ftail+="_gmap"
-        heat = dAK
-        print("Gaussian curvature heat",heat)
-        for m in range(cmap_smooth):
-            heat = mean_filter(heat,ns)
-        norm=Normalize(vmin=-0.1,vmax=0.0)
-        ax_xy.scatter(x,y,c=cmap(norm(heat)))
-        ax_zx.scatter(z,x,c=cmap(norm(heat)))
-        sm = plt.cm.ScalarMappable(cmap=cmap,norm=norm)
-        sm.set_array([])
-        cbar=plt.colorbar(sm)
-        #cbar=plt.colorbar(sm, ticks=[-0.1,-0.05,0])
-        #cbar.ax.set_yticklabels(["-0.1","-0.05","0"])
     # edge bond
     ecolors = ["blue","green","crimson","indigo","cyan"]
     for i in range(len(ens)):
@@ -120,7 +91,6 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
     ax_xy.plot([x_ave-D_ave*nu[0],x_ave+D_ave*nu[0]],[y_ave-D_ave*nu[1],y_ave+D_ave*nu[1]],"-",linewidth=3.0,color="k")
     ax_zx.plot([z_ave-D_ave*nu[2],z_ave+D_ave*nu[2]],[x_ave-D_ave*nu[0],x_ave+D_ave*nu[0]],"-",linewidth=3.0,color="k")
 
-
     snu=sx*nu[0]+sy*nu[1]+sz*nu[2]
     snu=sz
     #print(np.sqrt(un2)-np.absolute(snu))
@@ -131,8 +101,13 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
     if(rod):
         ftail+="_rod"
         for i in range(len(x)):
-            ax_xy.plot([x[i]-0.5*d*sx[i],x[i]+0.5*d*sx[i]],[y[i]-0.5*d*sy[i],y[i]+0.5*d*sy[i]],"-",linewidth=1.5,color=cmap(norm(deg[i])))
-            ax_zx.plot([z[i]-0.5*d*sz[i],z[i]+0.5*d*sz[i]],[x[i]-0.5*d*sx[i],x[i]+0.5*d*sx[i]],"-",linewidth=1.5,color=cmap(norm(deg[i])))
+            d=2
+            line="-"
+            if(is_cnp[i]):
+                d=1
+                line=":"
+            ax_xy.plot([x[i]-0.5*d*sx[i],x[i]+0.5*d*sx[i]],[y[i]-0.5*d*sy[i],y[i]+0.5*d*sy[i]],linestyle=line,linewidth=1.5,color=cmap(norm(deg[i])))
+            ax_zx.plot([z[i]-0.5*d*sz[i],z[i]+0.5*d*sz[i]],[x[i]-0.5*d*sx[i],x[i]+0.5*d*sx[i]],linestyle=line,linewidth=1.5,color=cmap(norm(deg[i])))
         #sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
         #sm.set_array([])
         #cbar=plt.colorbar(sm, ticks=[0,0.25*np.pi,0.5*np.pi])

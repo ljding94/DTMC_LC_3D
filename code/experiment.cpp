@@ -261,7 +261,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     edge_accept /= MC_sweeps * (step_p_sweep / int(std::sqrt(N)));
 
     std::clock_t c_end = std::clock();
-    std::ofstream f(folder + "/O_MC_" + finfo + ".txt");
+    std::ofstream f(folder + "/O_MC_" + finfo + ".csv");
     if (f.is_open())
     {
         f << "beta=" << beta << "\n";
