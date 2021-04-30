@@ -37,7 +37,8 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
 
     // new way, assume (N+2)%L != 0
     // if L=sqrt(N), N can't be 700
-    // determine initialization shape based on imod, TODO: will add mobius strip latter
+    // determine initialization shape based on imod,
+    //TODO: will add mobius strip latter
     int num_edge_exist; // number of edges already exist
     int hole_pos;       // position of the hole to add
     if (imod == 1)
@@ -54,6 +55,9 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     {
         init_cylinder_shape(d0_);
         num_edge_exist = 2;
+    }else if(imod==4){
+        init_mobius_shape(d0_);
+        num_edge_exist = 1;
     }
     // N is updated based on initialization procedure, especially will decrease if using disk-shape
     hole_pos = N / 4; // add hole at a random position
@@ -71,10 +75,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
         hole_pos += 4;
         //std::cout << "hole_pos=" << hole_pos << std::endl;
     }
-    // distribute cn based on (Cn,Cnp,rCnp)
-    // TODO: implement this
     // above shape setting take care of beads position
-
     // bulk_bond_list (excluding edge bond) and edge_list
 
     Np = int(N * Epar.rCnp);
@@ -147,7 +148,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
         Ob_sys.I2H += mesh[i].dAn2H[1] * mesh[i].dAn2H[0];
         Ob_sys.IK += mesh[i].dAK;
     }
-    Ob_sys.E = 0.5 * Epar.Cn * (N - Np) * 0.5 * Epar.Cnp * Np;
+    Ob_sys.E = 0.5 * Epar.Cn * (N - Np) + 0.5 * Epar.Cnp * Np;
     Ob_sys.E += E_m(Ob_sys);
 
     // set random number generators
@@ -613,6 +614,10 @@ void dtmc_lc::init_cylinder_shape(double d0_)
             }
         }
     }
+}
+
+void dtmc_lc::init_mobius_shape(double d0_){
+    // initialization of mobius strip
 }
 
 void dtmc_lc::push_neis_back(int i, std::vector<int> nei_dist)

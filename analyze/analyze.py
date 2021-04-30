@@ -47,11 +47,7 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2,Tun2p,IKun2 = data[1+Ne:]
         p2uu = Tp2uu/Bond_num
         uuc = Tuuc/Bond_num
-        # N in file name is not real N
         N =par[find_cpar_ind(par_nm,"N")]
-        Ndict={200:187,400:367,500:439,800:721,1000:823,1600:1459}
-        if(mode!="L" and par[find_cpar_ind(par_nm,"L")]==-1):
-            N=Ndict[N]
         rCnp = par[find_cpar_ind(par_nm,"rCnp")]
         Np = int(N*rCnp)
         un2=Tun2/(N-Np)
@@ -171,7 +167,7 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
             f2stail+="_"+par_nm[j]+"s"
         else:
             f2stail+="_"+par_nm[j]+"%.*f"%(par_dg[j],par_dealing[j])
-    f2stail+="_ana.txt"
+    f2stail+="_ana.csv"
     # only changed "lam" and "B" mode here, others waiting for further decision
     savefile = foldername + "/O_" + f2stail
 
@@ -250,7 +246,7 @@ def Gij_stat_ana(foldername,par,par_nm,par_dg,mode,tau_c=6):
             f2stail+="_"+par_nm[j]+"s"
         else:
             f2stail+="_"+par_nm[j]+"%.*f"%(par_dg[j],par_dealing[j])
-    f2stail+="_ana.txt"
+    f2stail+="_ana.csv"
     # only changed "lam" and "B" mode here, others waiting for further decision
     savefile = foldername + f2stail
 

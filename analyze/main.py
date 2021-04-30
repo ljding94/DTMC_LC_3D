@@ -15,35 +15,35 @@ def main():
     #config_plot_xyz("../data/scratch_local/State_N200_imod1_Ne2_kar100_lam6.0_Kd5.0_q1.0_Cn5.0_kard0.0_init.txt",mesh=1)
     #return 0
 
-    foldername = "../data/Ne2/Apr26_2021" # kinda switch to Ne2 simulation for next paper
+    foldername = "../data/Ne2/Apr28_2021" # kinda switch to Ne2 simulation for next paper
     print("analyzing "+foldername)
-    N = 300
-    imod=3 # 1 for rhombus, 2 disk, 3 cylinder
-    Ne=2
+    N = 241
+    imod=2 # 1 for rhombus, 2 disk, 3 cylinder
+    Ne=1
     kar = 100
     karg=0.0
-    lam=4.0
+    lam=5.0
     lams=np.arange(4.0,9.1,1.0)
-    Kd=5
-    qs=np.arange(0.0,2.01,0.2)
-    Cn=5.0
-    Cnp=2.0
-    rCnps=np.arange(0.0,1.01,0.1)
+    Kd=9.0
+    Cn=Kd
+    q=0.1
+    Cnps=np.arange(2.0,10.1,0.5)
+    rCnps=np.arange(0.0,1.01,0.2)
     pars = []
     for rCnp in rCnps:
-        pars.append([N, imod,Ne, kar, lam, Kd, qs, Cn, Cnp, rCnp])
+        pars.append([N, imod,Ne, kar, lam, Kd, q, Cn, Cnps, rCnp])
     par_nm = ["N","imod", "Ne", "kar","lam","Kd","q", "Cn", "Cnp", "rCnp"]
     par_dg = [0,0,0,0,1,1,1,1,1,1] # nsumber of digit for each
-    mod="q"
+    mod="Cnp"
     for i in range(len(pars)):
         print("analyzing",pars[i])
         N, imod, Ne, kar, lam, Kd, q,Cn,Cnp,rCnp = pars[i]
-        #O_stat_ana(foldername,pars[i],par_nm,par_dg, mode=mod, tau_c=6)
+        O_stat_ana(foldername,pars[i],par_nm,par_dg, mode=mod, tau_c=6)
         if(1):
             pass
-            #Gij_stat_ana(foldername,pars[i],par_nm,par_dg,mode=mod, tau_c=6)
+            Gij_stat_ana(foldername,pars[i],par_nm,par_dg,mode=mod, tau_c=6)
 
-        for q in qs[::2]:
+        for Cnp in Cnps[::2]:
             if(i%1==0):
                 pass
                 filename = foldername + "/State_N%.0f_imod%.0f_Ne%.0f_kar%.0f_lam%.1f_Kd%.1f_q%.1f_Cn%.1f_Cnp%.1f_rCnp%.1f.csv" % (N, imod,Ne, kar,lam,Kd,q,Cn,Cnp,rCnp)

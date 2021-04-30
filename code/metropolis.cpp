@@ -263,13 +263,15 @@ int dtmc_lc::bond_metropolis()
         return 0;
     }
     // check edge_num, can't connect different edges
+    // it has became unneseccery since no difference were observed
+    /*
     if (Ne > 1)
     {
         if ((mesh[ind_a].edge_num != -1) && (mesh[ind_b].edge_num != -1) && (mesh[ind_a].edge_num != mesh[ind_b].edge_num))
         {
             return 0;
         }
-    }
+    }*/
     // check # of nei
     // can't be greater than 9, otherwise will have more than 9 after flip
     if (mesh[ind_a].nei.size() >= 9 || mesh[ind_b].nei.size() >= 9)
@@ -700,6 +702,8 @@ int dtmc_lc::edge_metropolis()
         }
 
         // for Ne>1 check if i has neighbour on the other edge
+        // same here, this part is unneseccery since not difference were found
+        /*
         if (Ne > 1)
         {
             for (int k = 0; k < mesh[ind_i].nei.size(); k++)
@@ -710,6 +714,7 @@ int dtmc_lc::edge_metropolis()
                 }
             }
         }
+        */
         i_nei = mesh[ind_i].nei;
 
         // order of j k is unclear, unclear now
@@ -849,10 +854,6 @@ int dtmc_lc::swap_metropolis()
 #pragma region : find related beads and obserable
     ind_i = rand_pos(gen);
     ind_j = (ind_i + 1 + int((N - 1) * rand_uni(gen))) % N;
-    //if (ind_i == ind_j)
-    //{
-    //std::cout << "swap selection algorithm not working!\n";
-    //}
 
     if (mesh[ind_i].is_cnp == mesh[ind_j].is_cnp)
     {

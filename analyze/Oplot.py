@@ -26,7 +26,7 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
             else:
                 f2rtail+="_"+par_nm[j]+"%.*f"%(par_dg[j],par_dealing[j])
                 label +=par_nm[j]+"%.*f,"%(par_dg[j],par_dealing[j])
-        f2rtail+="_ana.txt"
+        f2rtail+="_ana.csv"
         head = "/O_"
         filename = foldername + head+f2rtail
         data.append(np.loadtxt(filename, skiprows=1,delimiter=",", unpack=True))
@@ -96,7 +96,8 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
     O_cpar_plot(axs[7,0], uuc_ave, uuc_err, O_label, "uuc", r"$u_c=\left<(u_i\times u_j)\cdot\hat{r}_{ij} (u_i\cdot u_j)\right>_{(i,j)}$",cpar, colors, alphas)
     #plot the differential if mode is q
     O_cpar_plot(axs[8,0], un2_ave, un2_err, O_label, "un2", r"$u_n=\left<(u_i\cdot n_i)^2\right>_{i}$",cpar, colors, alphas)
-    O_cpar_plot(axs[9,0], un2p_ave, un2p_err, O_label, "un2p", r"$u_n=\left<(u_i\cdot n_i)^2\right>_{i}$",cpar, colors, alphas)
+    O_cpar_plot(axs[9,0], un2p_ave, un2p_err, O_label, "un2p", r"$u_n(p)=\left<(u_i\cdot n_i)^2\right>_{i}$",cpar, colors, alphas)
+    O_cpar_plot(axs[9,1], un2_ave-un2p_ave, np.zeros(len(un2_ave)), O_label, "un2-un2p", r"$u_n-u_n(p)$",cpar, colors, alphas)
     if(mode=="q"):
         O_cpar_plot(axs[7,1], uuc_grad, uuc_grad_err, O_label, "uuc_grad", r"$\partial u_c /\partial q$",cpar, colors, alphas)
         O_cpar_plot(axs[8,1], un2_grad, un2_grad_err, O_label, "un2_grad", r"$\partial u_n /\partial q$",cpar, colors, alphas)
@@ -130,7 +131,7 @@ def Geig_pars_plot(foldername, pars,par_nm,par_dg, mode):
             else:
                 f2rtail+="_"+par_nm[j]+"%.*f"%(par_dg[j],par_dealing[j])
                 label +=par_nm[j]+"%.*f,"%(par_dg[j],par_dealing[j])
-        f2rtail+="_ana.txt"
+        f2rtail+="_ana.csv"
         filename = foldername+f2rtail
         data.append(np.loadtxt(filename, skiprows=1,delimiter=",", unpack=True))
         O_label.append(label)

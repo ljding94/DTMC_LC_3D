@@ -114,6 +114,7 @@ public:
     void init_rhombus_shape(double d0_);
     void init_disk_shape(double d0_);
     void init_cylinder_shape(double d0_);
+    void init_mobius_shape(double d0_);
     int add_hole_as_edge(int b0, int edgenum); // return 0 if fail to do so with b0
 
     void reset_config();
