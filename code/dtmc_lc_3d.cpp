@@ -6,7 +6,6 @@
 
 // initialization
 dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0_, E_parameter Epar_)
-//double kar_, double lam_, double Kd_, double Kt_, double Cn_, double kard_)
 {
     // system related
     beta = beta_;
@@ -55,7 +54,9 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     {
         init_cylinder_shape(d0_);
         num_edge_exist = 2;
-    }else if(imod==4){
+    }
+    else if (imod == 4)
+    {
         init_mobius_shape(d0_);
         num_edge_exist = 1;
     }
@@ -162,6 +163,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
 
 } // end of triangulation
 
+#pragma region : shape initialization
 void dtmc_lc::init_rhombus_shape(double d0_)
 {
     // works for Ne>=1, will add triangle holes if Ne>1
@@ -331,76 +333,6 @@ void dtmc_lc::init_rhombus_shape(double d0_)
         }
     }
 }
-int dtmc_lc::if_near_edge(int b)
-{
-    // check if b is connected to a edge bead
-    int bn;
-    for (int i = 0; i < mesh[b].nei.size(); i++)
-    {
-        bn = mesh[b].nei[i];
-        if (mesh[bn].edge_num != -1)
-        {
-            return 1;
-        }
-    }
-    return 0;
-}
-int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
-{
-    // add a hole as edge[edge_num], and i0 is one of the edge beads.
-    int b1, b2; // another two beads to include for the new triangle edge
-    // check if b0 is near the edge, if yes, it can't be on the new edge
-    if (if_near_edge(b0))
-    {
-        //std::cout << "b0 is near an edge\n";
-        return 0;
-    }
-
-    int i_nei = 1; // position in mesh[b0].nei
-    while (i_nei < mesh[b0].nei.size())
-    {
-        b1 = mesh[b0].nei[i_nei - 1];
-        b2 = mesh[b0].nei[i_nei];
-        if (list_a_nei_b(mesh[b1].nei, b2) == -1)
-        {
-            // b1 b2 somehow not connected?
-            std::cout << "b1-b2 not connected, big issue on connection\n";
-            continue;
-        }
-        if (if_near_edge(b1) || if_near_edge(b2))
-        {
-            // if b1 or b2 is near another edge, can't use them
-            // TODO: this line of code can be optimized
-            continue;
-        }
-        else
-        { // found the b1 b2 candidate
-            break;
-        }
-        i_nei += 1;
-    }
-    // b0-b1-b2-b0 as new edge
-    if (i_nei == mesh[b0].nei.size())
-    {
-        // didn't find appropriate candidate around b0
-        return 0;
-    }
-    // add edge bond, but also keep the b0-b1-b2-b0 order
-    mesh[b0].edge_num = edgenum;
-    mesh[b0].edge_nei = {b2, b1};
-    edge_lists[edgenum].push_back(b0);
-    mesh[b1].edge_num = edgenum;
-    mesh[b1].edge_nei = {b0, b2};
-    edge_lists[edgenum].push_back(b1);
-    mesh[b2].edge_num = edgenum;
-    mesh[b2].edge_nei = {b1, b0};
-    edge_lists[edgenum].push_back(b2);
-    // delete these three edge bond from the bulk bulk_bond_list
-    delete_bulk_bond_list(b0, b1);
-    delete_bulk_bond_list(b1, b2);
-    delete_bulk_bond_list(b2, b0);
-    return 1;
-}
 
 void dtmc_lc::init_disk_shape(double d0_)
 {
@@ -527,21 +459,23 @@ void dtmc_lc::init_cylinder_shape(double d0_)
     int x_n, y_n; // position of the vertex in the two vector coordinate
     // cylinder initial shape
     //use cylinder initialization
-    int L = 10;
+    int L = 10; // length of the cylinder
     if (N % L != 0)
     {
         std::cout << "N % L != 0 \n";
     }
-    int Lr = N / L;
-    double R = d0_ / (2 * std::sin(PI / Lr));
+    int Lr = N / L; // perimeter of cylinder circular bottom
+    double del_theta = 2 * PI / Lr;
+    double R = d0_ / (2 * std::sin(del_theta / 2));
+
     mesh.resize(N);
     for (int i = 0; i < N; i++)
     {
         // assign position
         x_n = i % Lr;
         y_n = i / Lr;
-        mesh[i].R[0] = R * std::cos(2 * PI * (x_n + 0.5 * y_n) / Lr);
-        mesh[i].R[1] = R * std::sin(2 * PI * (x_n + 0.5 * y_n) / Lr);
+        mesh[i].R[0] = R * std::cos(del_theta * (x_n + 0.5 * y_n));
+        mesh[i].R[1] = R * std::sin(del_theta * (x_n + 0.5 * y_n));
         mesh[i].R[2] = d0_ * 0.5 * std::sqrt(3) * y_n;
 
         // put bonds
@@ -616,8 +550,198 @@ void dtmc_lc::init_cylinder_shape(double d0_)
     }
 }
 
-void dtmc_lc::init_mobius_shape(double d0_){
+void dtmc_lc::init_mobius_shape(double d0_)
+{
     // initialization of mobius strip
+    double w, t; // continues parameter along the width and rotational direction
+
+    //use cylinder initialization
+    int W = 3; // width of mobius strip
+               //3 is very optimal consider the distance change need to be within (1,l0) when d0=1.5
+    N -= N % W;
+    int Lr = N / W;    // perimeter of strip's circular bottom
+    int Lw;            // number of bead depending on w_n
+    int i, inei_cache; // index in the mesh
+    double del_theta = 2 * PI / Lr;
+    double R = d0_ / (2 * std::sin(del_theta / 2));
+    mesh.resize(N);
+    for (int wn = 0; wn < W; wn++)
+    {
+        Lw = Lr + W / 2 - wn;
+        for (int tn = 0; tn < Lw; tn++)
+        {
+            i = wn * (Lr + W / 2) - (wn - 1) * wn / 2 + tn;
+            w = (wn - (W - 1) / 2) * std::sqrt(3) / 2;
+            t = tn + 0.5 * wn;
+            mesh[i].R[0] = (R + d0_ * w * std::cos(del_theta / 2 * t)) * std::cos(del_theta * t);
+            mesh[i].R[1] = (R + d0_ * w * std::cos(del_theta / 2 * t)) * std::sin(del_theta * t);
+            mesh[i].R[2] = w * std::sin(del_theta / 2 * t);
+
+            //TODO: implement below putting bond code
+            // put bonds
+            if (wn == 0)
+            {
+                // edge~
+                mesh[i].edge_num = 0;
+                edge_lists[0].push_back(i);
+                if (tn == 0)
+                {
+                    // i==0, connect to i=N-1
+                    // left most, connecting to w_n=W
+                    inei_cache = N - 1 - (Lr + W / 2 - (W - 1)); // just for index position storage
+                    push_neis_back(i, {1, Lw, inei_cache - i, N - 1 - i});
+                    push_eneis_back(i, {N - 1 - i, 1});
+                    push_bneis_list(i, {Lw, inei_cache - i});
+                }
+                else if (tn == Lw - 1)
+                {
+                    // right most, also  connecting to wn=W
+                    inei_cache = N - 1 - (Lr + W / 2 - (W - 1)) + 1; // just for index position storage
+                    push_neis_back(i, {inei_cache - i, inei_cache - (Lr + W / 2 - (W - 2)) - i, Lw - 1, -1});
+                    push_eneis_back(i, {-1, inei_cache - i});
+                }
+                else
+                {
+                    // middle
+                    push_neis_back(i, {1, Lw, Lw - 1, -1});
+                    push_eneis_back(i, {-1, 1});
+                    push_bneis_list(i, {Lw, Lw - 1});
+                }
+            }
+            else if (wn == W - 1)
+            {
+                mesh[i].edge_num = 0;
+                edge_lists[0].push_back(i);
+                if (tn == 0)
+                {
+                    // tn=0,w_n=W-1
+                    // left most, connecting to w_n=0
+                    push_neis_back(i, {1, -Lw, -Lw - 1, Lr + W / 2 - 1 - i});
+                    push_eneis_back(i, {Lr + W / 2 - 1 - i, 1});
+                    push_bneis_list(i, {-Lw, -Lw - 1});
+                }
+                else if (tn == Lw - 1)
+                {
+                    // right most, also  connecting to w_n=0 tn=0
+                    push_neis_back(i, {0 - i, -Lw, -Lw - 1, -1});
+                    push_eneis_back(i, {-1, 0 - i});
+                    push_bneis_list(i, {-Lw, -Lw - 1});
+                }
+                else
+                {
+                    // middle
+                    push_neis_back(i, {1, -1, -Lw - 1, -Lw});
+                    push_eneis_back(i, {-1, 1});
+                    push_bneis_list(i, {-Lw - 1, -Lw});
+                }
+                // edge~
+            }
+            else
+            { // in-bulk~ w_n!=0 and w_n!=W-1
+                if (tn == 0)
+                { // left most
+                    int wnc = W - 1 - wn;
+                    int tnc = Lr + W / 2 - wnc - 1;
+                    inei_cache = wnc * (Lr + W / 2) - (wnc - 1) * wnc / 2 + tnc;
+                    push_neis_back(i, {1, Lw, inei_cache - tnc - 1 - i, inei_cache - i, -Lw - 1, -Lw});
+                    push_bneis_list(i, {1, Lw, inei_cache - tnc - 1 - i, inei_cache - i, -Lw - 1, -Lw});
+                }
+                else if (tn == Lw - 1)
+                { // right most
+                    int wnc = W - 1 - wn;
+                    inei_cache = wnc * (Lr + W / 2) - (wnc - 1) * wnc / 2;
+                    push_neis_back(i, {inei_cache - i,
+                                       inei_cache - (Lr + W / 2 - wnc) - 1 - i,
+                                       Lw - 1, -1, -Lw - 1, -Lw});
+                    push_bneis_list(i, {inei_cache - i,
+                                        inei_cache - (Lr + W / 2 - wnc) - 1 - i,
+                                        Lw - 1, -1, -Lw - 1, -Lw});
+                }
+                else
+                {
+                    //true middle
+                    push_neis_back(i, {1, Lw, Lw - 1, -1, -Lw - 1, -Lw});
+                    push_bneis_list(i, {1, Lw, Lw - 1, -1, -Lw - 1, -Lw});
+                }
+            }
+        }
+    }
+}
+
+int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
+{
+    // add a hole as edge[edge_num], and i0 is one of the edge beads.
+    int b1, b2; // another two beads to include for the new triangle edge
+    // check if b0 is near the edge, if yes, it can't be on the new edge
+    if (if_near_edge(b0))
+    {
+        //std::cout << "b0 is near an edge\n";
+        return 0;
+    }
+
+    int i_nei = 1; // position in mesh[b0].nei
+    while (i_nei < mesh[b0].nei.size())
+    {
+        b1 = mesh[b0].nei[i_nei - 1];
+        b2 = mesh[b0].nei[i_nei];
+        if (list_a_nei_b(mesh[b1].nei, b2) == -1)
+        {
+            // b1 b2 somehow not connected?
+            std::cout << "b1-b2 not connected, big issue on connection\n";
+            continue;
+        }
+        if (if_near_edge(b1) || if_near_edge(b2))
+        {
+            // if b1 or b2 is near another edge, can't use them
+            // TODO: this line of code can be optimized
+            continue;
+        }
+        else
+        { // found the b1 b2 candidate
+            break;
+        }
+        i_nei += 1;
+    }
+    // b0-b1-b2-b0 as new edge
+    if (i_nei == mesh[b0].nei.size())
+    {
+        // didn't find appropriate candidate around b0
+        return 0;
+    }
+    // add edge bond, but also keep the b0-b1-b2-b0 order
+    mesh[b0].edge_num = edgenum;
+    mesh[b0].edge_nei = {b2, b1};
+    edge_lists[edgenum].push_back(b0);
+    mesh[b1].edge_num = edgenum;
+    mesh[b1].edge_nei = {b0, b2};
+    edge_lists[edgenum].push_back(b1);
+    mesh[b2].edge_num = edgenum;
+    mesh[b2].edge_nei = {b1, b0};
+    edge_lists[edgenum].push_back(b2);
+    // delete these three edge bond from the bulk bulk_bond_list
+    delete_bulk_bond_list(b0, b1);
+    delete_bulk_bond_list(b1, b2);
+    delete_bulk_bond_list(b2, b0);
+    return 1;
+}
+
+#pragma endregion
+
+#pragma region : useful tools
+
+int dtmc_lc::if_near_edge(int b)
+{
+    // check if b is connected to a edge bead
+    int bn;
+    for (int i = 0; i < mesh[b].nei.size(); i++)
+    {
+        bn = mesh[b].nei[i];
+        if (mesh[bn].edge_num != -1)
+        {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 void dtmc_lc::push_neis_back(int i, std::vector<int> nei_dist)
@@ -660,3 +784,4 @@ void dtmc_lc::delete_bulk_bond_list(int ind_i, int ind_j)
         }
     }
 }
+#pragma endregion

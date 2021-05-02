@@ -135,7 +135,7 @@ def config_plot_xyz_seq(filename,Seq):
 def config_plot3D(filename,mesh=0,rod=0,cvt_map="",cmap_smooth=0):
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
     #x,y,z,sx,sy,sz,enum, en0, en1 = data[5:14]
-    x,y,z,sx,sy,sz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:14]
+    x,y,z,sx,sy,sz,dA,d2H,ds,dAK,un2,is_cnp,enum, en0, en1 = data[:15]
     d=2
     #sx,sy,sz=d*sx,d*sy,d*sz
     x,y,z=x-np.average(x),y-np.average(y),z-np.average(z)
