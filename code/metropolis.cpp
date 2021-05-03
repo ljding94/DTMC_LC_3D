@@ -264,14 +264,13 @@ int dtmc_lc::bond_metropolis()
     }
     // check edge_num, can't connect different edges
     // it has became unneseccery since no difference were observed
-    /*
-    if (Ne > 1)
+    // TODO: however, it may help peserving topology, need to implement it for any two edge beads
+
+    // check for in-bulk bond bridging edges
+    if ((mesh[ind_a].edge_num != -1) && (mesh[ind_b].edge_num != -1))
     {
-        if ((mesh[ind_a].edge_num != -1) && (mesh[ind_b].edge_num != -1) && (mesh[ind_a].edge_num != mesh[ind_b].edge_num))
-        {
-            return 0;
-        }
-    }*/
+        return 0;
+    }
     // check # of nei
     // can't be greater than 9, otherwise will have more than 9 after flip
     if (mesh[ind_a].nei.size() >= 9 || mesh[ind_b].nei.size() >= 9)
@@ -703,18 +702,13 @@ int dtmc_lc::edge_metropolis()
 
         // for Ne>1 check if i has neighbour on the other edge
         // same here, this part is unneseccery since not difference were found
-        /*
-        if (Ne > 1)
-        {
-            for (int k = 0; k < mesh[ind_i].nei.size(); k++)
+        for (int k = 0; k < mesh[ind_i].nei.size(); k++)
+        { // check every neighbor of ind_i
+            if ((mesh[mesh[ind_i].nei[k]].edge_num != -1) && (mesh[ind_i].nei[k] != ind_j) && (mesh[ind_i].nei[k] != ind_k))
             {
-                if (mesh[mesh[ind_i].nei[k]].edge_num != -1 && mesh[mesh[ind_i].nei[k]].edge_num != mesh[ind_j].edge_num)
-                {
-                    return 0;
-                }
+                return 0;
             }
         }
-        */
         i_nei = mesh[ind_i].nei;
 
         // order of j k is unclear, unclear now
