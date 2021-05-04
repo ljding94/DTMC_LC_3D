@@ -203,6 +203,7 @@ def config_plot3D(filename,mesh=0,rod=0,cvt_map="",cmap_smooth=0):
     ax.set_xlabel("x")
     ax.set_ylabel("y")
     ax.set_zlabel("z")
+    ax.set_axis_off()
     plt.show()
     #plt.savefig(filename[:-4] + "_3D.png", dpi=300)
     plt.close()
