@@ -556,8 +556,10 @@ void dtmc_lc::init_mobius_shape(double d0_)
     double w, t; // continues parameter along the width and rotational direction
 
     //use cylinder initialization
-    int W = 3; // width of mobius strip
+    int W = 5; // width of mobius strip
+               // for now, odd only
                //3 is very optimal consider the distance change need to be within (1,l0) when d0=1.5
+               // for W=5 N>=300 at least when d0=1.4
     N -= N % W;
     int Lr = N / W;    // perimeter of strip's circular bottom
     int Lw;            // number of bead depending on w_n
@@ -638,6 +640,7 @@ void dtmc_lc::init_mobius_shape(double d0_)
             }
             else
             { // in-bulk~ w_n!=0 and w_n!=W-1
+                mesh[i].edge_num = -1;
                 if (tn == 0)
                 { // left most
                     int wnc = W - 1 - wn;
@@ -675,7 +678,7 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
     // check if b0 is near the edge, if yes, it can't be on the new edge
     if (if_near_edge(b0))
     {
-        //std::cout << "b0 is near an edge\n";
+        //std::cout << b0 << "b0 is near an edge\n";
         return 0;
     }
 
@@ -690,12 +693,14 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
             std::cout << "b1-b2 not connected, big issue on connection\n";
             continue;
         }
+        /* no longer necessary
         if (if_near_edge(b1) || if_near_edge(b2))
         {
             // if b1 or b2 is near another edge, can't use them
             // TODO: this line of code can be optimized
             continue;
         }
+        */
         else
         { // found the b1 b2 candidate
             break;

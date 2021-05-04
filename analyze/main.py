@@ -11,7 +11,7 @@ from analyze import *
 def main():
     print("hello! dtmc_lc analysis")
     #config_plot3D("../data/Ne2/Apr18_2021/State_N300_imod3_Ne3_kar100_lam4.0_Kd5.0_q1.4_Cn5.0_kard0.0.txt",mesh=1,rod=0)
-    #config_plot3D("../data/scratch_local/State_N198_imod4_Ne1_kar5_lam3.0_Kd5.0_q1.0_Cn5.0_Cnp0.0_rCnp0.0_init.csv",mesh=1)
+    config_plot3D("../data/scratch_local/State_N300_imod4_Ne2_kar100_lam5.0_Kd0.0_q0.0_Cn0.0_Cnp0.0_rCnp0.0.csv",mesh=1)
     #config_plot3D("../data/Ne2/Apr16_2021/State_N200_imod3_Ne2_kar100_lam6.0_Kd7.0_q0.0_Cn7.0_kard0.0.txt",mesh=1,rod=0)
 
     # to show

@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
     int imod = 0;
     //1 for rhombus, 2 disk, 3 cylinder
     int Ne;          // number of edges
-    double d0 = 1.5; // initialization distance between neighboring bead (for rhombus shape)
+    double d0 = 1.4; // initialization distance between neighboring bead (for rhombus shape)
     double l0 = 1.73;
     double kar;
     double karg;
