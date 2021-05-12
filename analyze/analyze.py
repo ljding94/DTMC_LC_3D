@@ -51,7 +51,7 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         rCnp = par[find_cpar_ind(par_nm,"rCnp")]
         Np = int(N*rCnp)
         un2=Tun2/(N-Np)
-        un2p=Tun2p/Np
+        un2p=Tun2p/Np if Np>0 else Tun2p
         # Ne2 case, need Ledif for additional info
         if(Ne==2):
             Ledif = np.abs(Les[0]-Les[1])

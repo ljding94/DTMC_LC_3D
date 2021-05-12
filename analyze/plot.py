@@ -42,8 +42,8 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
     x_min, x_max = np.min(x),np.max(x)
     y_min, y_max = np.min(y),np.max(y)
     z_min, z_max = np.min(z),np.max(z)
-    alpha_xy = 0.9*(z-z_min+0.1)/(z_max-z_min+0.1)+0.1
-    alpha_zx = 0.9*(y-y_min+0.1)/(y_max-y_min+0.1)+0.1
+    alpha_xy = 0.8*(z-z_min+0.1)/(z_max-z_min+0.1)+0.1
+    alpha_zx = 0.8*(y-y_min+0.1)/(y_max-y_min+0.1)+0.1
     ns = np.transpose(data[14:])
     #ns = np.transpose(data[14:])
     ens = np.array([en0, en1])

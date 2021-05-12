@@ -843,6 +843,7 @@ int dtmc_lc::edge_metropolis()
     } // end add ind_i
 }
 
+/*
 int dtmc_lc::swap_metropolis()
 {
     // since what's been changed is very simlple. I won't go through the entire process of storaging every related variables, instead I'll just update Ob_sys two un2 variable and the energy E.
@@ -854,10 +855,6 @@ int dtmc_lc::swap_metropolis()
     ind_i = rand_pos(gen);
     ind_j = (ind_i + 1 + int((N - 1) * rand_uni(gen))) % N;
 
-    if (mesh[ind_i].is_cnp == mesh[ind_j].is_cnp)
-    {
-        return 1;
-    }
     Er_old = 0;
     Tun2r_old = 0;
     Tun2pr_old = 0;
@@ -921,3 +918,4 @@ int dtmc_lc::swap_metropolis()
 
 #pragma endregion
 }
+*/

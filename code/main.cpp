@@ -15,13 +15,16 @@ int main(int argc, char const *argv[])
     int Ne;          // number of edges
     double d0 = 1.4; // initialization distance between neighboring bead (for rhombus shape)
     double l0 = 1.73;
-    double kar;
-    double karg;
-    double lam;
-    double Kd;
-    double q; // Kt = Kd*q
+    double kar; // bending
+    double lam; // edge line tension
+    double Kd;  // Lebwohl-Lasher
+    double q;   // Kt = Kd*q
     double Kt;
-    double Cn, Cn2, rCn2;
+    double Cn;
+    double kard; // effective depletion
+    // for mixture
+    //double ms;
+    //double mr;
     // tilt coupling, if rCn2 != 0, rCn2 is portion of directors of Cn2 coupling strength
 
     //double kard;
@@ -40,14 +43,16 @@ int main(int argc, char const *argv[])
     Epar.Kd = std::atof(argv[6]);
     Epar.q = std::atof(argv[7]);
     Epar.Cn = std::atof(argv[8]);
-    Epar.Cnp = std::atof(argv[9]);
-    Epar.rCnp = std::atof(argv[10]);
+    Epar.kard = std::atof(argv[9]);
+
+    //Epar.ms = std::atof(argv[9]);
+    //Epar.mr = std::atof(argv[10]);
     //kard = std::atof(argv[9]);
 
     dtmc_lc membrane(beta, N, imod, Ne, d0, l0, Epar);
     N = membrane.mesh.size();
-    std::string finfo = "N" + std::to_string(N) + "_imod" + std::string(argv[2]) + "_Ne" + std::string(argv[3]) + "_kar" + std::string(argv[4]) + "_lam" + std::string(argv[5]) + "_Kd" + std::string(argv[6]) + "_q" + std::string(argv[7]) + "_Cn" + std::string(argv[8]) + "_Cnp" + std::string(argv[9]) + "_rCnp" + std::string(argv[10]);
-    if (argc == 12)
+    std::string finfo = "N" + std::to_string(N) + "_imod" + std::string(argv[2]) + "_Ne" + std::string(argv[3]) + "_kar" + std::string(argv[4]) + "_lam" + std::string(argv[5]) + "_Kd" + std::string(argv[6]) + "_q" + std::string(argv[7]) + "_Cn" + std::string(argv[8]) + "_kard" + std::string(argv[9]);
+    if (argc == 11)
     {
         // use "prog name par* local" for local running
         // used for local running!
@@ -61,12 +66,12 @@ int main(int argc, char const *argv[])
 
         return 0;
     }
-    else if (argc == 11)
+    else if (argc == 10)
     {
         // ccv running
         folder = "/users/lding3/scratch";
         // used 2000, 4000 for manuscript
-        membrane.Thermal(1000, N / (delta_s * delta_s), 1, delta_s,
+        membrane.Thermal(1000, N / (delta_s * delta_s), 10, delta_s,
                          delta_theta);
         membrane.O_MC_measure(2000, 10, N / (delta_s * delta_s) + 1, delta_s,
                               delta_theta, folder, finfo);

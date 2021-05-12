@@ -9,7 +9,7 @@
 // observable
 struct observable
 {
-    // energy
+    // total energy
     double E;
     // geometric
     double I2H2;
@@ -19,24 +19,27 @@ struct observable
     double Tuuc;
     // coupling
     double Tun2;  // tilt coupling
-    double Tun2p; // coupling of Cnp directors
     double IKun2; // coupling between Gaussian curvature and tilt, depletion-like
-    // miscellany
-    double IdA; // integral of dA
-    double I2H; // integral of dA(2H)
-    double IK;  // integral of dA(K)
-
+    // miscellany, not directly related to system energy
+    double IdA;   // integral of dA
+    double I2H;   // integral of dA(2H)
+    double IK;    // integral of dA(K)
     int Bond_num; // total number of bonds
 };
 //hamiltonion parameters
 struct E_parameter
 {
-    double kar;       // mean curvature bending stiffness
-    double lam;       // line tension coefficient
-    double Kd;        // liquid crystal interaction moduli
-    double q;         // liquid crystall twist constant
-    double Cn;        // liquid crystal to membrane normal moduli
-    double Cnp, rCnp; // Cn2: Cn for short rods, and rCn2 portion of Cn2 in total beads
+    double kar;  // mean curvature bending stiffness
+    double lam;  // line tension coefficient
+    double Kd;   // liquid crystal interaction moduli
+    double q;    // liquid crystall twist constant
+    double Cn;   // liquid crystal to membrane normal moduli
+    double kard; // effective depletion energy
+
+    //double ms;  // mixture strength,
+    //double mr;  // mixture ratio, N mixture = mr*N
+    // on mixture strength:
+    // mixture: kar = ms*kar, lam=ms*lam, Kd_{i,j}=Kd*0.5*(1+ms) etc.
 };
 struct vertex
 {
@@ -51,16 +54,15 @@ struct vertex
     std::vector<int> edge_nei;
     // neighbors form edge with this one (if exist)
 
-    std::vector<int> nei2flip; // index in nei that could be flipped with
-
     // measurement related
     std::vector<double> dAn2H; // in bulk: (dA, 2H), on edge (0,0)
     // energy related (directly)
     double ds; // beads in bulk: 0 , beads on edge 0.5*(l_{i+}+l_{i-})
     // double dskg; // in bulk: 0, on edge: kg*ds
-    double dAK;      // in bulk: K*dA, on edge: 0
-    double un2;      // local un2
-    bool is_cnp = 0; // local Cn, if yes, local Cn is Cnp
+    double dAK; // in bulk: K*dA, on edge: 0
+    double un2; // local un2
+    double es;  // energy related strength, 1 for normal rods ms for mixture
+    //double dE;  // local energy; sum dE over all beads is the actually total energy.
 };
 class dtmc_lc
 {
@@ -71,13 +73,7 @@ public:
     int imod;    // mode for initialization shape
     int Ne;      // number of edges
     // also used to set fixed distance betwen two beads
-    double l0;   // tether maximum length
-    double kar;  // mean curvature bending stiffness
-    double lam;  // line tension coefficient
-    double Kd;   // liquid crystal interaction moduli
-    double Kt;   // liquid crystall twist interaction moduli
-    double Cn;   // liquid crystal to membrane normal moduli
-    double kard; // depletion-like gaussian curvature bending stiffness
+    double l0; // tether maximum length
 
     // system configuration
 
@@ -93,9 +89,11 @@ public:
     void mesh_bead_info_update(std::vector<int> ind_relate);
 
     E_parameter Epar;
-    observable Ob_sys;
+    observable Ob_sys, Ob_sys_w; //system observables and mixture weighted observables, later one is directly related to the energy measurement
+
     observable Ob_m(std::vector<int> ind_relate,
                     std::vector<std::pair<int, int>> bond_relate);
+    void Ob_init(observable &Ob);
     void Ob_sys_update(observable Ob_new, observable Ob_old);
 
     // measure observables related to these ind and bond
@@ -174,7 +172,7 @@ public:
     // execute bond remove/add update
     // return 1: accepted, 0: rejected
 
-    int swap_metropolis();
+    //int swap_metropolis(); // reserved for mixture which is not of my concern for now
     // swap two beads with different interaction parameters, like cn
     // return 1: accepted, 0: rejected
 

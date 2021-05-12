@@ -24,8 +24,9 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     Epar.q = Epar_.q;
     // coupling
     Epar.Cn = Epar_.Cn;
-    Epar.Cnp = Epar_.Cnp;
-    Epar.rCnp = Epar_.rCnp;
+    Epar.kard = Epar_.kard;
+    //Epar.ms = Epar_.ms;
+    //Epar.mr = Epar_.mr;
 
     edge_lists.resize(Ne);
     for (int n = 0; n < Ne; n++)
@@ -36,8 +37,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
 
     // new way, assume (N+2)%L != 0
     // if L=sqrt(N), N can't be 700
-    // determine initialization shape based on imod,
-    //TODO: will add mobius strip latter
+    // determine initialization shape based on imod
     int num_edge_exist; // number of edges already exist
     int hole_pos;       // position of the hole to add
     if (imod == 1)
@@ -79,28 +79,8 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     // above shape setting take care of beads position
     // bulk_bond_list (excluding edge bond) and edge_list
 
-    Np = int(N * Epar.rCnp);
     // set inital observable value
-    Ob_sys.E = 0;
-    Ob_sys.I2H2 = 0;
-    Ob_sys.Les.resize(Ne);
-    for (int e = 0; e < Ne; e++)
-    {
-        Ob_sys.Les[e] = 0;
-    }
-    Ob_sys.Tp2uu = 0;
-    Ob_sys.Tuuc = 0;
-    Ob_sys.Tun2 = 0;
-    Ob_sys.Tun2p = 0;
-    Ob_sys.IKun2 = 0;
-    Ob_sys.IdA = 0;
-    Ob_sys.I2H = 0;
-    Ob_sys.IK = 0;
-    Ob_sys.Bond_num = 0.5 * bulk_bond_list.size();
-    for (int n = 0; n < Ne; n++)
-    {
-        Ob_sys.Bond_num += edge_lists[n].size();
-    }
+    Ob_init(Ob_sys);
 
     for (int i = 0; i < mesh.size(); i++)
     {
@@ -112,12 +92,14 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
         mesh[i].dAK = dAK_m(i);
     }
 
+    /*
+    // not study mixture right now
     for (int i = 0; i < Np; i++)
     {
         // cn assignment for first Np rods
-        mesh[i].is_cnp = 1;
+        mesh[i].es = Epar.ms;
     }
-
+    */
     // geometric energy related
     for (int i = 0; i < mesh.size(); i++)
     {
@@ -132,24 +114,18 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
             // factor of 1/2 is for double counting
             Ob_sys.Tp2uu += 0.5 * p2uu_m(i, mesh[i].nei[j]);
             Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
+            //Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
         }
         // coupling related
-        if (mesh[i].is_cnp)
-        {
-            Ob_sys.Tun2p += mesh[i].un2;
-        }
-        else
-        {
-            Ob_sys.Tun2 += mesh[i].un2;
-        }
-
+        Ob_sys.Tun2 += mesh[i].un2;
         Ob_sys.IKun2 += mesh[i].dAK * mesh[i].un2;
         // miscellany
         Ob_sys.IdA += mesh[i].dAn2H[0];
         Ob_sys.I2H += mesh[i].dAn2H[1] * mesh[i].dAn2H[0];
         Ob_sys.IK += mesh[i].dAK;
     }
-    Ob_sys.E = 0.5 * Epar.Cn * (N - Np) + 0.5 * Epar.Cnp * Np;
+    //Ob_sys.E = 0.5 * Epar.Cn * (N - Np) + 0.5 * Epar.Cn * Np;
+    Ob_sys.E = 0.5 * Epar.Cn * N;
     Ob_sys.E += E_m(Ob_sys);
 
     // set random number generators
@@ -733,6 +709,29 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
 #pragma endregion
 
 #pragma region : useful tools
+
+void dtmc_lc::Ob_init(observable &Ob)
+{
+    Ob.E = 0;
+    Ob.I2H2 = 0;
+    Ob.Les.resize(Ne);
+    for (int e = 0; e < Ne; e++)
+    {
+        Ob.Les[e] = 0;
+    }
+    Ob.Tp2uu = 0;
+    Ob.Tuuc = 0;
+    Ob.Tun2 = 0;
+    Ob.IKun2 = 0;
+    Ob.IdA = 0;
+    Ob.I2H = 0;
+    Ob.IK = 0;
+    Ob.Bond_num = 0.5 * bulk_bond_list.size();
+    for (int n = 0; n < Ne; n++)
+    {
+        Ob.Bond_num += edge_lists[n].size();
+    }
+}
 
 int dtmc_lc::if_near_edge(int b)
 {

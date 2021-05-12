@@ -166,23 +166,8 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
 
     int ind, ind_i, ind_j;
     observable Ob;
-    // set inital observable value
-    Ob.E = 0;
-    Ob.I2H2 = 0;
-    Ob.Les.resize(Ne);
-    for (int e = 0; e < Ne; e++)
-    {
-        Ob.Les[e] = 0;
-    }
-    Ob.Tp2uu = 0;
-    Ob.Tuuc = 0;
-    Ob.Tun2 = 0;
-    Ob.Tun2p = 0;
-    Ob.IKun2 = 0;
-    Ob.IdA = 0;
-    Ob.I2H = 0;
-    Ob.IK = 0;
-    Ob.Bond_num = 0;
+    Ob_init(Ob); // set inital observable value, all to 0
+
     for (int i = 0; i < ind_relate.size(); i++)
     {
         ind = ind_relate[i];
@@ -191,14 +176,13 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         Ob.Les[mesh[ind].edge_num] += mesh[ind].ds;
         // crystalline terms
         // coupling terms
+        /* was used for mixture
         if (mesh[ind].is_cnp)
         {
             Ob.Tun2p += mesh[ind].un2;
         }
-        else
-        {
-            Ob.Tun2 += mesh[ind].un2;
-        }
+        */
+        Ob.Tun2 += mesh[ind].un2;
         Ob.IKun2 += mesh[ind].dAK * mesh[ind].un2;
         // miscellany terms
         Ob.IdA += mesh[ind].dAn2H[0];
@@ -228,7 +212,6 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
     Ob_sys.Tp2uu += Ob_new.Tp2uu - Ob_old.Tp2uu;
     Ob_sys.Tuuc += Ob_new.Tuuc - Ob_old.Tuuc;
     Ob_sys.Tun2 += Ob_new.Tun2 - Ob_old.Tun2;
-    Ob_sys.Tun2p += Ob_new.Tun2p - Ob_old.Tun2p;
     Ob_sys.IKun2 += Ob_new.IKun2 - Ob_old.IKun2;
     Ob_sys.IdA += Ob_new.IdA - Ob_old.IdA;
     Ob_sys.I2H += Ob_new.I2H - Ob_old.I2H;
@@ -244,7 +227,9 @@ double dtmc_lc::E_m(observable Ob)
         E += Epar.lam * Ob.Les[e];
     }
     E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
-    E += -0.5 * (Epar.Cn * Ob.Tun2 + Epar.Cnp * Ob.Tun2p);
+    E += -0.5 * Epar.Cn * Ob.Tun2;
+    E += Epar.kard * Ob.IKun2;
+    //E += -0.5 * (Epar.Cn * Ob.Tun2 + Epar.Cnp * Ob.Tun2p);
     // + kard * Ob.IKun2;
     return E;
 }
