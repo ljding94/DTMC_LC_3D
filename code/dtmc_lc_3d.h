@@ -14,6 +14,7 @@ struct observable
     // geometric
     double I2H2;
     std::vector<double> Les;
+    std::vector<double> Leuns; // edge length couples with tilt angle un
     // crystalline
     double Tp2uu;
     double Tuuc;
@@ -34,7 +35,8 @@ struct E_parameter
     double Kd;   // liquid crystal interaction moduli
     double q;    // liquid crystall twist constant
     double Cn;   // liquid crystal to membrane normal moduli
-    double kard; // effective depletion energy
+    double kard; // effective in-bulk depletion energy
+    double lamd; // effective on-edge depletion energy
 
     //double ms;  // mixture strength,
     //double mr;  // mixture ratio, N mixture = mr*N
