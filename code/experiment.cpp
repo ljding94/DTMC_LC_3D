@@ -26,7 +26,7 @@ void dtmc_lc::State_write(std::string filename)
         f << "imod=" << imod << "\n";
         f << "l0=" << l0 << "\n";
         f << "max_nei_size=" << max_nei_size << "\n";
-        f << "x,y,z,ux,uy,uz,dA,2H,ds,dAK,un2,is_cnp,edge_num,edge_neibs,neibs";
+        f << "x,y,z,ux,uy,uz,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
         for (int i = 0; i < mesh.size(); i++)
         {
             f << "\n"
@@ -34,7 +34,7 @@ void dtmc_lc::State_write(std::string filename)
             f << "," << mesh[i].u[0] << "," << mesh[i].u[1] << ","
               << mesh[i].u[2];
             f << "," << mesh[i].dAn2H[0] << "," << mesh[i].dAn2H[1] << ","
-              << mesh[i].ds << "," << mesh[i].dAK << "," << mesh[i].un2 << "," << 0;
+              << mesh[i].ds << "," << mesh[i].dAK << "," << mesh[i].un2;
             f << "," << mesh[i].edge_num;
             for (int j = 0; j < mesh[i].edge_nei.size(); j++)
             {
@@ -209,13 +209,6 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     double spin_accept = 0;
     double bond_accept = 0;
     double edge_accept = 0;
-    double swap_accept = 0;
-
-    bool fix_bead;
-    if (fixed_beads.size() == 2)
-    {
-        fix_bead = 1;
-    }
 
     std::clock_t c_start = std::clock();
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
@@ -230,7 +223,6 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             if (i % int(std::sqrt(N)) == 0)
             {
                 edge_accept += edge_metropolis();
-                //swap_accept += swap_metropolis(); // leave the frequency the same as edge update for now
             }
         }
         E_all.push_back(Ob_sys.E);
@@ -287,7 +279,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         {
             f << "Leuns[" << e << "],";
         }
-        f << "IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2,Tun2p,IKun2\n";
+        f << "IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2,IKun2\n";
         for (int i = 0; i < E_all.size(); i++)
         {
             f << E_all[i] << ",";

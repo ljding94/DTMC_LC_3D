@@ -173,16 +173,12 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         ind = ind_relate[i];
         // geometric terms
         Ob.I2H2 += mesh[ind].dAn2H[0] * mesh[ind].dAn2H[1] * mesh[ind].dAn2H[1];
-        Ob.Les[mesh[ind].edge_num] += mesh[ind].ds;
-        Ob.Leuns[mesh[ind].edge_num] += mesh[ind].ds * std::sqrt(mesh[ind].un2);
-        // crystalline terms
-        // coupling terms
-        /* was used for mixture
-        if (mesh[ind].is_cnp)
+        if (mesh[ind].edge_num != -1)
         {
-            Ob.Tun2p += mesh[ind].un2;
+            Ob.Les[mesh[ind].edge_num] += mesh[ind].ds;
+            Ob.Leuns[mesh[ind].edge_num] += mesh[ind].ds * std::sqrt(mesh[ind].un2);
         }
-        */
+        // coupling terms
         Ob.Tun2 += mesh[ind].un2;
         Ob.IKun2 += mesh[ind].dAK * mesh[ind].un2;
         // miscellany terms

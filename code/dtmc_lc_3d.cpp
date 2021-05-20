@@ -10,7 +10,6 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     // system related
     beta = beta_;
     N = N_;
-    int Np; // number of rod with tilt coupling Cnp
     imod = imod_;
     Ne = Ne_;
     l0 = l0_; // sigma0 is always 1;
@@ -151,6 +150,7 @@ void dtmc_lc::init_rhombus_shape(double d0_)
     {
         std::cout << "invalid N!\n";
     }
+
     for (int i = 0; i < N; i++)
     {
         // assign position
