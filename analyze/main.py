@@ -12,27 +12,28 @@ def main():
     print("hello! dtmc_lc analysis")
     #config_plot3D("../data/Ne2/Apr18_2021/State_N300_imod3_Ne3_kar100_lam4.0_Kd5.0_q1.4_Cn5.0_kard0.0.txt",mesh=1,rod=0)
     #config_plot3D("../data/scratch_local/State_N200_imod1_Ne1_kar20_lam0.0_Kd3.0_q0.0_Cn3.0_kard0.0_lamd5.0_init.csv",mesh=1,rod=1)
-    #config_plot3D("../data/scratch_local/State_N200_imod1_Ne1_kar20_lam0.0_Kd3.0_q0.0_Cn3.0_kard0.0_lamd5.0.csv",mesh=1,rod=1)
+    config_plot3D("../data/scratch_local/State_N200_imod1_Ne1_kar100_lam0.0_Kd3.0_q0.0_Cn6.0_kard0.0_lamd6.0_init.csv",mesh=1,rod=1)
+    config_plot3D("../data/scratch_local/State_N200_imod1_Ne1_kar100_lam0.0_Kd3.0_q0.0_Cn6.0_kard0.0_lamd6.0.csv",mesh=1,rod=1)
     #config_plot3D("../data/Ne1/May18_2021/State_N200_imod1_Ne1_kar100_lam5.0_Kd6.0_q0.0_Cn6.0_kard0.0_lamd7.5.csv",mesh=1,rod=1)
-    #return 0
+    return 0
 
     #foldername = "../data/Ne2/Apr29_2021" # kinda switch to Ne2 simulation for next paper
     #foldername = "../data/Ne1/May4_2021" # mobius strip~,
-    foldername = "../data/Ne1/May20_2021"
+    foldername = "../data/Ne1/May21_2021"
     print("analyzing "+foldername)
-    N = 200
+    N = 300
     imod=1 # 1 for rhombus, 2 disk, 3 cylinder, 4 for mobius strip
     Ne=1
     kar = 100
     karg=0.0
     lam=5.0
     lams=np.arange(4.0,10.1,1.0)
-    Kd=6.0
-    qs=np.arange(0.0,2.01,0.5)
-    kard=0.0
+    Kd=3.0
+    q=0.0
+    kards=np.arange(0.0,5.1,1.0)
     lamds=np.arange(0.0,10.01,0.5)
     pars = []
-    for q in qs:
+    for kard in kards:
         Cn=Kd
         pars.append([N, imod,Ne, kar, lam, Kd, q, Cn, kard,lamds])
     par_nm = ["N","imod", "Ne", "kar","lam","Kd","q", "Cn", "kard","lamd"]

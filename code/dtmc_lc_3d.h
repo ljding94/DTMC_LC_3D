@@ -14,7 +14,7 @@ struct observable
     // geometric
     double I2H2;
     std::vector<double> Les;
-    std::vector<double> Leuts; // edge length couples with u cdot t (edge tangent)
+    std::vector<double> Leuns; // edge length couples with u cdot t (edge tangent)
     // crystalline
     double Tp2uu;
     double Tuuc;

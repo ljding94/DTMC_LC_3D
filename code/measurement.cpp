@@ -176,7 +176,8 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         if (mesh[ind].edge_num != -1)
         {
             Ob.Les[mesh[ind].edge_num] += mesh[ind].ds;
-            Ob.Leuts[mesh[ind].edge_num] += mesh[ind].ds * ut_m(ind);
+            Ob.Leuns[mesh[ind].edge_num] += mesh[ind].ds * std::sqrt(mesh[ind].un2);
+            //Ob.Leuns[mesh[ind].edge_num] += mesh[ind].ds * ut_m(ind);
         }
         // coupling terms
         Ob.Tun2 += mesh[ind].un2;
@@ -205,7 +206,7 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
     for (int e = 0; e < Ne; e++)
     {
         Ob_sys.Les[e] += Ob_new.Les[e] - Ob_old.Les[e];
-        Ob_sys.Leuts[e] += Ob_new.Leuts[e] - Ob_old.Leuts[e];
+        Ob_sys.Leuns[e] += Ob_new.Leuns[e] - Ob_old.Leuns[e];
     }
     Ob_sys.Tp2uu += Ob_new.Tp2uu - Ob_old.Tp2uu;
     Ob_sys.Tuuc += Ob_new.Tuuc - Ob_old.Tuuc;
@@ -223,7 +224,7 @@ double dtmc_lc::E_m(observable Ob)
     for (int e = 0; e < Ne; e++)
     {
         E += Epar.lam * Ob.Les[e];
-        E += Epar.lamd * Ob.Leuts[e];
+        E += Epar.lamd * Ob.Leuns[e];
     }
     E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
     E += -0.5 * Epar.Cn * Ob.Tun2;
