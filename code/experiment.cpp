@@ -191,8 +191,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<double> I2H2_all;
     std::vector<std::vector<double>> Les_all;
     Les_all.resize(Ne);
-    std::vector<std::vector<double>> Leuns_all;
-    Leuns_all.resize(Ne);
+    std::vector<std::vector<double>> Leuts_all;
+    Leuts_all.resize(Ne);
     std::vector<double> Tp2uu_all;
     std::vector<double> Tuuc_all;
     std::vector<double> Tun2_all;
@@ -230,7 +230,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         for (int e = 0; e < Ne; e++)
         {
             Les_all[e].push_back(Ob_sys.Les[e]);
-            Leuns_all[e].push_back(Ob_sys.Leuns[e]);
+            Leuts_all[e].push_back(Ob_sys.Leuts[e]);
         }
         Tp2uu_all.push_back(Ob_sys.Tp2uu);
         Tuuc_all.push_back(Ob_sys.Tuuc);
@@ -277,7 +277,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
         for (int e = 0; e < Ne; e++)
         {
-            f << "Leuns[" << e << "],";
+            f << "Leuts[" << e << "],";
         }
         f << "IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2,IKun2\n";
         for (int i = 0; i < E_all.size(); i++)
@@ -289,7 +289,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             }
             for (int e = 0; e < Ne; e++)
             {
-                f << Leuns_all[e][i] << ",";
+                f << Leuts_all[e][i] << ",";
             }
             f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << ","
               << IK_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << ","

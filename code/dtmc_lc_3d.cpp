@@ -106,7 +106,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
         if (mesh[i].edge_num != -1)
         {
             Ob_sys.Les[mesh[i].edge_num] += mesh[i].ds;
-            Ob_sys.Leuns[mesh[i].edge_num] += mesh[i].ds * std::sqrt(mesh[i].un2);
+            Ob_sys.Leuts[mesh[i].edge_num] += mesh[i].ds * std::sqrt(mesh[i].un2);
         }
         // crystalline energy related
         for (int j = 0; j < mesh[i].nei.size(); j++)
@@ -716,11 +716,11 @@ void dtmc_lc::Ob_init(observable &Ob)
     Ob.E = 0;
     Ob.I2H2 = 0;
     Ob.Les.resize(Ne);
-    Ob.Leuns.resize(Ne);
+    Ob.Leuts.resize(Ne);
     for (int e = 0; e < Ne; e++)
     {
         Ob.Les[e] = 0;
-        Ob.Leuns[e] = 0;
+        Ob.Leuts[e] = 0;
     }
     Ob.Tp2uu = 0;
     Ob.Tuuc = 0;

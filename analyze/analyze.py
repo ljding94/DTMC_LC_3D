@@ -19,16 +19,17 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
     Ne = par[find_cpar_ind(par_nm,"Ne")]
 
     Les_ave, Les_tau, Les_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
+    Leuns_ave, Leuns_tau, Leuns_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
     IdA_ave, IdA_tau, IdA_err = [], [], []
     I2H_ave, I2H_tau, I2H_err = [], [], []
     I2H2_ave, I2H2_tau, I2H2_err = [], [], []
     IK_ave, IK_tau, IK_err = [], [], []
     p2uu_ave, p2uu_tau, p2uu_err = [], [], []
     uuc_ave, uuc_tau, uuc_err = [], [], []
+    # may need to add uuc2 to study the spontaneous symmetry breaking
     un2_ave,un2_tau,un2_err = [],[],[]
     un2p_ave,un2p_tau,un2p_err = [],[],[]
     IKun2_ave, IKun2_tau, IKun2_err = [], [], []
-
     if(Ne==2):
         Ledif_ave,Ledif_tau,Ledif_err=[],[],[]
     cpar_ind = find_cpar_ind(par_nm,mode)
@@ -44,7 +45,8 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         data = np.loadtxt(file2read, skiprows=13, delimiter=",", unpack=True)
         E = data[0]
         Les = data[1:1+Ne]
-        IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2,IKun2 = data[1+Ne:]
+        Leuns = data[1+Ne:1+2*Ne]
+        IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2,IKun2 = data[1+2*Ne:]
         p2uu = Tp2uu/Bond_num
         uuc = Tuuc/Bond_num
         N =par[find_cpar_ind(par_nm,"N")]
@@ -82,20 +84,23 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         # E
         E_ave.append(np.average(E))
         rho, cov0 = autocorrelation_function_fft(E)
-        #print("cov0-var(E)",cov0-np.var(E))
         tau, tau_err = tau_int_cal_rho(rho,tau_c)
-        # autocorrelation_plot(rho, tau, file2read[:-4] + "_autoE.pdf")
         E_tau.append(tau)
         E_err.append(np.sqrt(2 * tau / len(E) * cov0))
 
-        # Le
+        # Le and Leus
         for e in range(Ne):
             Les_ave[e].append(np.average(Les[e]))
             rho, cov0 = autocorrelation_function_fft(Les[e])
             tau, tau_err = tau_int_cal_rho(rho,tau_c)
-            # autocorrelation_plot(rho, tau, file2read[:-4] + "_autoLe.pdf")
             Les_tau[e].append(tau)
             Les_err[e].append(np.sqrt(2 * tau / len(Les[e]) * cov0))
+
+            Leuns_ave[e].append(np.average(Leuns[e]))
+            rho, cov0 = autocorrelation_function_fft(Leuns[e])
+            tau, tau_err = tau_int_cal_rho(rho,tau_c)
+            Leuns_tau[e].append(tau)
+            Leuns_err[e].append(np.sqrt(2 * tau / len(Leuns[e]) * cov0))
 
         # IdA
         IdA_ave.append(np.average(IdA))
@@ -169,6 +174,9 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         f.write(mode+",E_ave,E_tau,E_err")
         for e in range(Ne):
             f.write(",Les_ave[%d],Les_tau[%d],Les_err[%d]"%(e,e,e))
+        for e in range(Ne):
+            f.write(",Leuns_ave[%d],Leuns_tau[%d],Leuns_err[%d]"%(e,e,e))
+
         f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,IKun2_ave,IKun2_tau,IKun2_err")
         if(Ne==2):
             f.write(",Ledif_ave,Ledif_tau,Ledif_err")
@@ -177,6 +185,8 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
             f.write("%f,%f,%f,%f" % (cpar[i], E_ave[i], E_tau[i], E_err[i]))
             for e in range(Ne):
                 f.write(",%f,%f,%f"%(Les_ave[e][i],Les_tau[e][i], Les_err[e][i]))
+            for e in range(Ne):
+                f.write(",%f,%f,%f"%(Leuns_ave[e][i],Leuns_tau[e][i], Leuns_err[e][i]))
             f.write(",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f"%(IdA_ave[i], IdA_tau[i], IdA_err[i],I2H_ave[i], I2H_tau[i], I2H_err[i],I2H2_ave[i], I2H2_tau[i], I2H2_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i],IKun2_ave[i],IKun2_tau[i],IKun2_err[i]))
             if(Ne==2):
                 f.write(",%f,%f,%f"%(Ledif_ave[i], Ledif_tau[i], Ledif_err[i]))

@@ -14,7 +14,7 @@ struct observable
     // geometric
     double I2H2;
     std::vector<double> Les;
-    std::vector<double> Leuns; // edge length couples with tilt angle un
+    std::vector<double> Leuts; // edge length couples with u cdot t (edge tangent)
     // crystalline
     double Tp2uu;
     double Tuuc;
@@ -63,7 +63,7 @@ struct vertex
     // double dskg; // in bulk: 0, on edge: kg*ds
     double dAK; // in bulk: K*dA, on edge: 0
     double un2; // local un2
-    double es;  // energy related strength, 1 for normal rods ms for mixture
+    //double es;  // energy related strength, 1 for normal rods ms for mixture
     //double dE;  // local energy; sum dE over all beads is the actually total energy.
 };
 class dtmc_lc
@@ -129,6 +129,7 @@ public:
     // local energy-related measurement
     // _m stand for measurement
     double ds_m(int index);                 // length of the local edge index
+    double ut_m(int index);                 // director edge tangent sine angle
     std::vector<double> dAn2H_m(int index); // measure and set dA and |2H|
     double dAK_m(int index);                // K*dA measure the gauss curvature
     double dskg_m(int index);               // kg*ds, for gaussian
