@@ -19,7 +19,9 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     Epar.kar = Epar_.kar;
     Epar.lam = Epar_.lam;
     // orientational
-    Epar.Kd = Epar_.Kd;
+    //Epar.Kd = Epar_.Kd;
+    Epar.Ksb = Epar_.Ksb;
+    Epar.Kt = Epar_.Kt;
     Epar.q = Epar_.q;
     // coupling
     Epar.Cn = Epar_.Cn;
@@ -112,8 +114,10 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
         for (int j = 0; j < mesh[i].nei.size(); j++)
         {
             // factor of 1/2 is for double counting
-            Ob_sys.Tp2uu += 0.5 * p2uu_m(i, mesh[i].nei[j]);
-            Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
+            //Ob_sys.Tp2uu += 0.5 * p2uu_m(i, mesh[i].nei[j]);
+            //Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
+            Ob_sys.Tuusb += 0.5 * uusb_m(i, mesh[i].nei[j]);
+            Ob_sys.Tuut += 0.5 * uut_m(i, mesh[i].nei[j]);
             //Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
         }
         // coupling related
@@ -722,8 +726,10 @@ void dtmc_lc::Ob_init(observable &Ob)
         Ob.Les[e] = 0;
         Ob.Leuns[e] = 0;
     }
-    Ob.Tp2uu = 0;
-    Ob.Tuuc = 0;
+    //Ob.Tp2uu = 0;
+    //Ob.Tuuc = 0;
+    Ob.Tuusb = 0;
+    Ob.Tuut = 0;
     Ob.Tun2 = 0;
     Ob.IKun2 = 0;
     Ob.IdA = 0;

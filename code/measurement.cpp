@@ -192,8 +192,11 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
     {
         ind_i = bond_relate[i].first;
         ind_j = bond_relate[i].second;
-        Ob.Tp2uu += p2uu_m(ind_i, ind_j);
-        Ob.Tuuc += uuc_m(ind_i, ind_j);
+        //Ob.Tp2uu += p2uu_m(ind_i, ind_j);
+        //Ob.Tuuc += uuc_m(ind_i, ind_j);
+        // use new LC energy that seperate twist from the splay and bend
+        Ob.Tuusb += uusb_m(ind_i, ind_j);
+        Ob.Tuut += uut_m(ind_i, ind_j);
     }
     Ob.Bond_num += bond_relate.size();
     Ob.E = E_m(Ob);
@@ -208,8 +211,10 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
         Ob_sys.Les[e] += Ob_new.Les[e] - Ob_old.Les[e];
         Ob_sys.Leuns[e] += Ob_new.Leuns[e] - Ob_old.Leuns[e];
     }
-    Ob_sys.Tp2uu += Ob_new.Tp2uu - Ob_old.Tp2uu;
-    Ob_sys.Tuuc += Ob_new.Tuuc - Ob_old.Tuuc;
+    //Ob_sys.Tp2uu += Ob_new.Tp2uu - Ob_old.Tp2uu;
+    //Ob_sys.Tuuc += Ob_new.Tuuc - Ob_old.Tuuc;
+    Ob_sys.Tuusb += Ob_new.Tuusb - Ob_old.Tuusb;
+    Ob_sys.Tuut += Ob_new.Tuut - Ob_old.Tuut;
     Ob_sys.Tun2 += Ob_new.Tun2 - Ob_old.Tun2;
     Ob_sys.IKun2 += Ob_new.IKun2 - Ob_old.IKun2;
     Ob_sys.IdA += Ob_new.IdA - Ob_old.IdA;
@@ -226,7 +231,8 @@ double dtmc_lc::E_m(observable Ob)
         E += Epar.lam * Ob.Les[e];
         E += Epar.lamd * Ob.Leuns[e];
     }
-    E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
+    //E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
+    E += Epar.Ksb * Ob.Tuusb + Epar.Kt * Ob.Tuut; // use different moduli for twist and the other two
     E += -0.5 * Epar.Cn * Ob.Tun2;
     E += Epar.kard * Ob.IKun2;
 
@@ -263,7 +269,7 @@ double dtmc_lc::ds_m(int index)
     return Le_l;
 }
 double dtmc_lc::ut_m(int index)
-{
+{ // director edge tangent,[don't think I use this anymore]
     if (mesh[index].edge_num == -1)
     {
         return 0;
@@ -555,6 +561,40 @@ double dtmc_lc::uuc_m(int ind_i, int ind_j)
     return uuc_local;
 }
 
+double dtmc_lc::uusb_m(int ind_i, int ind_j)
+{
+    // splay and bend interaction of i and j
+    //[(u_i\cross u_j)\cross r_{ij}]^2
+    double uusb_local, lij2;
+    std::vector<double> uusb_vec{0, 0, 0};
+    std::vector<double> rij{0, 0, 0};
+    for (int k = 0; k < mesh[ind_i].R.size(); k++)
+    {
+        rij[k] = mesh[ind_j].R[k] - mesh[ind_i].R[k];
+    }
+    uusb_vec = crossproduct(crossproduct(mesh[ind_i].u, mesh[ind_j].u), rij);
+    uusb_local = innerproduct(uusb_vec, uusb_vec);
+    lij2 = innerproduct(rij, rij);
+    uusb_local /= lij2;
+    return uusb_local;
+}
+double dtmc_lc::uut_m(int ind_i, int ind_j)
+{
+    // twist interaction of i and j
+    //[(u_i\cross u_j)\cdot lr_{ij}]^2
+    double uut_local, lij2;
+    std::vector<double> uusb_vec{0, 0, 0};
+    std::vector<double> rij{0, 0, 0};
+    for (int k = 0; k < mesh[ind_i].R.size(); k++)
+    {
+        rij[k] = mesh[ind_j].R[k] - mesh[ind_i].R[k];
+    }
+    uut_local = innerproduct(crossproduct(mesh[ind_i].u, mesh[ind_j].u), rij);
+    uut_local = uut_local * uut_local;
+    lij2 = innerproduct(rij, rij);
+    uut_local /= lij2;
+    return uut_local;
+}
 double dtmc_lc::un2_m(int index)
 {
     // spin normal interaction of i

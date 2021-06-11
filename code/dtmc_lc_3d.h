@@ -18,6 +18,8 @@ struct observable
     // crystalline
     double Tp2uu;
     double Tuuc;
+    double Tuusb; // splay and bend [(u_i\cross u_j)\cross r_{ij}]^2
+    double Tuut;  // twist   [(u_i\cross u_j)\cdot lr_{ij}]^2
     // coupling
     double Tun2;  // tilt coupling
     double IKun2; // coupling between Gaussian curvature and tilt, depletion-like
@@ -30,9 +32,11 @@ struct observable
 //hamiltonion parameters
 struct E_parameter
 {
-    double kar;  // mean curvature bending stiffness
-    double lam;  // line tension coefficient
-    double Kd;   // liquid crystal interaction moduli
+    double kar; // mean curvature bending stiffness
+    double lam; // line tension coefficient
+    //double Kd;   // liquid crystal interaction moduli
+    double Ksb;  // liquid crystalline interaction for splay and bend
+    double Kt;   //liquid crystalline interaction for the twist only
     double q;    // liquid crystall twist constant
     double Cn;   // liquid crystal to membrane normal moduli
     double kard; // effective in-bulk depletion energy
@@ -136,6 +140,8 @@ public:
     std::vector<double> n_m(int index);     // surface normal
     double p2uu_m(int ind_i, int ind_j);    // spin spin interaction of i and j
     double uuc_m(int ind_i, int ind_j);     // spin twist interaction of i and j
+    double uusb_m(int ind_i, int ind_j);    // splay bend interaction of i and j
+    double uut_m(int ind_i, int ind_j);     // twist interaction of i and j
     double un2_m(int index);                // spin normal interaction of i
     double dEgeo_m(int index);              // energy of the local vertex
 

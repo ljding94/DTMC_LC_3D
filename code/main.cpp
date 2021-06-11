@@ -23,11 +23,12 @@ int main(int argc, char const *argv[])
     E_parameter Epar;
     Epar.kar = std::atof(argv[4]);
     Epar.lam = std::atof(argv[5]);
-    Epar.Kd = std::atof(argv[6]);
-    Epar.q = std::atof(argv[7]);
-    Epar.Cn = std::atof(argv[8]);
-    Epar.kard = std::atof(argv[9]);
-    Epar.lamd = std::atof(argv[10]);
+    Epar.Ksb = std::atof(argv[6]);
+    Epar.Kt = std::atof(argv[7]);
+    Epar.q = std::atof(argv[8]);
+    Epar.Cn = std::atof(argv[9]);
+    Epar.kard = std::atof(argv[10]);
+    Epar.lamd = std::atof(argv[11]);
 
     //Epar.ms = std::atof(argv[9]);
     //Epar.mr = std::atof(argv[10]);
@@ -35,8 +36,8 @@ int main(int argc, char const *argv[])
 
     dtmc_lc membrane(beta, N, imod, Ne, d0, l0, Epar);
     N = membrane.mesh.size();
-    std::string finfo = "N" + std::to_string(N) + "_imod" + std::string(argv[2]) + "_Ne" + std::string(argv[3]) + "_kar" + std::string(argv[4]) + "_lam" + std::string(argv[5]) + "_Kd" + std::string(argv[6]) + "_q" + std::string(argv[7]) + "_Cn" + std::string(argv[8]) + "_kard" + std::string(argv[9]) + "_lamd" + std::string(argv[10]);
-    if (argc == 12)
+    std::string finfo = "N" + std::to_string(N) + "_imod" + std::string(argv[2]) + "_Ne" + std::string(argv[3]) + "_kar" + std::string(argv[4]) + "_lam" + std::string(argv[5]) + "_Ksb" + std::string(argv[6]) + "_Kt" + std::string(argv[7]) + "_q" + std::string(argv[8]) + "_Cn" + std::string(argv[9]) + "_kard" + std::string(argv[10]) + "_lamd" + std::string(argv[11]);
+    if (argc == 13)
     {
         // use "prog name par* local" for local running
         // used for local running!
@@ -50,7 +51,7 @@ int main(int argc, char const *argv[])
 
         return 0;
     }
-    else if (argc == 11)
+    else if (argc == 12)
     {
         // ccv running
         folder = "/users/lding3/scratch";
