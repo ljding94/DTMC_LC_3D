@@ -173,30 +173,30 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         ind = ind_relate[i];
         // geometric terms
         Ob.I2H2 += mesh[ind].dAn2H[0] * mesh[ind].dAn2H[1] * mesh[ind].dAn2H[1];
+        Ob.IK += mesh[ind].dAK;
         if (mesh[ind].edge_num != -1)
         {
             Ob.Les[mesh[ind].edge_num] += mesh[ind].ds;
-            Ob.Leuns[mesh[ind].edge_num] += mesh[ind].ds * std::sqrt(mesh[ind].un2);
+            //Ob.Leuns[mesh[ind].edge_num] += mesh[ind].ds * std::sqrt(mesh[ind].un2);
             //Ob.Leuns[mesh[ind].edge_num] += mesh[ind].ds * ut_m(ind);
         }
         // coupling terms
         Ob.Tun2 += mesh[ind].un2;
-        Ob.IKun2 += mesh[ind].dAK * mesh[ind].un2;
+        //Ob.IKun2 += mesh[ind].dAK * mesh[ind].un2;
         // miscellany terms
         Ob.IdA += mesh[ind].dAn2H[0];
         Ob.I2H += mesh[ind].dAn2H[0] * mesh[ind].dAn2H[1];
-        Ob.IK += mesh[ind].dAK;
     }
     // crystalline terms
     for (int i = 0; i < bond_relate.size(); i++)
     {
         ind_i = bond_relate[i].first;
         ind_j = bond_relate[i].second;
-        //Ob.Tp2uu += p2uu_m(ind_i, ind_j);
-        //Ob.Tuuc += uuc_m(ind_i, ind_j);
+        Ob.Tp2uu += p2uu_m(ind_i, ind_j);
+        Ob.Tuuc += uuc_m(ind_i, ind_j);
         // use new LC energy that seperate twist from the splay and bend
-        Ob.Tuusb += uusb_m(ind_i, ind_j);
-        Ob.Tuut += uut_m(ind_i, ind_j);
+        //Ob.Tuusb += uusb_m(ind_i, ind_j);
+        //Ob.Tuut += uut_m(ind_i, ind_j);
     }
     Ob.Bond_num += bond_relate.size();
     Ob.E = E_m(Ob);
@@ -206,35 +206,37 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
 {
     Ob_sys.E += Ob_new.E - Ob_old.E;
     Ob_sys.I2H2 += Ob_new.I2H2 - Ob_old.I2H2;
+    Ob_sys.IK += Ob_new.IK - Ob_old.IK;
     for (int e = 0; e < Ne; e++)
     {
         Ob_sys.Les[e] += Ob_new.Les[e] - Ob_old.Les[e];
-        Ob_sys.Leuns[e] += Ob_new.Leuns[e] - Ob_old.Leuns[e];
+        //Ob_sys.Leuns[e] += Ob_new.Leuns[e] - Ob_old.Leuns[e];
     }
-    //Ob_sys.Tp2uu += Ob_new.Tp2uu - Ob_old.Tp2uu;
-    //Ob_sys.Tuuc += Ob_new.Tuuc - Ob_old.Tuuc;
-    Ob_sys.Tuusb += Ob_new.Tuusb - Ob_old.Tuusb;
-    Ob_sys.Tuut += Ob_new.Tuut - Ob_old.Tuut;
+    Ob_sys.Tp2uu += Ob_new.Tp2uu - Ob_old.Tp2uu;
+    Ob_sys.Tuuc += Ob_new.Tuuc - Ob_old.Tuuc;
+    //Ob_sys.Tuusb += Ob_new.Tuusb - Ob_old.Tuusb;
+    //Ob_sys.Tuut += Ob_new.Tuut - Ob_old.Tuut;
     Ob_sys.Tun2 += Ob_new.Tun2 - Ob_old.Tun2;
-    Ob_sys.IKun2 += Ob_new.IKun2 - Ob_old.IKun2;
+    //Ob_sys.IKun2 += Ob_new.IKun2 - Ob_old.IKun2;
     Ob_sys.IdA += Ob_new.IdA - Ob_old.IdA;
     Ob_sys.I2H += Ob_new.I2H - Ob_old.I2H;
-    Ob_sys.IK += Ob_new.IK - Ob_old.IK;
+
     Ob_sys.Bond_num += Ob_new.Bond_num - Ob_old.Bond_num;
 }
 double dtmc_lc::E_m(observable Ob)
 {
     double E = 0;
     E += 0.5 * Epar.kar * Ob.I2H2;
+    E += Epar.karg * Ob.IK;
     for (int e = 0; e < Ne; e++)
     {
         E += Epar.lam * Ob.Les[e];
-        E += Epar.lamd * Ob.Leuns[e];
+        //E += Epar.lamd * Ob.Leuns[e];
     }
-    //E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
-    E += Epar.Ksb * Ob.Tuusb + Epar.Kt * Ob.Tuut; // use different moduli for twist and the other two
+    E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
+    //E += Epar.Ksb * Ob.Tuusb + Epar.Kt * Ob.Tuut; // use different moduli for twist and the other two
     E += -0.5 * Epar.Cn * Ob.Tun2;
-    E += Epar.kard * Ob.IKun2;
+    //E += Epar.kard * Ob.IKun2;
 
     //E += -0.5 * (Epar.Cn * Ob.Tun2 + Epar.Cnp * Ob.Tun2p);
     // + kard * Ob.IKun2;

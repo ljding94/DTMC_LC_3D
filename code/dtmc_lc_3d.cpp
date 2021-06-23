@@ -17,16 +17,17 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     // set energy related
     // geometric
     Epar.kar = Epar_.kar;
+    Epar.karg = Epar_.karg;
     Epar.lam = Epar_.lam;
     // orientational
-    //Epar.Kd = Epar_.Kd;
-    Epar.Ksb = Epar_.Ksb;
-    Epar.Kt = Epar_.Kt;
+    Epar.Kd = Epar_.Kd;
+    //Epar.Ksb = Epar_.Ksb;
+    //Epar.Kt = Epar_.Kt;
     Epar.q = Epar_.q;
     // coupling
     Epar.Cn = Epar_.Cn;
-    Epar.kard = Epar_.kard;
-    Epar.lamd = Epar_.lamd;
+    //Epar.kard = Epar_.kard;
+    //Epar.lamd = Epar_.lamd;
     //Epar.ms = Epar_.ms;
     //Epar.mr = Epar_.mr;
 
@@ -105,28 +106,28 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     for (int i = 0; i < mesh.size(); i++)
     {
         Ob_sys.I2H2 += mesh[i].dAn2H[0] * mesh[i].dAn2H[1] * mesh[i].dAn2H[1];
+        Ob_sys.IK += mesh[i].dAK;
         if (mesh[i].edge_num != -1)
         {
             Ob_sys.Les[mesh[i].edge_num] += mesh[i].ds;
-            Ob_sys.Leuns[mesh[i].edge_num] += mesh[i].ds * std::sqrt(mesh[i].un2);
+            //Ob_sys.Leuns[mesh[i].edge_num] += mesh[i].ds * std::sqrt(mesh[i].un2);
         }
         // crystalline energy related
         for (int j = 0; j < mesh[i].nei.size(); j++)
         {
             // factor of 1/2 is for double counting
-            //Ob_sys.Tp2uu += 0.5 * p2uu_m(i, mesh[i].nei[j]);
-            //Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
-            Ob_sys.Tuusb += 0.5 * uusb_m(i, mesh[i].nei[j]);
-            Ob_sys.Tuut += 0.5 * uut_m(i, mesh[i].nei[j]);
+            Ob_sys.Tp2uu += 0.5 * p2uu_m(i, mesh[i].nei[j]);
+            Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
+            //Ob_sys.Tuusb += 0.5 * uusb_m(i, mesh[i].nei[j]);
+            //Ob_sys.Tuut += 0.5 * uut_m(i, mesh[i].nei[j]);
             //Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
         }
         // coupling related
         Ob_sys.Tun2 += mesh[i].un2;
-        Ob_sys.IKun2 += mesh[i].dAK * mesh[i].un2;
+        //Ob_sys.IKun2 += mesh[i].dAK * mesh[i].un2;
         // miscellany
         Ob_sys.IdA += mesh[i].dAn2H[0];
         Ob_sys.I2H += mesh[i].dAn2H[1] * mesh[i].dAn2H[0];
-        Ob_sys.IK += mesh[i].dAK;
     }
     //Ob_sys.E = 0.5 * Epar.Cn * (N - Np) + 0.5 * Epar.Cn * Np;
     Ob_sys.E = 0.5 * Epar.Cn * N;
@@ -719,22 +720,20 @@ void dtmc_lc::Ob_init(observable &Ob)
 {
     Ob.E = 0;
     Ob.I2H2 = 0;
+    Ob.IK = 0;
     Ob.Les.resize(Ne);
-    Ob.Leuns.resize(Ne);
+    //Ob.Leuns.resize(Ne);
     for (int e = 0; e < Ne; e++)
     {
         Ob.Les[e] = 0;
-        Ob.Leuns[e] = 0;
+        //Ob.Leuns[e] = 0;
     }
-    //Ob.Tp2uu = 0;
+    Ob.Tp2uu = 0;
     //Ob.Tuuc = 0;
-    Ob.Tuusb = 0;
-    Ob.Tuut = 0;
     Ob.Tun2 = 0;
-    Ob.IKun2 = 0;
+    //Ob.IKun2 = 0;
     Ob.IdA = 0;
     Ob.I2H = 0;
-    Ob.IK = 0;
     Ob.Bond_num = 0.5 * bulk_bond_list.size();
     for (int n = 0; n < Ne; n++)
     {

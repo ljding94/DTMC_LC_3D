@@ -12,35 +12,36 @@ struct observable
     // total energy
     double E;
     // geometric
-    double I2H2;
+    double I2H2; // integral of dA (2H)^2
+    double IK;   // integral of dA(K)
     std::vector<double> Les;
-    std::vector<double> Leuns; // edge length couples with u cdot t (edge tangent)
+    //std::vector<double> Leuns; // edge length couples with u cdot t (edge tangent)
     // crystalline
     double Tp2uu;
     double Tuuc;
-    double Tuusb; // splay and bend [(u_i\cross u_j)\cross r_{ij}]^2
-    double Tuut;  // twist   [(u_i\cross u_j)\cdot lr_{ij}]^2
+    //double Tuusb; // splay and bend [(u_i\cross u_j)\cross r_{ij}]^2
+    //double Tuut;  // twist   [(u_i\cross u_j)\cdot lr_{ij}]^2
     // coupling
-    double Tun2;  // tilt coupling
-    double IKun2; // coupling between Gaussian curvature and tilt, depletion-like
+    double Tun2; // tilt coupling
+    //double IKun2; // coupling between Gaussian curvature and tilt, depletion-like
     // miscellany, not directly related to system energy
     double IdA;   // integral of dA
     double I2H;   // integral of dA(2H)
-    double IK;    // integral of dA(K)
     int Bond_num; // total number of bonds
 };
 //hamiltonion parameters
 struct E_parameter
 {
-    double kar; // mean curvature bending stiffness
-    double lam; // line tension coefficient
-    //double Kd;   // liquid crystal interaction moduli
-    double Ksb;  // liquid crystalline interaction for splay and bend
-    double Kt;   //liquid crystalline interaction for the twist only
-    double q;    // liquid crystall twist constant
-    double Cn;   // liquid crystal to membrane normal moduli
-    double kard; // effective in-bulk depletion energy
-    double lamd; // effective on-edge depletion energy
+    double kar;  // mean curvature bending stiffness
+    double karg; // Gaussian curvature bending stiffness
+    double lam;  // line tension coefficient
+    double Kd;   // liquid crystal interaction moduli
+    //double Ksb;  // liquid crystalline interaction for splay and bend
+    //double Kt;   //liquid crystalline interaction for the twist only
+    double q;  // liquid crystall twist constant
+    double Cn; // liquid crystal to membrane normal moduli
+    //double kard; // effective in-bulk depletion energy
+    //double lamd; // effective on-edge depletion energy
 
     //double ms;  // mixture strength,
     //double mr;  // mixture ratio, N mixture = mr*N

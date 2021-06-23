@@ -14,35 +14,37 @@ def main():
     #config_plot3D("../data/scratch_local/State_N200_imod1_Ne1_kar20_lam0.0_Kd3.0_q0.0_Cn3.0_kard0.0_lamd5.0_init.csv",mesh=1,rod=1)
     #config_plot3D("../data/scratch_local/State_N200_imod1_Ne1_kar100_lam0.0_Kd3.0_q0.0_Cn6.0_kard0.0_lamd6.0_init.csv",mesh=1,rod=1)
     #config_plot3D("../data/scratch_local/State_N200_imod1_Ne1_kar100_lam0.0_Kd3.0_q0.0_Cn6.0_kard0.0_lamd6.0.csv",mesh=1,rod=1)
-    config_plot3D("../data/Ne1/May23_2021/State_N300_imod1_Ne1_kar100_lam5.0_Kd3.0_q0.0_Cn3.0_kard0.0_lamd4.0.csv",mesh=1,rod=1)
-    return 0
+    #config_plot3D("../data/Ne1/May23_2021/State_N300_imod1_Ne1_kar100_lam5.0_Kd3.0_q0.0_Cn3.0_kard0.0_lamd4.0.csv",mesh=1,rod=1)
+    #return 0
 
     #foldername = "../data/Ne2/Apr29_2021" # kinda switch to Ne2 simulation for next paper
     #foldername = "../data/Ne1/May4_2021" # mobius strip~,
-    foldername = "../data/Ne1/May23_2021"
+    foldername = "../data/Ne1/Jun12_2021"
     print("analyzing "+foldername)
     N = 300
     imod=1 # 1 for rhombus, 2 disk, 3 cylinder, 4 for mobius strip
     Ne=1
     kar = 100
     karg=0.0
-    lam=0.0
+    lam=5.0
     lams=np.arange(3.0,6.1,1.0)
-    Kd=3.0
+    Ksb=6.0
+    Kts = np.arange(0.0,5.1,1.0)
     q=0.0
-    Cn=3.0
+    Cn=6.0
     Cns=[3.0,6.0,9.0]
     kard=0.0
     lamds=np.arange(0.0,5.01,0.5)
     pars = []
-    for lam in lams:
-        pars.append([N, imod,Ne, kar, lam, Kd, q, Cn, kard,lamds])
-    par_nm = ["N","imod", "Ne", "kar","lam","Kd","q", "Cn", "kard","lamd"]
-    par_dg = [0,0,0,0,1,1,1,1,1,1] # nsumber of digit for each
+    for Kt in Kts:
+        Cn=Ksb
+        pars.append([N, imod, Ne, kar, lam, Ksb, Kt, q, Cn, kard,lamds])
+    par_nm = ["N","imod", "Ne", "kar","lam","Ksb","Kt","q", "Cn", "kard","lamd"]
+    par_dg = [0,0,0,0,1,1,1,1,1,1,1] # nsumber of digit for each
     mod="lamd"
     for i in range(len(pars)):
         print("analyzing",pars[i])
-        N, imod, Ne, kar, lam, Kd, q,Cn,kard,lamd = pars[i]
+        N, imod, Ne, kar, lam, Ksb, Kt, q,Cn,kard,lamd = pars[i]
         O_stat_ana(foldername,pars[i],par_nm,par_dg, mode=mod, tau_c=6)
         if(1):
             pass
@@ -51,9 +53,9 @@ def main():
         for lamd in lamds[::1]:
             if(i%1==0):
                 pass
-                filename = foldername + "/State_N%.0f_imod%.0f_Ne%.0f_kar%.0f_lam%.1f_Kd%.1f_q%.1f_Cn%.1f_kard%.1f_lamd%.1f.csv" % (N, imod,Ne, kar,lam,Kd,q,Cn,kard,lamd)
+                filename = foldername + "/State_N%.0f_imod%.0f_Ne%.0f_kar%.0f_lam%.1f_Ksb%.1f_Kt%.1f_q%.1f_Cn%.1f_kard%.1f_lamd%.1f.csv" % (N, imod,Ne, kar,lam,Ksb,Kt,q,Cn,kard,lamd)
                 #config_plot_xyz(filename,mesh=1,rod=0,tag=r"$K_d=%.1f,q=%.1f,C_n=%.1f$" % (Kd,q,Cn),Format="png")
-                config_plot_xyz(filename,mesh=0,rod=1,tag=r"$K_d=%.1f,q=%.1f,C_n=%.1f$" % (Kd,q,Cn),Format="png")
+                config_plot_xyz(filename,mesh=0,rod=1,tag=r"$K_{sb}=%.1f,K_t=%1.f,q=%.1f,C_n=%.1f$" % (Ksb,Kt,q,Cn),Format="png")
 
     colors = None
     alphas = None
