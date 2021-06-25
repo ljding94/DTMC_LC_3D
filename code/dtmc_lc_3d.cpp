@@ -118,8 +118,6 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
             // factor of 1/2 is for double counting
             Ob_sys.Tp2uu += 0.5 * p2uu_m(i, mesh[i].nei[j]);
             Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
-            //Ob_sys.Tuusb += 0.5 * uusb_m(i, mesh[i].nei[j]);
-            //Ob_sys.Tuut += 0.5 * uut_m(i, mesh[i].nei[j]);
             //Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
         }
         // coupling related
@@ -722,16 +720,13 @@ void dtmc_lc::Ob_init(observable &Ob)
     Ob.I2H2 = 0;
     Ob.IK = 0;
     Ob.Les.resize(Ne);
-    //Ob.Leuns.resize(Ne);
     for (int e = 0; e < Ne; e++)
     {
         Ob.Les[e] = 0;
-        //Ob.Leuns[e] = 0;
     }
     Ob.Tp2uu = 0;
-    //Ob.Tuuc = 0;
+    Ob.Tuuc = 0;
     Ob.Tun2 = 0;
-    //Ob.IKun2 = 0;
     Ob.IdA = 0;
     Ob.I2H = 0;
     Ob.Bond_num = 0.5 * bulk_bond_list.size();

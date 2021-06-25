@@ -19,11 +19,8 @@ struct observable
     // crystalline
     double Tp2uu;
     double Tuuc;
-    //double Tuusb; // splay and bend [(u_i\cross u_j)\cross r_{ij}]^2
-    //double Tuut;  // twist   [(u_i\cross u_j)\cdot lr_{ij}]^2
     // coupling
     double Tun2; // tilt coupling
-    //double IKun2; // coupling between Gaussian curvature and tilt, depletion-like
     // miscellany, not directly related to system energy
     double IdA;   // integral of dA
     double I2H;   // integral of dA(2H)

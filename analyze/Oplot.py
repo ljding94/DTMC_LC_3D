@@ -41,15 +41,15 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
         Les_ave.append(data[4+3*e])
         Les_tau.append(data[5+3*e])
         Les_err.append(data[6+3*e])
-    for e in range(Ne):
-        Leuns_ave.append(data[7+3*(Ne-1)+3*e])
-        Leuns_tau.append(data[8+3*(Ne-1)+3*e])
-        Leuns_err.append(data[9+3*(Ne-1)+3*e])
+    #for e in range(Ne):
+    #    Leuns_ave.append(data[7+3*(Ne-1)+3*e])
+    #    Leuns_tau.append(data[8+3*(Ne-1)+3*e])
+    #    Leuns_err.append(data[9+3*(Ne-1)+3*e])
     Le_ave = np.sum(Les_ave,axis=0)
     Le_err = np.sqrt(np.sum(np.power(Les_err,2),axis=0))
     Leun_ave = np.sum(Leuns_ave,axis=0)
     Leun_err = np.sqrt(np.sum(np.power(Leuns_err,2),axis=0))
-    IdA_ave, IdA_tau, IdA_err,I2H_ave, I2H_tau, I2H_err,I2H2_ave, I2H2_tau, I2H2_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err,uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, IKun2_ave,IKun2_tau,IKun2_err = data[10+6*(Ne-1):34+6*(Ne-1)]
+    IdA_ave, IdA_tau, IdA_err,I2H_ave, I2H_tau, I2H_err,I2H2_ave, I2H2_tau, I2H2_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err,uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err = data[7+3*(Ne-1):28+3*(Ne-1)]
     uuc_grad,uuc_grad_err = [],[]
     un2_grad,un2_grad_err = [],[]
     cpar_tsqN = []
@@ -70,12 +70,13 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
     O_cpar_plot(axs[0,0], E_ave, E_err, O_label, "E", r"$E$",
                 cpar, colors, alphas)
     O_cpar_plot(axs[1,0], Le_ave, Le_err, O_label, "Le", r"$\int ds$",cpar, colors, alphas)
-    O_cpar_plot(axs[2,0], Leun_ave, Leun_err, O_label, "Le", r"$\int ds |u\cdot n|$",cpar, colors, alphas)
+    #O_cpar_plot(axs[2,0], Leun_ave, Leun_err, O_label, "Le", r"$\int ds |u\cdot n|$",cpar, colors, alphas)
     if Ne==2:
         Le_ave_diff = np.abs(Les_ave[1]-Les_ave[0])
         Le_err_diff = np.sqrt(np.power(Les_err[1],2)+np.power(Les_err[0],2))
         O_cpar_plot(axs[1,1], Le_ave_diff, Le_err_diff, O_label, "Le_diff", r"$|\left<\int_0 ds\right>-\left<\int_1 ds\right>|$",cpar, colors, alphas)
-        Ledif_ave,Ledif_tau,Ledif_err = data[31+3*(Ne-1):]
+        print(len(data[31+3*(Ne-1):]))
+        Ledif_ave,Ledif_tau,Ledif_err = data[28+3*(Ne-1):]
         O_cpar_plot(axs[2,1], Ledif_ave, Ledif_ave, O_label, "Le_diff'", r"$\left<|\int_0 ds-\int_1 ds|\right>$",cpar, colors, alphas)
         O_cpar_plot(axs[3,1], Le_ave_diff/Le_ave, Le_err_diff*0, O_label, "Le_diff/Le_ave", r"$|\left<\int_0 ds\right>-\left<\int_1 ds\right>|/sum$",cpar, colors, alphas)
         O_cpar_plot(axs[4,1], Ledif_ave/Le_ave, Ledif_ave*0, O_label, "Le_diff/Le_ave'", r"$\left<|\int_0 ds-\int_1 ds|\right>/sum$",cpar, colors, alphas)
@@ -95,7 +96,7 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
     if(mode=="q"):
         O_cpar_plot(axs[8,1], uuc_grad, uuc_grad_err, O_label, "uuc_grad", r"$\partial u_c /\partial q$",cpar, colors, alphas)
         O_cpar_plot(axs[9,1], un2_grad, un2_grad_err, O_label, "un2_grad", r"$\partial u_n /\partial q$",cpar, colors, alphas)
-    O_cpar_plot(axs[10,0], IKun2_ave, IKun2_err, O_label, "IKun2", r"$\left<\int dA K (u_i\cdot n_i)\right>$",cpar, colors, alphas)
+    #O_cpar_plot(axs[10,0], IKun2_ave, IKun2_err, O_label, "IKun2", r"$\left<\int dA K (u_i\cdot n_i)\right>$",cpar, colors, alphas)
     #O_cpar_plot(axs[9,0], Itau2_ave, Itau2_err, O_label, "Itau2", r"$\left<\int ds \tau^2\right>$",cpar, colors, alphas)
     axs[10,0].set_xlabel(xLabel)
     #axs[0,0].xaxis.set_major_locator(MultipleLocator(2))

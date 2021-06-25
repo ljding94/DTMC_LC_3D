@@ -192,14 +192,9 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<double> IK_all;
     std::vector<std::vector<double>> Les_all;
     Les_all.resize(Ne);
-    std::vector<std::vector<double>> Leuns_all;
-    Leuns_all.resize(Ne);
     std::vector<double> Tp2uu_all;
     std::vector<double> Tuuc_all;
-    //std::vector<double> Tuusb_all;
-    //std::vector<double> Tuut_all;
     std::vector<double> Tun2_all;
-    //std::vector<double> IKun2_all;
     std::vector<double> IdA_all;
     std::vector<double> I2H_all;
     std::vector<int> Bond_num_all;
@@ -232,14 +227,10 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         for (int e = 0; e < Ne; e++)
         {
             Les_all[e].push_back(Ob_sys.Les[e]);
-            //Leuns_all[e].push_back(Ob_sys.Leuns[e]);
         }
         Tp2uu_all.push_back(Ob_sys.Tp2uu);
         Tuuc_all.push_back(Ob_sys.Tuuc);
-        //Tuusb_all.push_back(Ob_sys.Tuusb);
-        //Tuut_all.push_back(Ob_sys.Tuut);
         Tun2_all.push_back(Ob_sys.Tun2);
-        //IKun2_all.push_back(Ob_sys.IKun2);
         IdA_all.push_back(Ob_sys.IdA);
         I2H_all.push_back(Ob_sys.I2H);
         IK_all.push_back(Ob_sys.IK);
