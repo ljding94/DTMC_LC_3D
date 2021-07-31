@@ -173,6 +173,7 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         ind = ind_relate[i];
         // geometric terms
         Ob.I2H2 += mesh[ind].dAn2H[0] * mesh[ind].dAn2H[1] * mesh[ind].dAn2H[1];
+        Ob.I2H2dis+=mesh[ind].dAn2H[0]*std::pow(mesh[ind].dAn2H[1]-Epar.C0,2);
         Ob.IK += mesh[ind].dAK;
         if (mesh[ind].edge_num != -1)
         {
@@ -206,6 +207,7 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
 {
     Ob_sys.E += Ob_new.E - Ob_old.E;
     Ob_sys.I2H2 += Ob_new.I2H2 - Ob_old.I2H2;
+    Ob_sys.I2H2dis += Ob_new.I2H2dis - Ob_old.I2H2dis;
     Ob_sys.IK += Ob_new.IK - Ob_old.IK;
     for (int e = 0; e < Ne; e++)
     {
@@ -226,7 +228,7 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
 double dtmc_lc::E_m(observable Ob)
 {
     double E = 0;
-    E += 0.5 * Epar.kar * Ob.I2H2;
+    E += 0.5 * Epar.kar * Ob.I2H2dis;
     E += Epar.karg * Ob.IK;
     for (int e = 0; e < Ne; e++)
     {

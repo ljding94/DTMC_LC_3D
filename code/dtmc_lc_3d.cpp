@@ -17,6 +17,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     // set energy related
     // geometric
     Epar.kar = Epar_.kar;
+    Epar.C0=Epar_.C0;
     Epar.karg = Epar_.karg;
     Epar.lam = Epar_.lam;
     // orientational
@@ -718,6 +719,7 @@ void dtmc_lc::Ob_init(observable &Ob)
 {
     Ob.E = 0;
     Ob.I2H2 = 0;
+    Ob.I2H2dis=0;
     Ob.IK = 0;
     Ob.Les.resize(Ne);
     for (int e = 0; e < Ne; e++)

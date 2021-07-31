@@ -14,7 +14,7 @@ def find_cpar_ind(par_nm,mode):
             break
     return cpar_ind
 
-def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
+def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
     E_ave, E_tau, E_err = [], [], []
     Ne = par[find_cpar_ind(par_nm,"Ne")]
 
@@ -34,13 +34,20 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, tau_c=6):
         Ledif_ave,Ledif_tau,Ledif_err=[],[],[]
     cpar_ind = find_cpar_ind(par_nm,mode)
     cpar = par[cpar_ind]
+    Cn_ind=-1
+    if(CnequalsKc and mode=="Kd"):
+        Cn_ind=find_cpar_ind(par_nm,"Cn")
+    # TODO: add code dealing with the Cn=Kd = mode case
     for i in range(len(cpar)):
         par_dealing = par[:]
         par_dealing[cpar_ind] = par[cpar_ind][i]
+        if(CnequalsKc and mode=="Kd"):
+            par_dealing[Cn_ind]=par[cpar_ind][i]
         f2rtail = "MC"
         for j in range(len(par_dealing)):
             f2rtail+="_"+par_nm[j]+"%.*f"%(par_dg[j],par_dealing[j])
         f2rtail+=".csv"
+        #print("f2rtail",f2rtail)
         file2read = foldername + "/O_"+f2rtail
         data = np.loadtxt(file2read, skiprows=13, delimiter=",", unpack=True)
         E = data[0]
