@@ -23,6 +23,7 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
     IdA_ave, IdA_tau, IdA_err = [], [], []
     I2H_ave, I2H_tau, I2H_err = [], [], []
     I2H2_ave, I2H2_tau, I2H2_err = [], [], []
+    I2H2dis_ave, I2H2dis_tau, I2H2dis_err = [], [], []
     IK_ave, IK_tau, IK_err = [], [], []
     p2uu_ave, p2uu_tau, p2uu_err = [], [], []
     uuc_ave, uuc_tau, uuc_err = [], [], []
@@ -37,7 +38,7 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
     Cn_ind=-1
     if(CnequalsKc and mode=="Kd"):
         Cn_ind=find_cpar_ind(par_nm,"Cn")
-    # TODO: add code dealing with the Cn=Kd = mode case
+
     for i in range(len(cpar)):
         par_dealing = par[:]
         par_dealing[cpar_ind] = par[cpar_ind][i]
@@ -53,7 +54,7 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
         E = data[0]
         Les = data[1:1+Ne]
         #Leuns = data[1+Ne:1+2*Ne]
-        IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2 = data[1+Ne:]
+        IdA,I2H,I2H2,I2H2dis,IK,Tp2uu,Tuuc,Bond_num,Tun2 = data[1+Ne:]
         p2uu = Tp2uu/Bond_num
         uuc = Tuuc/Bond_num
         N =par[find_cpar_ind(par_nm,"N")]
@@ -133,6 +134,14 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
         I2H2_tau.append(tau)
         I2H2_err.append(np.sqrt(2 * tau / len(I2H2) * cov0))
 
+        # I2H2dis
+        I2H2dis_ave.append(np.average(I2H2dis))
+        rho, cov0 = autocorrelation_function_fft(I2H2dis)
+        tau, tau_err = tau_int_cal_rho(rho,tau_c)
+        # autocorrelation_plot(rho, tau, file2read[:-4] + "_autoI2H2.pdf")
+        I2H2dis_tau.append(tau)
+        I2H2dis_err.append(np.sqrt(2 * tau / len(I2H2dis) * cov0))
+
         # IK
         IK_ave.append(np.average(IK))
         rho, cov0 = autocorrelation_function_fft(IK)
@@ -173,6 +182,7 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
     # only changed "lam" and "B" mode here, others waiting for further decision
     savefile = foldername + "/O_" + f2stail
 
+    # TODO: include writing I2H2dis analyzed data into the ana file
     with open(savefile, "w") as f:
         f.write(mode+",E_ave,E_tau,E_err")
         for e in range(Ne):
