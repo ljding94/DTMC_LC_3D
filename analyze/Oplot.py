@@ -34,6 +34,7 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
     data = np.transpose(np.array(data), axes=(1, 0, 2))
     print("len(data)",len(data))
     cpar, E_ave, E_tau, E_err = data[:4]
+    print("E_ave",E_ave)
     Les_ave,Les_tau,Les_err = [],[],[]
     Leuns_ave,Leuns_tau,Leuns_err = [],[],[]
     Ne = pars[0][2]

@@ -59,7 +59,7 @@ int main(int argc, char const *argv[])
         // ccv running
         folder = "/users/lding3/scratch";
         // used 2000, 4000 for manuscript
-        membrane.Thermal(1000, int(N / (delta_s * delta_s)), 1, delta_s,
+        membrane.Thermal(1000, int(N / (delta_s * delta_s)), 100, delta_s,
                          delta_theta);
         membrane.O_MC_measure(2000, 10, int(N / (delta_s * delta_s)) + 1, delta_s,
                               delta_theta, folder, finfo);

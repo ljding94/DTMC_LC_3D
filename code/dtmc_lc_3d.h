@@ -76,6 +76,7 @@ public:
     // eternal parameters
     double beta; // system temperature
     int N;       // number of beads
+    int N1;      // number of short rods, accompanied by spontaneous curvature C0
     int imod;    // mode for initialization shape
     int Ne;      // number of edges
     // also used to set fixed distance betwen two beads
@@ -180,6 +181,10 @@ public:
 
     int edge_metropolis();
     // execute bond remove/add update
+    // return 1: accepted, 0: rejected
+
+    int hop_metropolis();
+    // nearing short - long rods exchange update
     // return 1: accepted, 0: rejected
 
     //int swap_metropolis(); // reserved for mixture which is not of my concern for now

@@ -120,7 +120,7 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
     ax_zx.set_xlim(z_min-2, z_max+2)
     ax_zx.set_ylim(x_min-2, x_max+2)
     ax_zx.set_title("ZX")
-    #ax_xy.legend(title=tag)
+    ax_xy.legend(title=tag)
     # plt.savefig(filename[:-4] + "_xy.pdf", dpi=300, format="pdf")
     plt.savefig(filename[:-4] + ftail+"."+Format, dpi=100,
                 format=Format, bbox_inches='tight',transparent=False)
