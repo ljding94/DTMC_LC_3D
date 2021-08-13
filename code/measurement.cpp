@@ -153,7 +153,7 @@ void dtmc_lc::mesh_bead_info_update(std::vector<int> ind_relate)
     {
         ind = ind_relate[i];
         mesh[ind].n = n_m(ind);
-        mesh[ind].dAn2H = dAn2H_m(ind);
+        mesh[ind].dAn2H = dAn2H_m(ind); // signed H depends on n
         mesh[ind].ds = ds_m(ind);
         mesh[ind].dAK = dAK_m(ind);
         mesh[ind].un2 = un2_m(ind);
@@ -173,7 +173,7 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         ind = ind_relate[i];
         // geometric terms
         Ob.I2H2 += mesh[ind].dAn2H[0] * mesh[ind].dAn2H[1] * mesh[ind].dAn2H[1];
-        Ob.I2H2dis+=mesh[ind].dAn2H[0]*std::pow(mesh[ind].dAn2H[1]-Epar.C0,2);
+        Ob.I2H2dis+=mesh[ind].dAn2H[0]*std::pow(mesh[ind].dAn2H[1]-mesh[ind].phiH*Epar.C0,2);
         Ob.IK += mesh[ind].dAK;
         if (mesh[ind].edge_num != -1)
         {
@@ -375,6 +375,10 @@ std::vector<double> dtmc_lc::dAn2H_m(int index)
     }
     dAn2H[0] = sigma_i;
     dAn2H[1] = std::sqrt(innerproduct(dH_i, dH_i));
+    // find the sign of H by comparing with local normal
+    if(innerproduct(dH_i,mesh[index].n)<0){
+        dAn2H[1] *=-1;
+    }
     return dAn2H;
 }
 

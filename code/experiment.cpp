@@ -26,13 +26,16 @@ void dtmc_lc::State_write(std::string filename)
         f << "imod=" << imod << "\n";
         f << "l0=" << l0 << "\n";
         f << "max_nei_size=" << max_nei_size << "\n";
-        f << "x,y,z,ux,uy,uz,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
+        //f << "x,y,z,ux,uy,uz,nx,ny,nz,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
+        f << "x,y,z,ux,uy,uz,phiH,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
         for (int i = 0; i < mesh.size(); i++)
         {
             f << "\n"
               << mesh[i].R[0] << "," << mesh[i].R[1] << "," << mesh[i].R[2];
             f << "," << mesh[i].u[0] << "," << mesh[i].u[1] << ","
               << mesh[i].u[2];
+            f << "," << mesh[i].phiH;
+            //f << "," << mesh[i].n[0] << "," << mesh[i].n[1] << "," << mesh[i].n[2];
             f << "," << mesh[i].dAn2H[0] << "," << mesh[i].dAn2H[1] << ","
               << mesh[i].ds << "," << mesh[i].dAK << "," << mesh[i].un2;
             f << "," << mesh[i].edge_num;
@@ -172,6 +175,7 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
                 spin_metropolis(delta_theta);
                 bond_metropolis();
                 bond_metropolis();
+                hop_metropolis();
                 if (i % int(std::sqrt(N)) == 0)
                 {
                     edge_metropolis();
@@ -189,6 +193,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
 {
     std::vector<double> E_all;
     std::vector<double> I2H2_all;
+    std::vector<double> phiH_sum_all;
     std::vector<double> I2H2dis_all;
     std::vector<double> IK_all;
     std::vector<std::vector<double>> Les_all;
@@ -207,6 +212,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     double spin_accept = 0;
     double bond_accept = 0;
     double edge_accept = 0;
+    double hop_accept = 0;
 
     std::clock_t c_start = std::clock();
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
@@ -218,6 +224,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             spin_accept += spin_metropolis(delta_theta);
             bond_accept += bond_metropolis();
             bond_accept += bond_metropolis();
+            hop_accept += hop_metropolis();
             if (i % int(std::sqrt(N)) == 0)
             {
                 edge_accept += edge_metropolis();
@@ -225,6 +232,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
         E_all.push_back(Ob_sys.E);
         I2H2_all.push_back(Ob_sys.I2H2);
+        phiH_sum_all.push_back(Ob_sys.phiH_sum);
         I2H2dis_all.push_back(Ob_sys.I2H2dis);
         for (int e = 0; e < Ne; e++)
         {
@@ -248,6 +256,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     bead_accept /= MC_sweeps * step_p_sweep;
     spin_accept /= MC_sweeps * step_p_sweep;
     bond_accept /= MC_sweeps * step_p_sweep * 2;
+    hop_accept /= MC_sweeps * step_p_sweep;
     edge_accept /= MC_sweeps * (step_p_sweep / int(std::sqrt(N)));
 
     std::clock_t c_end = std::clock();
@@ -266,6 +275,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         f << "bead_accept," << bead_accept << "\n";
         f << "spin_accept," << spin_accept << "\n";
         f << "bond_accept," << bond_accept << "\n";
+        f << "hop_accept," << hop_accept << "\n";
         f << "edge_accept," << edge_accept << "\n";
         f << "E,";
         for (int e = 0; e < Ne; e++)
@@ -276,7 +286,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         //{
         //f << "Leuns[" << e << "],";
         //}
-        f << "IdA,I2H,I2H2,I2H2dis,IK,Tp2uu,Tuuc,Bond_num,Tun2\n";
+        f << "IdA,I2H,I2H2,phiH_sum,I2H2dis,IK,Tp2uu,Tuuc,Bond_num,Tun2\n";
         for (int i = 0; i < E_all.size(); i++)
         {
             f << E_all[i] << ",";
@@ -288,7 +298,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             //{
             //f << Leuns_all[e][i] << ",";
             //}
-            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i]<< "," << I2H2dis_all[i] << ","
+            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << phiH_sum_all[i] << "," << I2H2dis_all[i] << ","
               << IK_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << ","
               << Bond_num_all[i] << "," << Tun2_all[i] << "\n";
         }

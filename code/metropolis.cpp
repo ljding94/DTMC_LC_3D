@@ -919,3 +919,47 @@ int dtmc_lc::swap_metropolis()
 #pragma endregion
 }
 */
+
+int dtmc_lc::hop_metropolis(){
+    // notice this update is local (for now, without interaction Aug13_2021)
+#pragma region : variable declaration
+    // vertex info related,
+    int index;
+    double local_I2H2dis_old,local_I2H2dis_new; // only affected variables
+
+#pragma endregion
+
+#pragma region : find update, and related beads
+    index  = rand_pos(gen);
+#pragma endregion
+
+#pragma region : store observable of affected beads
+    local_I2H2dis_old  = mesh[index].dAn2H[0]*std::pow(mesh[index].dAn2H[1]-mesh[index].phiH*Epar.C0,2);
+#pragma endregion
+
+
+#pragma region : hopping MC update proposal
+    mesh[index].phiH  *=  -1;
+#pragma endregion
+
+#pragma region : get after - update observables
+    local_I2H2dis_new  = mesh[index].dAn2H[0]*std::pow(mesh[index].dAn2H[1]-mesh[index].phiH*Epar.C0,2);
+#pragma endregion
+
+#pragma region : Metropolis
+    if (rand_uni(gen) <=
+        std::exp(-beta * Epar.kar*(local_I2H2dis_new - local_I2H2dis_old)))
+    {
+        // [accepted]
+        Ob_sys.I2H2dis+=local_I2H2dis_new - local_I2H2dis_old;
+        Ob_sys.E += Epar.kar*(local_I2H2dis_new - local_I2H2dis_old);
+        Ob_sys.phiH_sum += 2*mesh[index].phiH;
+        return 1;
+    }
+    else{
+        // [rejected]
+        mesh[index].phiH  *=  -1;
+        return 0 ;
+    }
+#pragma endregion
+}

@@ -36,6 +36,7 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
     ftail = "_xyz"
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
 
+    #x,y,z,sx,sy,sz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:17]
     x,y,z,sx,sy,sz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:14]
 
     #sx,sy,sz=d*sx,d*sy,d*sz
@@ -130,10 +131,17 @@ def config_plot_xyz_seq(filename,Seq):
     for i in range(Seq):
         config_plot_xyz(filename[:-4]+"_%d.txt"%i,Format="png")
 
-def config_plot3D(filename,mesh=0,rod=0,cvt_map="",cmap_smooth=0):
+def config_plot3D(filename,mesh=0,rod=0,fnormal=0,cvt_map="",cmap_smooth=0):
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
     #x,y,z,sx,sy,sz,enum, en0, en1 = data[5:14]
-    x,y,z,sx,sy,sz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:14]
+
+    x,y,z,sx,sy,sz,phiH,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:15]
+    ns = np.transpose(data[15:])
+
+    # just for illustrating surface normal
+    #x,y,z,sx,sy,sz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:17]
+    #ns = np.transpose(data[17:])
+
     #x,y,z,sx,sy,sz,dA,d2H,ds,dAK,un2,is_cnp,enum, en0, en1 = data[:15]
     d=2
     #sx,sy,sz=d*sx,d*sy,d*sz
@@ -144,10 +152,13 @@ def config_plot3D(filename,mesh=0,rod=0,cvt_map="",cmap_smooth=0):
     max_range_half = max([x_max-x_min,y_max-y_min,z_max-z_min])*0.5
     alpha_xy = 0.9*(z-z_min+0.1)/(z_max-z_min+0.1)+0.1
     alpha_zx = 0.9*(y-y_min+0.1)/(y_max-y_min+0.1)+0.1
-    ns = np.transpose(data[14:])
+
     ens = np.array([en0, en1])
     fig = plt.figure(figsize=(5, 5))
     ax = plt.axes(projection="3d")
+
+    ax.scatter3D(x[phiH==1],y[phiH==1],z[phiH==1],marker="o",facecolor="None",edgecolor="black")
+    ax.scatter3D(x[phiH==-1],y[phiH==-1],z[phiH==-1],marker="o",color="black")
 
     if(mesh):
         for i in range(len(ns)):
@@ -195,6 +206,10 @@ def config_plot3D(filename,mesh=0,rod=0,cvt_map="",cmap_smooth=0):
         sm.set_array([])
         cbar=plt.colorbar(sm, ticks=[0,0.25*np.pi,0.5*np.pi])
         cbar.ax.set_yticklabels([r"$0$",r"$\pi/4$",r"$\pi/2$"])
+    if(fnormal):
+        for i in range(len(sx)):
+            ax.plot3D([x[i],x[i]+d*nx[i]],[y[i],y[i]+d*ny[i]],[z[i],z[i]+d*nz[i]],"k-")
+
     ax.set_xlim(-max_range_half,max_range_half)
     ax.set_ylim(-max_range_half,max_range_half)
     ax.set_zlim(-max_range_half,max_range_half)

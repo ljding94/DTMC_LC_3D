@@ -6,38 +6,47 @@ import matplotlib.pyplot as plt
 from plot import *
 from Oplot import *
 from analyze import *
+from test_plot import *
 
 
 def main():
     print("hello! dtmc_lc analysis")
 
-    config_plot3D("../data/scratch_local/State_N200_imod1_Ne2_kar100_C00.0_karg0.0_lam5.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0)
+    config_plot3D("../data/scratch_local/State_N200_imod3_Ne2_kar100_C00.2_karg0.0_lam5.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0)
     #config_plot3D("../data/Ne2/Aug4_2021_1/State_N300_imod3_Ne2_kar50_C00.0_karg0.0_lam8.0_Kd10.0_q2.0_Cn20.0.csv",mesh=1,rod=0)
 
     return 0
 
     #foldername = "../data/Ne2/Apr29_2021" # kinda switch to Ne2 simulation for next paper
     #foldername = "../data/Ne1/May4_2021" # mobius strip~,
-    foldername = "../data/Ne2/Aug4_2021_1"
+    foldername = "../data/Ne2/Aug8_2021"
     print("analyzing "+foldername)
-    N = 300
+    Ns = [100,200,300,400,500]
     imod=3 # 1 for rhombus, 2 disk, 3 cylinder, 4 for mobius strip
     Ne=2
-    kar = 50
+    kar = 100
     C0 = 0.0
     karg = 0.0
-    lam = 8.0
-    Kds = np.arange(6.0,10.1,1.0)
-    qs = np.arange(0.2,2.1,0.2)
+    lam = 5.0
+    Kd = 8.0
+    qs = np.arange(0.5,5.1,0.5)
     #qs=np.arange(0.2,1.1,0.2)
-    Cn =5.0
+    Cn =8.0
     pars = []
-    for Kd in Kds:
-        Cn = 2*Kd
+    pars1,pars2 = [],[]
+    for N in Ns:
+        Cn = Kd
         pars.append([N, imod, Ne, kar, C0, karg, lam, Kd, qs, Cn])
+        pars1.append([N, 1, 1, kar, C0, karg, lam, Kd, qs, Cn])
+        pars2.append([N, 3, 2, kar, C0, karg, lam, Kd, qs, Cn])
     par_nm = ["N","imod", "Ne", "kar", "C0","karg", "lam","Kd","q", "Cn"]
     par_dg = [0,0,0,0,1,1,1,1,1,1] # number of digit for each
     mod="q"
+
+    # run test plot
+    #E_compare(foldername, pars1, pars2, par_nm, par_dg, mod)
+    #return 0
+
     for i in range(len(pars)):
         print("analyzing",pars[i])
         N, imod, Ne, kar, C0, karg, lam, Kd, q, Cn = pars[i]

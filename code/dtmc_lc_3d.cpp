@@ -17,7 +17,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     // set energy related
     // geometric
     Epar.kar = Epar_.kar;
-    Epar.C0=Epar_.C0;
+    Epar.C0 = Epar_.C0;
     Epar.karg = Epar_.karg;
     Epar.lam = Epar_.lam;
     // orientational
@@ -88,6 +88,8 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
 
     for (int i = 0; i < mesh.size(); i++)
     {
+        // set phiH field
+        mesh[i].phiH = 1;
         // vertex info measurement
         mesh[i].n = n_m(i);
         mesh[i].dAn2H = dAn2H_m(i);
@@ -107,7 +109,8 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     for (int i = 0; i < mesh.size(); i++)
     {
         Ob_sys.I2H2 += mesh[i].dAn2H[0] * mesh[i].dAn2H[1] * mesh[i].dAn2H[1];
-        Ob_sys.I2H2dis+=mesh[i].dAn2H[0]*std::pow(mesh[i].dAn2H[1]-Epar.C0,2);
+        Ob_sys.phiH_sum += mesh[i].phiH;
+        Ob_sys.I2H2dis += mesh[i].dAn2H[0] * std::pow(mesh[i].dAn2H[1] - mesh[i].phiH * Epar.C0, 2);
         Ob_sys.IK += mesh[i].dAK;
         if (mesh[i].edge_num != -1)
         {
@@ -720,7 +723,7 @@ void dtmc_lc::Ob_init(observable &Ob)
 {
     Ob.E = 0;
     Ob.I2H2 = 0;
-    Ob.I2H2dis=0;
+    Ob.I2H2dis = 0;
     Ob.IK = 0;
     Ob.Les.resize(Ne);
     for (int e = 0; e < Ne; e++)

@@ -13,7 +13,8 @@ struct observable
     double E;
     // geometric
     double I2H2; // integral of dA (2H)^2
-    double I2H2dis; // integral of dA (|2H| - C0)^2, dis = displacement
+    double I2H2dis; // integral of dA (2H - 2H0)^2, dis = displacement, where 2H0 = phiH*C0
+    double phiH_sum; // sum of phiH
     double IK;   // integral of dA(K)
     std::vector<double> Les;
     //std::vector<double> Leuns; // edge length couples with u cdot t (edge tangent)
@@ -61,7 +62,9 @@ struct vertex
     // neighbors form edge with this one (if exist)
 
     // measurement related
-    std::vector<double> dAn2H; // in bulk: (dA, |2H|), on edge (0,0)
+    int phiH;  // local 2H0 = phiH*C0, phiH=\pm 1
+    // interaction among phiH field can be added as need
+    std::vector<double> dAn2H; // in bulk: (dA, 2H), on edge (0,0)
     // energy related (directly)
     double ds; // beads in bulk: 0 , beads on edge 0.5*(l_{i+}+l_{i-})
     // double dskg; // in bulk: 0, on edge: kg*ds

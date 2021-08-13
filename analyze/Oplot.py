@@ -68,7 +68,7 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
     fig, axs = plt.subplots(11, 2, figsize=(
         246 / ppi*2, 246 / ppi * 5.5), sharex=True)  # , sharex=True
     #cpar_aj = cpar-np.outer([2.8, 2.0, 1.5, 0.8, 0], np.ones(len(cpar[0])))
-    O_cpar_plot(axs[0,0], E_ave, E_err, O_label, "E", r"$E$",
+    O_cpar_plot(axs[0,0], E_ave, E_err, O_label, "E", r"$E/N$",
                 cpar, colors, alphas)
     O_cpar_plot(axs[1,0], Le_ave, Le_err, O_label, "Le", r"$\int ds$",cpar, colors, alphas)
     #O_cpar_plot(axs[2,0], Leun_ave, Leun_err, O_label, "Le", r"$\int ds |u\cdot n|$",cpar, colors, alphas)

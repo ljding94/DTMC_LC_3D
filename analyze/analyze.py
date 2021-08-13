@@ -51,7 +51,8 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
         #print("f2rtail",f2rtail)
         file2read = foldername + "/O_"+f2rtail
         data = np.loadtxt(file2read, skiprows=13, delimiter=",", unpack=True)
-        E = data[0]
+        N = par_dealing[0]
+        E = data[0]/N
         Les = data[1:1+Ne]
         #Leuns = data[1+Ne:1+2*Ne]
         IdA,I2H,I2H2,I2H2dis,IK,Tp2uu,Tuuc,Bond_num,Tun2 = data[1+Ne:]
