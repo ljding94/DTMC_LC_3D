@@ -36,9 +36,9 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
     ftail = "_xyz"
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
 
-    #x,y,z,sx,sy,sz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:17]
-    x,y,z,sx,sy,sz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:14]
-
+    #x,y,z,sx,sy,sz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:18]
+    x,y,z,sx,sy,sz,phiH,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:15]
+    ns = np.transpose(data[15:])
     #sx,sy,sz=d*sx,d*sy,d*sz
     #x,y,z,sx,sy,sz, enum, en0, en1 = data[5:14]
     x_min, x_max = np.min(x),np.max(x)
@@ -46,13 +46,18 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
     z_min, z_max = np.min(z),np.max(z)
     alpha_xy = 0.8*(z-z_min+0.1)/(z_max-z_min+0.1)+0.1
     alpha_zx = 0.8*(y-y_min+0.1)/(y_max-y_min+0.1)+0.1
-    ns = np.transpose(data[14:])
     #ns = np.transpose(data[14:])
     ens = np.array([en0, en1])
     fig = plt.figure(figsize=(10, 5))
     #ax_xy = fig.add_subplot(111, aspect="equal")
     ax_xy = fig.add_subplot(121, aspect="equal")
     ax_zx = fig.add_subplot(122, aspect="equal")
+
+    # beads
+    ax_xy.scatter(x[phiH==1],y[phiH==1],marker="o",facecolor="None",edgecolor="black")
+    #ax_xy.scatter(x[phiH==-1],y[phiH==-1],marker="o",color="gray")
+    ax_zx.scatter(z[phiH==1],x[phiH==1],marker="o",facecolor="None",edgecolor="black")
+    #ax_zx.scatter(z[phiH==-1],x[phiH==-1],marker="o",color="gray")
     # bulk bond
 
     # track bead ind #
@@ -135,8 +140,9 @@ def config_plot3D(filename,mesh=0,rod=0,fnormal=0,cvt_map="",cmap_smooth=0):
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
     #x,y,z,sx,sy,sz,enum, en0, en1 = data[5:14]
 
-    x,y,z,sx,sy,sz,phiH,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:15]
-    ns = np.transpose(data[15:])
+    x,y,z,sx,sy,sz,nx,ny,nz,phiH,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:18]
+    #x,y,z,sx,sy,sz,phiH,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:15]
+    ns = np.transpose(data[18:])
 
     # just for illustrating surface normal
     #x,y,z,sx,sy,sz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:17]
@@ -158,7 +164,7 @@ def config_plot3D(filename,mesh=0,rod=0,fnormal=0,cvt_map="",cmap_smooth=0):
     ax = plt.axes(projection="3d")
 
     ax.scatter3D(x[phiH==1],y[phiH==1],z[phiH==1],marker="o",facecolor="None",edgecolor="black")
-    ax.scatter3D(x[phiH==-1],y[phiH==-1],z[phiH==-1],marker="o",color="black")
+    #ax.scatter3D(x[phiH==-1],y[phiH==-1],z[phiH==-1],marker="o",color="dimgray")
 
     if(mesh):
         for i in range(len(ns)):
@@ -174,7 +180,7 @@ def config_plot3D(filename,mesh=0,rod=0,fnormal=0,cvt_map="",cmap_smooth=0):
             if ens[i, j] != -1:
                 ax.plot3D([x[j], x[int(ens[i, j])]], [
                     y[j], y[int(ens[i, j])]], [
-                    z[j], z[int(ens[i, j])]], "-",linewidth=2, color=ecolors[int(enum[j])], alpha=0.7)
+                    z[j], z[int(ens[i, j])]], "-",linewidth=2, color=ecolors[int(enum[j])], alpha=0.5)
     cmap = cm.get_cmap("jet_r")
     if(cvt_map=="Mean"):
         #ftail+="_mmap"

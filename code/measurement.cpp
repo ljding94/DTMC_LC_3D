@@ -163,7 +163,8 @@ void dtmc_lc::mesh_bead_info_update(std::vector<int> ind_relate)
 observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
                          std::vector<std::pair<int, int>> bond_relate)
 {
-
+    //Observable related measurement for local metropolis update usage
+    // note: hop_metropolis not using this function [Aug17]
     int ind, ind_i, ind_j;
     observable Ob;
     Ob_init(Ob); // set inital observable value, all to 0
@@ -173,7 +174,7 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         ind = ind_relate[i];
         // geometric terms
         Ob.I2H2 += mesh[ind].dAn2H[0] * mesh[ind].dAn2H[1] * mesh[ind].dAn2H[1];
-        Ob.I2H2dis+=mesh[ind].dAn2H[0]*std::pow(mesh[ind].dAn2H[1]-mesh[ind].phiH*Epar.C0,2);
+        Ob.I2H2dis += mesh[ind].dAn2H[0] * std::pow(mesh[ind].dAn2H[1] - mesh[ind].phiH * Epar.C0, 2);
         Ob.IK += mesh[ind].dAK;
         if (mesh[ind].edge_num != -1)
         {
@@ -195,6 +196,8 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         ind_j = bond_relate[i].second;
         Ob.Tp2uu += p2uu_m(ind_i, ind_j);
         Ob.Tuuc += uuc_m(ind_i, ind_j);
+        // also, Ising-like phiH field tems
+        Ob.TphiH2 += mesh[ind_i].phiH * mesh[ind_j].phiH;
         // use new LC energy that seperate twist from the splay and bend
         //Ob.Tuusb += uusb_m(ind_i, ind_j);
         //Ob.Tuut += uut_m(ind_i, ind_j);
@@ -207,6 +210,7 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
 {
     Ob_sys.E += Ob_new.E - Ob_old.E;
     Ob_sys.I2H2 += Ob_new.I2H2 - Ob_old.I2H2;
+    Ob_sys.TphiH2 += Ob_new.TphiH2 - Ob_old.TphiH2;
     Ob_sys.I2H2dis += Ob_new.I2H2dis - Ob_old.I2H2dis;
     Ob_sys.IK += Ob_new.IK - Ob_old.IK;
     for (int e = 0; e < Ne; e++)
@@ -227,8 +231,10 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
 }
 double dtmc_lc::E_m(observable Ob)
 {
+    // Energy measurement for local Ob and global Ob_sys usage
     double E = 0;
     E += 0.5 * Epar.kar * Ob.I2H2dis;
+    E += -Epar.J * Ob.TphiH2;
     E += Epar.karg * Ob.IK;
     for (int e = 0; e < Ne; e++)
     {
@@ -241,7 +247,7 @@ double dtmc_lc::E_m(observable Ob)
     //E += Epar.kard * Ob.IKun2;
 
     //E += -0.5 * (Epar.Cn * Ob.Tun2 + Epar.Cnp * Ob.Tun2p);
-    // + kard * Ob.IKun2;
+    // + kard * Ob.IKun2;00
     return E;
 }
 
@@ -336,11 +342,11 @@ std::vector<double> dtmc_lc::dAn2H_m(int index)
         // triangulation site to site vectors
         for (int k = 0; k < 3; k++)
         {
-            r_ij[k] = mesh[ind_j].R[k] - mesh[index].R[k];
-            r_ij0[k] = mesh[ind_j0].R[k] - mesh[index].R[k];
-            r_ij2[k] = mesh[ind_j2].R[k] - mesh[index].R[k];
-            r_jj0[k] = mesh[ind_j0].R[k] - mesh[ind_j].R[k];
-            r_jj2[k] = mesh[ind_j2].R[k] - mesh[ind_j].R[k];
+            r_ij[k] = mesh[index].R[k] - mesh[ind_j].R[k];
+            r_ij0[k] = mesh[index].R[k] - mesh[ind_j0].R[k];
+            r_ij2[k] = mesh[index].R[k] - mesh[ind_j2].R[k];
+            r_jj0[k] = mesh[ind_j].R[k] - mesh[ind_j0].R[k];
+            r_jj2[k] = mesh[ind_j].R[k] - mesh[ind_j2].R[k];
         }
         // site-site distance
         l_ij = std::sqrt(innerproduct(r_ij, r_ij));
@@ -376,8 +382,9 @@ std::vector<double> dtmc_lc::dAn2H_m(int index)
     dAn2H[0] = sigma_i;
     dAn2H[1] = std::sqrt(innerproduct(dH_i, dH_i));
     // find the sign of H by comparing with local normal
-    if(innerproduct(dH_i,mesh[index].n)<0){
-        dAn2H[1] *=-1;
+    if (innerproduct(dH_i, mesh[index].n) < 0)
+    {
+        dAn2H[1] *= -1;
     }
     return dAn2H;
 }

@@ -13,6 +13,7 @@ struct observable
     double E;
     // geometric
     double I2H2; // integral of dA (2H)^2
+    double TphiH2; // sum of phiH*phiH for near-site beads
     double I2H2dis; // integral of dA (2H - 2H0)^2, dis = displacement, where 2H0 = phiH*C0
     double phiH_sum; // sum of phiH
     double IK;   // integral of dA(K)
@@ -26,12 +27,13 @@ struct observable
     // miscellany, not directly related to system energy
     double IdA;   // integral of dA
     double I2H;   // integral of dA(2H)
-    int Bond_num; // total number of bonds
+    int Bond_num; // total number of bonds0
 };
 //hamiltonion parameters
 struct E_parameter
 {
     double kar;  // mean curvature bending stiffness
+    double J; // side-side phiH field Ising-like intereaction
     double C0; // spontaneous absolute mean curvature (introduced by the hooping of short rods)
     double karg; // Gaussian curvature bending stiffness
     double lam;  // line tension coefficient

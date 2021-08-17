@@ -22,14 +22,15 @@ int main(int argc, char const *argv[])
     Ne = std::atoi(argv[3]);
     E_parameter Epar;
     Epar.kar = std::atof(argv[4]);
-    Epar.C0 = std::atof(argv[5]);
-    Epar.karg = std::atof(argv[6]);
-    Epar.lam = std::atof(argv[7]);
-    Epar.Kd = std::atof(argv[8]);
+    Epar.J = std::atof(argv[5]);
+    Epar.C0 = std::atof(argv[6]);
+    Epar.karg = std::atof(argv[7]);
+    Epar.lam = std::atof(argv[8]);
+    Epar.Kd = std::atof(argv[9]);
     //Epar.Ksb = std::atof(argv[6]);
     //Epar.Kt = std::atof(argv[7]);
-    Epar.q = std::atof(argv[9]);
-    Epar.Cn = std::atof(argv[10]);
+    Epar.q = std::atof(argv[10]);
+    Epar.Cn = std::atof(argv[11]);
     //Epar.kard = std::atof(argv[10]);
     //Epar.lamd = std::atof(argv[11]);
 
@@ -39,8 +40,8 @@ int main(int argc, char const *argv[])
 
     dtmc_lc membrane(beta, N, imod, Ne, d0, l0, Epar);
     N = membrane.mesh.size();
-    std::string finfo = "N" + std::to_string(N) + "_imod" + std::string(argv[2]) + "_Ne" + std::string(argv[3]) + "_kar" + std::string(argv[4])+ "_C0" + std::string(argv[5]) + "_karg" + std::string(argv[6]) + "_lam" + std::string(argv[7]) + "_Kd" + std::string(argv[8]) + "_q" + std::string(argv[9]) + "_Cn" + std::string(argv[10]);
-    if (argc == 12)
+    std::string finfo = "N" + std::to_string(N) + "_imod" + std::string(argv[2]) + "_Ne" + std::string(argv[3]) + "_kar" + std::string(argv[4])+ "_J"+ std::string(argv[5])+ "_C0" + std::string(argv[6]) + "_karg" + std::string(argv[7]) + "_lam" + std::string(argv[8]) + "_Kd" + std::string(argv[9]) + "_q" + std::string(argv[10]) + "_Cn" + std::string(argv[11]);
+    if (argc == 13)
     {
         // use "prog name par* local" for local running
         // used for local running!
@@ -49,12 +50,12 @@ int main(int argc, char const *argv[])
 
         membrane.State_write(folder + "/State_" + finfo + "_init.csv");
         membrane.Thermal(10, int(N / (delta_s * delta_s)) + 1, 1, delta_s, delta_theta);
-        membrane.O_MC_measure(20, 5, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, folder, finfo);
+        membrane.O_MC_measure(100, 5, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, folder, finfo);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 
         return 0;
     }
-    else if (argc == 11)
+    else if (argc == 12)
     {
         // ccv running
         folder = "/users/lding3/scratch";

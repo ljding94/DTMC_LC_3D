@@ -124,6 +124,8 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
             Ob_sys.Tp2uu += 0.5 * p2uu_m(i, mesh[i].nei[j]);
             Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
             //Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
+            // Ising-like phiH field interaction
+            Ob_sys.TphiH2 += 0.5 * mesh[i].phiH*mesh[mesh[i].nei[j]].phiH;
         }
         // coupling related
         Ob_sys.Tun2 += mesh[i].un2;
@@ -133,7 +135,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
         Ob_sys.I2H += mesh[i].dAn2H[1] * mesh[i].dAn2H[0];
     }
     //Ob_sys.E = 0.5 * Epar.Cn * (N - Np) + 0.5 * Epar.Cn * Np;
-    Ob_sys.E = 0.5 * Epar.Cn * N;
+    Ob_sys.E = 0.5 * Epar.Cn * N; // offset tilt energy
     Ob_sys.E += E_m(Ob_sys);
 
     // set random number generators
@@ -723,6 +725,7 @@ void dtmc_lc::Ob_init(observable &Ob)
 {
     Ob.E = 0;
     Ob.I2H2 = 0;
+    Ob.TphiH2 = 0;
     Ob.I2H2dis = 0;
     Ob.IK = 0;
     Ob.Les.resize(Ne);
