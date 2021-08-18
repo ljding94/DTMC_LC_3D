@@ -37,8 +37,8 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
 
     #x,y,z,sx,sy,sz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:18]
-    x,y,z,sx,sy,sz,phiH,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:15]
-    ns = np.transpose(data[15:])
+    x,y,z,sx,sy,sz,nx,ny,nz,phiH,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:18]
+    ns = np.transpose(data[18:])
     #sx,sy,sz=d*sx,d*sy,d*sz
     #x,y,z,sx,sy,sz, enum, en0, en1 = data[5:14]
     x_min, x_max = np.min(x),np.max(x)

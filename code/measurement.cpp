@@ -234,7 +234,7 @@ double dtmc_lc::E_m(observable Ob)
     // Energy measurement for local Ob and global Ob_sys usage
     double E = 0;
     E += 0.5 * Epar.kar * Ob.I2H2dis;
-    E += -Epar.J * Ob.TphiH2;
+    E += - Epar.J * Ob.TphiH2;
     E += Epar.karg * Ob.IK;
     for (int e = 0; e < Ne; e++)
     {

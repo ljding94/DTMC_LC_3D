@@ -943,7 +943,7 @@ int dtmc_lc::hop_metropolis()
         ind_j = mesh[index].nei[j];
         local_TphiH_nei += mesh[ind_j].phiH;
     }
-    Er_old = Epar.kar * local_I2H2dis_old - Epar.J * mesh[index].phiH * local_TphiH_nei;
+    Er_old = 0.5 * Epar.kar * local_I2H2dis_old - Epar.J * mesh[index].phiH * local_TphiH_nei;
 
 #pragma endregion
 
@@ -953,7 +953,7 @@ int dtmc_lc::hop_metropolis()
 
 #pragma region : get after - update observables
     local_I2H2dis_new = mesh[index].dAn2H[0] * std::pow(mesh[index].dAn2H[1] - mesh[index].phiH * Epar.C0, 2);
-    Er_new = Epar.kar * local_I2H2dis_new - Epar.J * mesh[index].phiH * local_TphiH_nei;
+    Er_new = 0.5 * Epar.kar * local_I2H2dis_new - Epar.J * mesh[index].phiH * local_TphiH_nei;
 #pragma endregion
 
 #pragma region : Metropolis
