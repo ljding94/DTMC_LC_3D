@@ -49,7 +49,7 @@ int main(int argc, char const *argv[])
         folder = "../data/scratch_local";
 
         membrane.State_write(folder + "/State_" + finfo + "_init.csv");
-        membrane.Thermal(10, int(N / (delta_s * delta_s)) + 1, 1, delta_s, delta_theta);
+        membrane.Thermal(20, int(N / (delta_s * delta_s)) + 1, 1, delta_s, delta_theta);
         membrane.O_MC_measure(100, 5, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, folder, finfo);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 

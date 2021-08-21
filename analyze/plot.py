@@ -91,15 +91,16 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
                     y[j], y[int(ens[i, j])]], "-",linewidth=0.5, color=ecolors[int(enum[j])], alpha=alpha_xy[j])
                 ax_zx.plot([z[j], z[int(ens[i, j])]],[x[j], x[int(ens[i, j])]], "-",linewidth=2, color=ecolors[int(enum[j])], alpha=alpha_zx[j])
     # spin vector
+    ''''
     nu=find_nu(sx,sy,sz)
     #nu=[0,0,1]
     x_ave,y_ave,z_ave = np.average(x),np.average(y),np.average(z)
     D_ave = 3
     ax_xy.plot([x_ave-D_ave*nu[0],x_ave+D_ave*nu[0]],[y_ave-D_ave*nu[1],y_ave+D_ave*nu[1]],"-",linewidth=3.0,color="k")
     ax_zx.plot([z_ave-D_ave*nu[2],z_ave+D_ave*nu[2]],[x_ave-D_ave*nu[0],x_ave+D_ave*nu[0]],"-",linewidth=3.0,color="k")
-
     snu=sx*nu[0]+sy*nu[1]+sz*nu[2]
     snu=sz
+    '''
     #print(np.sqrt(un2)-np.absolute(snu))
     #deg = np.arccos(np.absolute(snu))
     norm=Normalize(vmin=0,vmax=0.5*np.pi)

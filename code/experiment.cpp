@@ -233,7 +233,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
         E_all.push_back(Ob_sys.E);
         I2H2_all.push_back(Ob_sys.I2H2);
-        phiH_sum_all.push_back(Ob_sys.phiH_sum);
+        phiH_sum_all.push_back(Ob_sys.IphiH);
         TphiH2_all.push_back(Ob_sys.TphiH2);
         I2H2dis_all.push_back(Ob_sys.I2H2dis);
         for (int e = 0; e < Ne; e++)

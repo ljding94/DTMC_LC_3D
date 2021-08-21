@@ -210,6 +210,7 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
 {
     Ob_sys.E += Ob_new.E - Ob_old.E;
     Ob_sys.I2H2 += Ob_new.I2H2 - Ob_old.I2H2;
+    Ob_sys.IphiH += Ob_new.IphiH - Ob_old.IphiH;
     Ob_sys.TphiH2 += Ob_new.TphiH2 - Ob_old.TphiH2;
     Ob_sys.I2H2dis += Ob_new.I2H2dis - Ob_old.I2H2dis;
     Ob_sys.IK += Ob_new.IK - Ob_old.IK;

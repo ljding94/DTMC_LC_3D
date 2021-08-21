@@ -20,14 +20,14 @@ def main():
 
     #foldername = "../data/Ne2/Apr29_2021" # kinda switch to Ne2 simulation for next paper
     #foldername = "../data/Ne1/May4_2021" # mobius strip~,
-    foldername = "../data/Ne2/Aug17_2021"
+    foldername = "../data/Ne2/Aug19_2021"
     print("analyzing "+foldername)
     N = 300
     imod=1 # 1 for rhombus, 2 disk, 3 cylinder, 4 for mobius strip
     Ne=1
     kar = 100
-    Js = np.arange(0.03,0.61,0.03)
-    C0s = np.arange(0.0,0.91,0.1)
+    Js = np.arange(0.20,4.01,0.20)
+    C0s = np.arange(0.0,0.51,0.1)
     karg = 0.0
     lam = 5.0
     Kd = 0.0
@@ -56,7 +56,7 @@ def main():
             pass
             Gij_stat_ana(foldername,pars[i],par_nm,par_dg,mode=mod, tau_c=6)
 
-        for J in Js[::1]:
+        for J in Js[::2]:
             if(i%1==0):
                 pass
                 filename = foldername + "/State_N%.0f_imod%.0f_Ne%.0f_kar%.0f_J%.2f_C0%.1f_karg%.1f_lam%.1f_Kd%.1f_q%.1f_Cn%.1f.csv" % (N, imod,Ne,kar,J,C0,karg,lam,Kd,q,Cn)

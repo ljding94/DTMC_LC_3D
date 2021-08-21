@@ -17,6 +17,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     // set energy related
     // geometric
     Epar.kar = Epar_.kar;
+    Epar.J = Epar_.J;
     Epar.C0 = Epar_.C0;
     Epar.karg = Epar_.karg;
     Epar.lam = Epar_.lam;
@@ -109,7 +110,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     for (int i = 0; i < mesh.size(); i++)
     {
         Ob_sys.I2H2 += mesh[i].dAn2H[0] * mesh[i].dAn2H[1] * mesh[i].dAn2H[1];
-        Ob_sys.phiH_sum += mesh[i].phiH;
+        Ob_sys.IphiH += mesh[i].phiH;
         Ob_sys.I2H2dis += mesh[i].dAn2H[0] * std::pow(mesh[i].dAn2H[1] - mesh[i].phiH * Epar.C0, 2);
         Ob_sys.IK += mesh[i].dAK;
         if (mesh[i].edge_num != -1)
@@ -725,6 +726,7 @@ void dtmc_lc::Ob_init(observable &Ob)
 {
     Ob.E = 0;
     Ob.I2H2 = 0;
+    Ob.IphiH = 0;
     Ob.TphiH2 = 0;
     Ob.I2H2dis = 0;
     Ob.IK = 0;

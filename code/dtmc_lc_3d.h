@@ -13,9 +13,9 @@ struct observable
     double E;
     // geometric
     double I2H2; // integral of dA (2H)^2
+    double IphiH; // sum of phiH
     double TphiH2; // sum of phiH*phiH for near-site beads
     double I2H2dis; // integral of dA (2H - 2H0)^2, dis = displacement, where 2H0 = phiH*C0
-    double phiH_sum; // sum of phiH
     double IK;   // integral of dA(K)
     std::vector<double> Les;
     //std::vector<double> Leuns; // edge length couples with u cdot t (edge tangent)

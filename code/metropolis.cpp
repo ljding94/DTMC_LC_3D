@@ -964,7 +964,7 @@ int dtmc_lc::hop_metropolis()
         Ob_sys.I2H2dis += local_I2H2dis_new - local_I2H2dis_old;
         Ob_sys.E += Er_new - Er_old;
         Ob_sys.TphiH2 += 2 * mesh[index].phiH * local_TphiH_nei;
-        Ob_sys.phiH_sum += 2 * mesh[index].phiH;
+        Ob_sys.IphiH += 2 * mesh[index].phiH;
 
         return 1;
     }
