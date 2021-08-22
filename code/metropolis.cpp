@@ -922,12 +922,16 @@ int dtmc_lc::swap_metropolis()
 
 int dtmc_lc::hop_metropolis()
 {
+    // hop update changes the relative density of short rods on the outside vs. inside
+    // the density related parameter phi continuously take (-1,1)
     // notice this update is local (for now, without interaction Aug13_2021)
 #pragma region : variable declaration
     // vertex info related,
     int index, ind_j;
+    double phi_old, phi_new;
+    double local_IKphi2_old, local_IKphi2_new;
     double local_I2H2dis_old, local_I2H2dis_new; // only affected variables
-    double local_TphiH_nei;
+    double local_Tphi_nei;
     double Er_old, Er_new;
 #pragma endregion
 
@@ -936,24 +940,27 @@ int dtmc_lc::hop_metropolis()
 #pragma endregion
 
 #pragma region : store observable of affected beads
-    local_I2H2dis_old = mesh[index].dAn2H[0] * std::pow(mesh[index].dAn2H[1] - mesh[index].phiH * Epar.C0, 2);
-    local_TphiH_nei = 0;
+    phi_old = mesh[index].phi;
+    local_I2H2dis_old = mesh[index].dAn2H[0] * std::pow(mesh[index].dAn2H[1] - mesh[index].phi * Epar.C0, 2);
+    local_IKphi2_old = mesh[index].dAK * mesh[index].phi * mesh[index].phi;
+    local_Tphi_nei = 0;
     for (int j = 0; j < mesh[index].nei.size(); j++)
     {
         ind_j = mesh[index].nei[j];
-        local_TphiH_nei += mesh[ind_j].phiH;
+        local_Tphi_nei += mesh[ind_j].phi;
     }
-    Er_old = 0.5 * Epar.kar * local_I2H2dis_old - Epar.J * mesh[index].phiH * local_TphiH_nei;
+    Er_old = 0.5 * Epar.kar * local_I2H2dis_old + Epar.karg * local_IKphi2_old - Epar.J * mesh[index].phi * local_Tphi_nei;
 
 #pragma endregion
 
 #pragma region : hopping MC update proposal
-    mesh[index].phiH *= -1;
+    mesh[index].phi = 2*rand_uni(gen)-1; //randomly set within (-1,1)
 #pragma endregion
 
 #pragma region : get after - update observables
-    local_I2H2dis_new = mesh[index].dAn2H[0] * std::pow(mesh[index].dAn2H[1] - mesh[index].phiH * Epar.C0, 2);
-    Er_new = 0.5 * Epar.kar * local_I2H2dis_new - Epar.J * mesh[index].phiH * local_TphiH_nei;
+    local_I2H2dis_new = mesh[index].dAn2H[0] * std::pow(mesh[index].dAn2H[1] - mesh[index].phi * Epar.C0, 2);
+    local_IKphi2_new = mesh[index].dAK * mesh[index].phi * mesh[index].phi;
+    Er_new = 0.5 * Epar.kar * local_I2H2dis_new + Epar.karg * local_IKphi2_new - Epar.J * mesh[index].phi * local_Tphi_nei;
 #pragma endregion
 
 #pragma region : Metropolis
@@ -962,16 +969,17 @@ int dtmc_lc::hop_metropolis()
     {
         // [accepted]
         Ob_sys.I2H2dis += local_I2H2dis_new - local_I2H2dis_old;
+        Ob_sys.IKphi2 += local_IKphi2_new - local_IKphi2_old;
         Ob_sys.E += Er_new - Er_old;
-        Ob_sys.TphiH2 += 2 * mesh[index].phiH * local_TphiH_nei;
-        Ob_sys.IphiH += 2 * mesh[index].phiH;
+        Ob_sys.Tphi2 += (mesh[index].phi - phi_old) * local_Tphi_nei;
+        Ob_sys.Iphi += mesh[index].phi - phi_old;
 
         return 1;
     }
     else
     {
         // [rejected]
-        mesh[index].phiH *= -1;
+        mesh[index].phi = phi_old;
         return 0;
     }
 #pragma endregion

@@ -13,10 +13,11 @@ struct observable
     double E;
     // geometric
     double I2H2; // integral of dA (2H)^2
-    double IphiH; // sum of phiH
-    double TphiH2; // sum of phiH*phiH for near-site beads
-    double I2H2dis; // integral of dA (2H - 2H0)^2, dis = displacement, where 2H0 = phiH*C0
+    double Iphi; // sum of phi
+    double Tphi2; // sum of phi*phi for near sites
+    double I2H2dis; // integral of dA (2H - 2H0)^2, dis = displacement, where 2H0 = phi*C0
     double IK;   // integral of dA(K)
+    double IKphi2; // integral of dA(K*phi^2)
     std::vector<double> Les;
     //std::vector<double> Leuns; // edge length couples with u cdot t (edge tangent)
     // crystalline
@@ -33,7 +34,7 @@ struct observable
 struct E_parameter
 {
     double kar;  // mean curvature bending stiffness
-    double J; // side-side phiH field Ising-like intereaction
+    double J; // side-side phi field Ising-like intereaction
     double C0; // spontaneous absolute mean curvature (introduced by the hooping of short rods)
     double karg; // Gaussian curvature bending stiffness
     double lam;  // line tension coefficient
@@ -64,8 +65,8 @@ struct vertex
     // neighbors form edge with this one (if exist)
 
     // measurement related
-    int phiH;  // local 2H0 = phiH*C0, phiH=\pm 1
-    // interaction among phiH field can be added as need
+    double phi;  // local 2H0 = phi*C0, phi\in (-1,1) // also karg phi
+    // interaction among phi field can be added as need
     std::vector<double> dAn2H; // in bulk: (dA, 2H), on edge (0,0)
     // energy related (directly)
     double ds; // beads in bulk: 0 , beads on edge 0.5*(l_{i+}+l_{i-})

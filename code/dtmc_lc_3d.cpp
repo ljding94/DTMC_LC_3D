@@ -89,8 +89,8 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
 
     for (int i = 0; i < mesh.size(); i++)
     {
-        // set phiH field
-        mesh[i].phiH = 1;
+        // set phi field
+        mesh[i].phi = 0;
         // vertex info measurement
         mesh[i].n = n_m(i);
         mesh[i].dAn2H = dAn2H_m(i);
@@ -110,9 +110,10 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     for (int i = 0; i < mesh.size(); i++)
     {
         Ob_sys.I2H2 += mesh[i].dAn2H[0] * mesh[i].dAn2H[1] * mesh[i].dAn2H[1];
-        Ob_sys.IphiH += mesh[i].phiH;
-        Ob_sys.I2H2dis += mesh[i].dAn2H[0] * std::pow(mesh[i].dAn2H[1] - mesh[i].phiH * Epar.C0, 2);
+        Ob_sys.Iphi += mesh[i].phi;
+        Ob_sys.I2H2dis += mesh[i].dAn2H[0] * std::pow(mesh[i].dAn2H[1] - mesh[i].phi * Epar.C0, 2);
         Ob_sys.IK += mesh[i].dAK;
+        Ob_sys.IKphi2 += mesh[i].dAK*mesh[i].phi*mesh[i].phi;
         if (mesh[i].edge_num != -1)
         {
             Ob_sys.Les[mesh[i].edge_num] += mesh[i].ds;
@@ -125,8 +126,8 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
             Ob_sys.Tp2uu += 0.5 * p2uu_m(i, mesh[i].nei[j]);
             Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
             //Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
-            // Ising-like phiH field interaction
-            Ob_sys.TphiH2 += 0.5 * mesh[i].phiH*mesh[mesh[i].nei[j]].phiH;
+            // Ising-like phi field interaction
+            Ob_sys.Tphi2 += 0.5 * mesh[i].phi*mesh[mesh[i].nei[j]].phi;
         }
         // coupling related
         Ob_sys.Tun2 += mesh[i].un2;
@@ -726,10 +727,11 @@ void dtmc_lc::Ob_init(observable &Ob)
 {
     Ob.E = 0;
     Ob.I2H2 = 0;
-    Ob.IphiH = 0;
-    Ob.TphiH2 = 0;
+    Ob.Iphi = 0;
+    Ob.Tphi2 = 0;
     Ob.I2H2dis = 0;
     Ob.IK = 0;
+    Ob.IKphi2 = 0;
     Ob.Les.resize(Ne);
     for (int e = 0; e < Ne; e++)
     {

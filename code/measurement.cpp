@@ -174,8 +174,9 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         ind = ind_relate[i];
         // geometric terms
         Ob.I2H2 += mesh[ind].dAn2H[0] * mesh[ind].dAn2H[1] * mesh[ind].dAn2H[1];
-        Ob.I2H2dis += mesh[ind].dAn2H[0] * std::pow(mesh[ind].dAn2H[1] - mesh[ind].phiH * Epar.C0, 2);
+        Ob.I2H2dis += mesh[ind].dAn2H[0] * std::pow(mesh[ind].dAn2H[1] - mesh[ind].phi * Epar.C0, 2);
         Ob.IK += mesh[ind].dAK;
+        Ob.IKphi2 += mesh[ind].dAK*mesh[ind].phi*mesh[ind].phi;
         if (mesh[ind].edge_num != -1)
         {
             Ob.Les[mesh[ind].edge_num] += mesh[ind].ds;
@@ -196,8 +197,8 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         ind_j = bond_relate[i].second;
         Ob.Tp2uu += p2uu_m(ind_i, ind_j);
         Ob.Tuuc += uuc_m(ind_i, ind_j);
-        // also, Ising-like phiH field tems
-        Ob.TphiH2 += mesh[ind_i].phiH * mesh[ind_j].phiH;
+        // also, Ising-like phi field tems
+        Ob.Tphi2 += mesh[ind_i].phi * mesh[ind_j].phi;
         // use new LC energy that seperate twist from the splay and bend
         //Ob.Tuusb += uusb_m(ind_i, ind_j);
         //Ob.Tuut += uut_m(ind_i, ind_j);
@@ -210,10 +211,11 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
 {
     Ob_sys.E += Ob_new.E - Ob_old.E;
     Ob_sys.I2H2 += Ob_new.I2H2 - Ob_old.I2H2;
-    Ob_sys.IphiH += Ob_new.IphiH - Ob_old.IphiH;
-    Ob_sys.TphiH2 += Ob_new.TphiH2 - Ob_old.TphiH2;
+    Ob_sys.Iphi += Ob_new.Iphi - Ob_old.Iphi;
+    Ob_sys.Tphi2 += Ob_new.Tphi2 - Ob_old.Tphi2;
     Ob_sys.I2H2dis += Ob_new.I2H2dis - Ob_old.I2H2dis;
     Ob_sys.IK += Ob_new.IK - Ob_old.IK;
+    Ob_sys.IKphi2 += Ob_new.IKphi2 - Ob_old.IKphi2;
     for (int e = 0; e < Ne; e++)
     {
         Ob_sys.Les[e] += Ob_new.Les[e] - Ob_old.Les[e];
@@ -235,8 +237,9 @@ double dtmc_lc::E_m(observable Ob)
     // Energy measurement for local Ob and global Ob_sys usage
     double E = 0;
     E += 0.5 * Epar.kar * Ob.I2H2dis;
-    E += - Epar.J * Ob.TphiH2;
-    E += Epar.karg * Ob.IK;
+    E += - Epar.J * Ob.Tphi2;
+    //E += Epar.karg * Ob.IK;
+    E += Epar.karg * Ob.IKphi2;
     for (int e = 0; e < Ne; e++)
     {
         E += Epar.lam * Ob.Les[e];

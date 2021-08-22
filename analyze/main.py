@@ -12,22 +12,23 @@ from test_plot import *
 def main():
     print("hello! dtmc_lc analysis")
 
-    #config_plot3D("../data/scratch_local/State_N200_imod1_Ne1_kar20_J2.0_C00.5_karg0.0_lam5.0_Kd0.0_q0.0_Cn0.0_init.csv",mesh=1,rod=0,fnormal=1)
+    config_plot3D("../data/scratch_local/State_N200_imod3_Ne2_kar20_J0.0_C00.3_karg5.0_lam5.0_Kd4.0_q1.0_Cn4.0_init.csv",mesh=1,rod=1,fnormal=0)
+    config_plot3D("../data/scratch_local/State_N200_imod3_Ne2_kar20_J0.0_C00.3_karg5.0_lam5.0_Kd4.0_q1.0_Cn4.0.csv",mesh=1,rod=1,fnormal=0)
     #config_plot3D("../data/scratch_local/State_N200_imod1_Ne1_kar20_J2.0_C00.5_karg0.0_lam5.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0,fnormal=0)
-    #config_plot3D("../data/Ne2/Aug4_2021_1/State_N300_imod3_Ne2_kar50_C00.0_karg0.0_lam8.0_Kd10.0_q2.0_Cn20.0.csv",mesh=1,rod=0)
+    #config_plot3D("../data/Ne2/Aug20_2021/State_N300_imod1_Ne1_kar100_J1.50_C00.6_karg0.0_lam5.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0,fnormal=1)
 
-    #return 0
+    return 0
 
     #foldername = "../data/Ne2/Apr29_2021" # kinda switch to Ne2 simulation for next paper
     #foldername = "../data/Ne1/May4_2021" # mobius strip~,
-    foldername = "../data/Ne2/Aug19_2021"
+    foldername = "../data/Ne2/Aug20_2021"
     print("analyzing "+foldername)
     N = 300
-    imod=1 # 1 for rhombus, 2 disk, 3 cylinder, 4 for mobius strip
-    Ne=1
+    imod=3 # 1 for rhombus, 2 disk, 3 cylinder, 4 for mobius strip
+    Ne=2
     kar = 100
-    Js = np.arange(0.20,4.01,0.20)
-    C0s = np.arange(0.0,0.51,0.1)
+    Js = np.arange(0.10,2.01,0.10)
+    C0s = np.arange(0.0,0.61,0.1)
     karg = 0.0
     lam = 5.0
     Kd = 0.0
@@ -51,10 +52,10 @@ def main():
     for i in range(len(pars)):
         print("analyzing",pars[i])
         N, imod, Ne, kar, J, C0, karg, lam, Kd, q, Cn = pars[i]
-        O_stat_ana(foldername,pars[i],par_nm,par_dg, mode=mod, CnequalsKc=0, tau_c=6)
+        #O_stat_ana(foldername,pars[i],par_nm,par_dg, mode=mod, CnequalsKc=0, tau_c=6)
         if(1):
             pass
-            Gij_stat_ana(foldername,pars[i],par_nm,par_dg,mode=mod, tau_c=6)
+            #Gij_stat_ana(foldername,pars[i],par_nm,par_dg,mode=mod, tau_c=6)
 
         for J in Js[::2]:
             if(i%1==0):

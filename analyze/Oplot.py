@@ -50,7 +50,7 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
     Le_err = np.sqrt(np.sum(np.power(Les_err,2),axis=0))
     Leun_ave = np.sum(Leuns_ave,axis=0)
     Leun_err = np.sqrt(np.sum(np.power(Leuns_err,2),axis=0))
-    IdA_ave, IdA_tau, IdA_err,I2H_ave, I2H_tau, I2H_err,I2H2_ave, I2H2_tau, I2H2_err, phiHp_ave,phiHp_tau,phiHp_err,phiH2p_ave,phiH2p_tau,phiH2p_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err,uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err = data[7+3*(Ne-1):37+3*(Ne-1)]
+    IdA_ave, IdA_tau, IdA_err,I2H_ave, I2H_tau, I2H_err,I2H2_ave, I2H2_tau, I2H2_err, phip_ave,phip_tau,phip_err,phi2p_ave,phi2p_tau,phi2p_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err,uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err = data[7+3*(Ne-1):37+3*(Ne-1)]
     uuc_grad,uuc_grad_err = [],[]
     un2_grad,un2_grad_err = [],[]
     cpar_tsqN = []
@@ -82,15 +82,21 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
         O_cpar_plot(axs[3,1], Le_ave_diff/Le_ave, Le_err_diff*0, O_label, "Le_diff/Le_ave", r"$|\left<\int_0 ds\right>-\left<\int_1 ds\right>|/sum$",cpar, colors, alphas)
         O_cpar_plot(axs[4,1], Ledif_ave/Le_ave, Ledif_ave*0, O_label, "Le_diff/Le_ave'", r"$\left<|\int_0 ds-\int_1 ds|\right>/sum$",cpar, colors, alphas)
         axs[4,1].set_xlabel(xLabel)
+        Lelong_ave = (Le_ave+Ledif_ave)/2
+        Leshort_ave = (Le_ave-Ledif_ave)/2
+        O_cpar_plot(axs[5,1], Lelong_ave, Lelong_ave*0, O_label, "max(L1,L2)", r"$max(L1,L2)$",cpar, colors, alphas)
+        axs[5,1].set_xlabel(xLabel)
+        O_cpar_plot(axs[6,1], Leshort_ave, Leshort_ave*0, O_label, "min(L1,L2)", r"$min(L1,L2)$",cpar, colors, alphas)
+        axs[6,1].set_xlabel(xLabel)
 
     O_cpar_plot(axs[3,0], IdA_ave, IdA_err, O_label, "IdA", r"$\int dA$",cpar, colors, alphas)
     O_cpar_plot(axs[4,0], I2H_ave, I2H_err, O_label, "I2H", r"$\int dA (2H)$",cpar, colors, alphas)
     print("I2H_ave-I2H2_ave",I2H_ave-I2H2_ave)
     O_cpar_plot(axs[5,0], I2H2_ave/(16*np.pi), I2H2_err/(16*np.pi), O_label, "I2H2", r"$\int dA (2H)^2/(16\pi)$",cpar, colors, alphas)
 
-    ## phiH and I2H2dis
-    O_cpar_plot(axs[6,0], phiHp_ave, phiHp_err, O_label, "phiHp", r"$\phi_H$",cpar, colors, alphas)
-    O_cpar_plot(axs[7,0], phiH2p_ave, phiH2p_err, O_label, "phiH2p", r"$\sum \phi_H\phi_H$",cpar, colors, alphas)
+    ## phi and I2H2dis
+    O_cpar_plot(axs[6,0], np.abs(phip_ave), phip_err, O_label, "phip", r"$|\phi_H|$",cpar, colors, alphas)
+    O_cpar_plot(axs[7,0], phi2p_ave, phi2p_err, O_label, "phi2p", r"$\sum \phi_H\phi_H$",cpar, colors, alphas)
     O_cpar_plot(axs[8,0], I2H2dis_ave, I2H2dis_err, O_label, "I2H2dis", r"$\int dA (2H-\phi_H C_0)^2$",cpar, colors, alphas)
 
     O_cpar_plot(axs[9,0], IK_ave, IK_err, O_label, "IK", r"$\int dA K$",cpar, colors, alphas)

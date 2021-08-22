@@ -26,8 +26,8 @@ void dtmc_lc::State_write(std::string filename)
         f << "imod=" << imod << "\n";
         f << "l0=" << l0 << "\n";
         f << "max_nei_size=" << max_nei_size << "\n";
-        f << "x,y,z,ux,uy,uz,nx,ny,nz,phiH,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
-        //f << "x,y,z,ux,uy,uz,phiH,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
+        f << "x,y,z,ux,uy,uz,nx,ny,nz,phi,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
+        //f << "x,y,z,ux,uy,uz,phi,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
         for (int i = 0; i < mesh.size(); i++)
         {
             f << "\n"
@@ -35,7 +35,7 @@ void dtmc_lc::State_write(std::string filename)
             f << "," << mesh[i].u[0] << "," << mesh[i].u[1] << ","
               << mesh[i].u[2];
             f << "," << mesh[i].n[0] << "," << mesh[i].n[1] << "," << mesh[i].n[2];
-            f << "," << mesh[i].phiH;
+            f << "," << mesh[i].phi;
             f << "," << mesh[i].dAn2H[0] << "," << mesh[i].dAn2H[1] << ","
               << mesh[i].ds << "," << mesh[i].dAK << "," << mesh[i].un2;
             f << "," << mesh[i].edge_num;
@@ -193,10 +193,11 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
 {
     std::vector<double> E_all;
     std::vector<double> I2H2_all;
-    std::vector<double> phiH_sum_all;
-    std::vector<double> TphiH2_all;
+    std::vector<double> phi_sum_all;
+    std::vector<double> Tphi2_all;
     std::vector<double> I2H2dis_all;
     std::vector<double> IK_all;
+    std::vector<double> IKphi2_all;
     std::vector<std::vector<double>> Les_all;
     Les_all.resize(Ne);
     std::vector<double> Tp2uu_all;
@@ -233,8 +234,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
         E_all.push_back(Ob_sys.E);
         I2H2_all.push_back(Ob_sys.I2H2);
-        phiH_sum_all.push_back(Ob_sys.IphiH);
-        TphiH2_all.push_back(Ob_sys.TphiH2);
+        phi_sum_all.push_back(Ob_sys.Iphi);
+        Tphi2_all.push_back(Ob_sys.Tphi2);
         I2H2dis_all.push_back(Ob_sys.I2H2dis);
         for (int e = 0; e < Ne; e++)
         {
@@ -246,6 +247,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         IdA_all.push_back(Ob_sys.IdA);
         I2H_all.push_back(Ob_sys.I2H);
         IK_all.push_back(Ob_sys.IK);
+        IKphi2_all.push_back(Ob_sys.IKphi2);
         Bond_num_all.push_back(Ob_sys.Bond_num);
 
         if (sweep_n % sweep_p_G == 0)
@@ -288,7 +290,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         //{
         //f << "Leuns[" << e << "],";
         //}
-        f << "IdA,I2H,I2H2,phiH_sum,TphiH2,I2H2dis,IK,Tp2uu,Tuuc,Bond_num,Tun2\n";
+        f << "IdA,I2H,I2H2,phi_sum,Tphi2,I2H2dis,IK,IKphi2,Tp2uu,Tuuc,Bond_num,Tun2\n";
         for (int i = 0; i < E_all.size(); i++)
         {
             f << E_all[i] << ",";
@@ -300,9 +302,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             //{
             //f << Leuns_all[e][i] << ",";
             //}
-            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << phiH_sum_all[i]<< "," << TphiH2_all[i] << "," << I2H2dis_all[i] << ","
-              << IK_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << ","
-              << Bond_num_all[i] << "," << Tun2_all[i] << "\n";
+            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << phi_sum_all[i]<< "," << Tphi2_all[i] << "," << I2H2dis_all[i] << ","<< IK_all[i] << ","<< IKphi2_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << ","<< Bond_num_all[i] << "," << Tun2_all[i] << "\n";
         }
     }
     f.close();
