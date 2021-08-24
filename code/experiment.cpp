@@ -175,7 +175,7 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
                 spin_metropolis(delta_theta);
                 bond_metropolis();
                 bond_metropolis();
-                hop_metropolis();
+                //hop_metropolis();
                 if (i % int(std::sqrt(N)) == 0)
                 {
                     edge_metropolis();
@@ -200,6 +200,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<double> IKphi2_all;
     std::vector<std::vector<double>> Les_all;
     Les_all.resize(Ne);
+    std::vector<std::vector<double>> Ik2s_all;
+    Ik2s_all.resize(Ne);
     std::vector<double> Tp2uu_all;
     std::vector<double> Tuuc_all;
     std::vector<double> Tun2_all;
@@ -226,7 +228,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             spin_accept += spin_metropolis(delta_theta);
             bond_accept += bond_metropolis();
             bond_accept += bond_metropolis();
-            hop_accept += hop_metropolis();
+            //hop_accept += hop_metropolis();
             if (i % int(std::sqrt(N)) == 0)
             {
                 edge_accept += edge_metropolis();
@@ -240,6 +242,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         for (int e = 0; e < Ne; e++)
         {
             Les_all[e].push_back(Ob_sys.Les[e]);
+            Ik2s_all[e].push_back(Ob_sys.Ik2s[e]);
         }
         Tp2uu_all.push_back(Ob_sys.Tp2uu);
         Tuuc_all.push_back(Ob_sys.Tuuc);
@@ -286,6 +289,10 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         {
             f << "Les[" << e << "],";
         }
+        for (int e = 0; e < Ne; e++)
+        {
+            f << "Ik2s[" << e << "],";
+        }
         //for (int e = 0; e < Ne; e++)
         //{
         //f << "Leuns[" << e << "],";
@@ -298,11 +305,15 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             {
                 f << Les_all[e][i] << ",";
             }
+            for (int e = 0; e < Ne; e++)
+            {
+                f << Ik2s_all[e][i] << ",";
+            }
             //for (int e = 0; e < Ne; e++)
             //{
             //f << Leuns_all[e][i] << ",";
             //}
-            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << phi_sum_all[i]<< "," << Tphi2_all[i] << "," << I2H2dis_all[i] << ","<< IK_all[i] << ","<< IKphi2_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << ","<< Bond_num_all[i] << "," << Tun2_all[i] << "\n";
+            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << phi_sum_all[i] << "," << Tphi2_all[i] << "," << I2H2dis_all[i] << "," << IK_all[i] << "," << IKphi2_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << "," << Bond_num_all[i] << "," << Tun2_all[i] << "\n";
         }
     }
     f.close();

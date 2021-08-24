@@ -155,6 +155,7 @@ void dtmc_lc::mesh_bead_info_update(std::vector<int> ind_relate)
         mesh[ind].n = n_m(ind);
         mesh[ind].dAn2H = dAn2H_m(ind); // signed H depends on n
         mesh[ind].ds = ds_m(ind);
+        mesh[ind].dsk2 = dsk2_m(ind);
         mesh[ind].dAK = dAK_m(ind);
         mesh[ind].un2 = un2_m(ind);
     }
@@ -176,10 +177,11 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         Ob.I2H2 += mesh[ind].dAn2H[0] * mesh[ind].dAn2H[1] * mesh[ind].dAn2H[1];
         Ob.I2H2dis += mesh[ind].dAn2H[0] * std::pow(mesh[ind].dAn2H[1] - mesh[ind].phi * Epar.C0, 2);
         Ob.IK += mesh[ind].dAK;
-        Ob.IKphi2 += mesh[ind].dAK*mesh[ind].phi*mesh[ind].phi;
+        Ob.IKphi2 += mesh[ind].dAK * mesh[ind].phi * mesh[ind].phi;
         if (mesh[ind].edge_num != -1)
         {
             Ob.Les[mesh[ind].edge_num] += mesh[ind].ds;
+            Ob.Ik2s[mesh[ind].edge_num] += mesh[ind].dsk2;
             //Ob.Leuns[mesh[ind].edge_num] += mesh[ind].ds * std::sqrt(mesh[ind].un2);
             //Ob.Leuns[mesh[ind].edge_num] += mesh[ind].ds * ut_m(ind);
         }
@@ -219,6 +221,7 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
     for (int e = 0; e < Ne; e++)
     {
         Ob_sys.Les[e] += Ob_new.Les[e] - Ob_old.Les[e];
+        Ob_sys.Ik2s[e] += Ob_new.Ik2s[e] - Ob_old.Ik2s[e];
         //Ob_sys.Leuns[e] += Ob_new.Leuns[e] - Ob_old.Leuns[e];
     }
     Ob_sys.Tp2uu += Ob_new.Tp2uu - Ob_old.Tp2uu;
@@ -237,12 +240,13 @@ double dtmc_lc::E_m(observable Ob)
     // Energy measurement for local Ob and global Ob_sys usage
     double E = 0;
     E += 0.5 * Epar.kar * Ob.I2H2dis;
-    E += - Epar.J * Ob.Tphi2;
+    E += -Epar.J * Ob.Tphi2;
     //E += Epar.karg * Ob.IK;
     E += Epar.karg * Ob.IKphi2;
     for (int e = 0; e < Ne; e++)
     {
         E += Epar.lam * Ob.Les[e];
+        E += Epar.B * Ob.Ik2s[e];
         //E += Epar.lamd * Ob.Leuns[e];
     }
     E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
@@ -281,6 +285,41 @@ double dtmc_lc::ds_m(int index)
         std::cout << "Le_l=" << Le_l << "\n";
     }
     return Le_l;
+}
+double dtmc_lc::dsk2_m(int index)
+{
+    if (mesh[index].edge_num == -1)
+    {
+        return 0;
+    }
+    /*
+    (j)===(i)===(k)
+    */
+    double cos_jk, theta_jk;
+    double l2_ji, l2_ik;
+    int ind_j, ind_k;
+    std::vector<double> r_ji{0, 0, 0};
+    std::vector<double> r_ik{0, 0, 0};
+    cos_jk = 0;
+    l2_ji = 0;
+    l2_ik = 0;
+    ind_j = mesh[index].edge_nei[0];
+    ind_k = mesh[index].edge_nei[1];
+    for (int k = 0; k < 3; k++)
+    {
+        r_ji[k] = mesh[index].R[k] - mesh[ind_j].R[k];
+        l2_ji += r_ji[k] * r_ji[k];
+        r_ik[k] = mesh[ind_k].R[k] - mesh[index].R[k];
+        l2_ik += r_ik[k] * r_ik[k];
+        cos_jk += r_ji[k] * r_ik[k];
+    }
+    cos_jk = cos_jk / (std::sqrt(l2_ji * l2_ik));
+    // make sure cos is not over the bound
+    cos_jk = std::min(cos_jk, 1.0);
+    cos_jk = std::max(cos_jk, -1.0);
+
+    theta_jk = std::acos(cos_jk);
+    return theta_jk * theta_jk / ds_m(index);
 }
 double dtmc_lc::ut_m(int index)
 { // director edge tangent,[don't think I use this anymore]

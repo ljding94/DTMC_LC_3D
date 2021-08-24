@@ -87,7 +87,18 @@ int dtmc_lc::bead_metropolis(double delta_s)
     {
         nei_ind = mesh[index].nei[j];
         distance2_cache = distance2(index, nei_ind);
-        if (distance2_cache - l0 * l0 >= 0)
+        if (mesh[index].edge_nei.size() != 0 &&
+            (nei_ind == mesh[index].edge_nei[0] ||
+             nei_ind == mesh[index].edge_nei[1]))
+        {
+            if (distance2_cache - l1 * l1 >= 0)
+            {
+                mesh[index].R = bead_relate[0].R;
+                // return previous position
+                return 0;
+            }
+        }
+        else if (distance2_cache - l0 * l0 >= 0)
         {
             mesh[index].R = bead_relate[0].R;
             // return previous position
@@ -264,9 +275,9 @@ int dtmc_lc::bond_metropolis()
     }
     // check edge_num, can't connect different edges
     // it has became unneseccery since no difference were observed
-    // TODO: however, it may help peserving topology, need to implement it for any two edge beads
     // conclusion on mobius strip, this condition is not useful
 
+    // still, helps perserving the topoloty
     // check for in-bulk bond bridging edges
     if ((mesh[ind_a].edge_num != -1) && (mesh[ind_b].edge_num != -1))
     {
@@ -468,12 +479,20 @@ int dtmc_lc::edge_metropolis()
         {
             return 0;
         }
+        // check distance, note the bond limit differes for on-edge and in-bulk bond
+        if (distance(ind_j, ind_k) >= l1 || distance(ind_i, ind_j) >= l0 ||
+            distance(ind_i, ind_k) >= l0)
+        {
+            return 0;
+        }
         // check distance
+        /*
         if (distance(ind_j, ind_k) >= l0 || distance(ind_i, ind_j) >= l0 ||
             distance(ind_i, ind_k) >= l0)
         {
             return 0;
         }
+        */
         /*if (distance(ind_j, ind_k) >= l1 || distance(ind_i, ind_j) >= l0 ||
             distance(ind_i, ind_k) >= l0) {
             return 0;
@@ -954,7 +973,7 @@ int dtmc_lc::hop_metropolis()
 #pragma endregion
 
 #pragma region : hopping MC update proposal
-    mesh[index].phi = 2*rand_uni(gen)-1; //randomly set within (-1,1)
+    mesh[index].phi = 2 * rand_uni(gen) - 1; //randomly set within (-1,1)
 #pragma endregion
 
 #pragma region : get after - update observables

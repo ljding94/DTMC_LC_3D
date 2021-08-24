@@ -31,7 +31,7 @@ def mean_filter(heat,ns):
     return mean_heat
 
 
-def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Format="pdf",lim=15,fix_index=None):
+def config_plot_xyz(filename,mesh=0,rod=1,phicolor=0,cvt_map="",cmap_smooth=0,tag="", Format="pdf",lim=15,fix_index=None):
     print("plotting",filename)
     ftail = "_xyz"
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
@@ -50,20 +50,22 @@ def config_plot_xyz(filename,mesh=0,rod=1,cvt_map="",cmap_smooth=0,tag="", Forma
     ens = np.array([en0, en1])
     fig = plt.figure(figsize=(10, 5))
     #ax_xy = fig.add_subplot(111, aspect="equal")
-    ax_xy = fig.add_subplot(121, aspect="equal")
-    ax_zx = fig.add_subplot(122, aspect="equal")
+    ax_xy = fig.add_subplot(121,aspect="equal")
+    ax_zx = fig.add_subplot(122,aspect="equal")
 
     # beads
-    phicmap = cm.get_cmap("PuOr")
-    phinorm=Normalize(vmin=-1,vmax=1)
-    ax_xy.scatter(x,y,c=phi,marker="o",cmap=phicmap,norm=phinorm)
-    #ax_xy.scatter(x[phi==1],y[phi==1],marker="o",facecolor="None",edgecolor="black")
-    ax_xy.scatter(z,x,c=phi,marker="o",cmap=phicmap,norm=phinorm)
-    #ax_zx.scatter(z[phi==1],x[phi==1],marker="o",facecolor="None",edgecolor="black")
-    phism=plt.cm.ScalarMappable(cmap=phicmap, norm=phinorm)
-    phism.set_array([])
-    phicbar=plt.colorbar(phism, ticks=[-1,-0.5,0,0.5,1])
-    phicbar.ax.set_title(r"$\phi$")
+    # phi field
+    if(phicolor):
+        phicmap = cm.get_cmap("PuOr")
+        phinorm=Normalize(vmin=-1,vmax=1)
+        ax_xy.scatter(x,y,c=phi,marker="o",cmap=phicmap,norm=phinorm)
+        #ax_xy.scatter(x[phi==1],y[phi==1],marker="o",facecolor="None",edgecolor="black")
+        ax_zx.scatter(z,x,c=phi,marker="o",cmap=phicmap,norm=phinorm)
+        #ax_zx.scatter(z[phi==1],x[phi==1],marker="o",facecolor="None",edgecolor="black")
+        phism=plt.cm.ScalarMappable(cmap=phicmap, norm=phinorm)
+        phism.set_array([])
+        phicbar=plt.colorbar(phism, ticks=[-1,-0.5,0,0.5,1])
+        phicbar.ax.set_title(r"$\phi$")
     # bulk bond
 
     # track bead ind #
@@ -143,7 +145,7 @@ def config_plot_xyz_seq(filename,Seq):
     for i in range(Seq):
         config_plot_xyz(filename[:-4]+"_%d.txt"%i,Format="png")
 
-def config_plot3D(filename,mesh=0,rod=0,fnormal=0,cvt_map="",cmap_smooth=0):
+def config_plot3D(filename,mesh=0,rod=0,phicolor=0,fnormal=0,cvt_map="",cmap_smooth=0):
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
     #x,y,z,sx,sy,sz,enum, en0, en1 = data[5:14]
 
@@ -170,16 +172,18 @@ def config_plot3D(filename,mesh=0,rod=0,fnormal=0,cvt_map="",cmap_smooth=0):
     fig = plt.figure(figsize=(5, 5))
     ax = plt.axes(projection="3d")
 
-    phicmap = cm.get_cmap("PuOr")
-    phinorm=Normalize(vmin=-1,vmax=1)
-    ax.scatter3D(x,y,z,c=phi,marker="o",cmap=phicmap,norm=phinorm,facecolor="None")
-    ax.plot3D([x[0],x[0]+3*nx[0]],[y[0],y[0]+3*ny[0]],[z[0],z[0]+3*nz[0]],"k-")
-    phism = plt.cm.ScalarMappable(cmap=phicmap, norm=phinorm)
-    phism.set_array([])
-    phicbar=plt.colorbar(phism, ticks=[-1,-0.5,0,0.5,1])
-    phicbar.ax.set_title(r"$\phi$")
-    #ax.scatter3D(x[phi==1],y[phi==1],z[phi==1],marker="o",facecolor="None",edgecolor="black")
-    #ax.scatter3D(x[phi==-1],y[phi==-1],z[phi==-1],marker="o",color="dimgray")
+    # phi field
+    if(phicolor):
+        phicmap = cm.get_cmap("PuOr")
+        phinorm=Normalize(vmin=-1,vmax=1)
+        ax.scatter3D(x,y,z,c=phi,marker="o",cmap=phicmap,norm=phinorm,facecolor="None")
+        ax.plot3D([x[0],x[0]+3*nx[0]],[y[0],y[0]+3*ny[0]],[z[0],z[0]+3*nz[0]],"k-")
+        phism = plt.cm.ScalarMappable(cmap=phicmap, norm=phinorm)
+        phism.set_array([])
+        phicbar=plt.colorbar(phism, ticks=[-1,-0.5,0,0.5,1])
+        phicbar.ax.set_title(r"$\phi$")
+        #ax.scatter3D(x[phi==1],y[phi==1],z[phi==1],marker="o",facecolor="None",edgecolor="black")
+        #ax.scatter3D(x[phi==-1],y[phi==-1],z[phi==-1],marker="o",color="dimgray")
 
     if(mesh):
         for i in range(len(ns)):

@@ -12,13 +12,14 @@ struct observable
     // total energy
     double E;
     // geometric
-    double I2H2; // integral of dA (2H)^2
-    double Iphi; // sum of phi
-    double Tphi2; // sum of phi*phi for near sites
-    double I2H2dis; // integral of dA (2H - 2H0)^2, dis = displacement, where 2H0 = phi*C0
-    double IK;   // integral of dA(K)
-    double IKphi2; // integral of dA(K*phi^2)
-    std::vector<double> Les;
+    double I2H2;              // integral of dA (2H)^2
+    double Iphi;              // sum of phi
+    double Tphi2;             // sum of phi*phi for near sites
+    double I2H2dis;           // integral of dA (2H - 2H0)^2, dis = displacement, where 2H0 = phi*C0
+    double IK;                // integral of dA(K)
+    double IKphi2;            // integral of dA(K*phi^2)
+    std::vector<double> Les;  // list of edge length
+    std::vector<double> Ik2s; // list of edge bending
     //std::vector<double> Leuns; // edge length couples with u cdot t (edge tangent)
     // crystalline
     double Tp2uu;
@@ -34,22 +35,16 @@ struct observable
 struct E_parameter
 {
     double kar;  // mean curvature bending stiffness
-    double J; // side-side phi field Ising-like intereaction
-    double C0; // spontaneous absolute mean curvature (introduced by the hooping of short rods)
+    double J;    // side-side phi field Ising-like intereaction
+    double C0;   // spontaneous absolute mean curvature (introduced by the hooping of short rods)
     double karg; // Gaussian curvature bending stiffness
     double lam;  // line tension coefficient
+    double B;    // edge bending moduli
     double Kd;   // liquid crystal interaction moduli
     //double Ksb;  // liquid crystalline interaction for splay and bend
     //double Kt;   //liquid crystalline interaction for the twist only
     double q;  // liquid crystall twist constant
     double Cn; // liquid crystal to membrane normal moduli
-    //double kard; // effective in-bulk depletion energy
-    //double lamd; // effective on-edge depletion energy
-
-    //double ms;  // mixture strength,
-    //double mr;  // mixture ratio, N mixture = mr*N
-    // on mixture strength:
-    // mixture: kar = ms*kar, lam=ms*lam, Kd_{i,j}=Kd*0.5*(1+ms) etc.
 };
 struct vertex
 {
@@ -65,11 +60,12 @@ struct vertex
     // neighbors form edge with this one (if exist)
 
     // measurement related
-    double phi;  // local 2H0 = phi*C0, phi\in (-1,1) // also karg phi
+    double phi; // local 2H0 = phi*C0, phi\in (-1,1) // also karg phi
     // interaction among phi field can be added as need
     std::vector<double> dAn2H; // in bulk: (dA, 2H), on edge (0,0)
     // energy related (directly)
-    double ds; // beads in bulk: 0 , beads on edge 0.5*(l_{i+}+l_{i-})
+    double ds;   // beads in bulk: 0 , beads on edge 0.5*(l_{i+}+l_{i-})
+    double dsk2; // edge bending
     // double dskg; // in bulk: 0, on edge: kg*ds
     double dAK; // in bulk: K*dA, on edge: 0
     double un2; // local un2
@@ -86,7 +82,8 @@ public:
     int imod;    // mode for initialization shape
     int Ne;      // number of edges
     // also used to set fixed distance betwen two beads
-    double l0; // tether maximum length
+    double l0; // in-bulk tether maximum length
+    double l1; // on-edge tether maximum length
 
     // system configuration
 
@@ -118,7 +115,7 @@ public:
     std::uniform_real_distribution<> rand_uni; // uniform distribution
 
     // initialization
-    dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0_, E_parameter Epar_);
+    dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0_, double l1_, E_parameter Epar_);
     //double kar_, double lam_, double Kd_, double Kt_, double Cn_,double kard_);
 
     // put the beads and bonds in to position accordingly
@@ -139,19 +136,20 @@ public:
 
     // local energy-related measurement
     // _m stand for measurement
-    double ds_m(int index);                 // length of the local edge index
+    double ds_m(int index);                 // length of the local edge bead
+    double dsk2_m(int index);               // edge bending of local edge bead ds(index) needed
     double ut_m(int index);                 // director edge tangent sine angle
     std::vector<double> dAn2H_m(int index); // measure and set dA and |2H|
 
-    double dAK_m(int index);                // K*dA measure the gauss curvature
-    double dskg_m(int index);               // kg*ds, for gaussian
-    std::vector<double> n_m(int index);     // surface normal
-    double p2uu_m(int ind_i, int ind_j);    // spin spin interaction of i and j
-    double uuc_m(int ind_i, int ind_j);     // spin twist interaction of i and j
-    double uusb_m(int ind_i, int ind_j);    // splay bend interaction of i and j
-    double uut_m(int ind_i, int ind_j);     // twist interaction of i and j
-    double un2_m(int index);                // spin normal interaction of i
-    double dEgeo_m(int index);              // energy of the local vertex
+    double dAK_m(int index);             // K*dA measure the gauss curvature
+    double dskg_m(int index);            // kg*ds, for gaussian
+    std::vector<double> n_m(int index);  // surface normal
+    double p2uu_m(int ind_i, int ind_j); // spin spin interaction of i and j
+    double uuc_m(int ind_i, int ind_j);  // spin twist interaction of i and j
+    double uusb_m(int ind_i, int ind_j); // splay bend interaction of i and j
+    double uut_m(int ind_i, int ind_j);  // twist interaction of i and j
+    double un2_m(int index);             // spin normal interaction of i
+    double dEgeo_m(int index);           // energy of the local vertex
 
     // Gyration tensor measurement
     std::vector<double> Gij_m();

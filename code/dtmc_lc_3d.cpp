@@ -5,7 +5,7 @@
 #define PI 3.14159265358979323846
 
 // initialization
-dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0_, E_parameter Epar_)
+dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0_, double l1_, E_parameter Epar_)
 {
     // system related
     beta = beta_;
@@ -13,6 +13,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     imod = imod_;
     Ne = Ne_;
     l0 = l0_; // sigma0 is always 1;
+    l1 = l1_;
 
     // set energy related
     // geometric
@@ -21,6 +22,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     Epar.C0 = Epar_.C0;
     Epar.karg = Epar_.karg;
     Epar.lam = Epar_.lam;
+    Epar.B = Epar_.B;
     // orientational
     Epar.Kd = Epar_.Kd;
     //Epar.Ksb = Epar_.Ksb;
@@ -90,11 +92,12 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     for (int i = 0; i < mesh.size(); i++)
     {
         // set phi field
-        mesh[i].phi = 0;
+        mesh[i].phi = 1;
         // vertex info measurement
         mesh[i].n = n_m(i);
         mesh[i].dAn2H = dAn2H_m(i);
         mesh[i].ds = ds_m(i);
+        mesh[i].dsk2 = dsk2_m(i);
         mesh[i].un2 = un2_m(i);
         mesh[i].dAK = dAK_m(i);
     }
@@ -113,10 +116,11 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
         Ob_sys.Iphi += mesh[i].phi;
         Ob_sys.I2H2dis += mesh[i].dAn2H[0] * std::pow(mesh[i].dAn2H[1] - mesh[i].phi * Epar.C0, 2);
         Ob_sys.IK += mesh[i].dAK;
-        Ob_sys.IKphi2 += mesh[i].dAK*mesh[i].phi*mesh[i].phi;
+        Ob_sys.IKphi2 += mesh[i].dAK * mesh[i].phi * mesh[i].phi;
         if (mesh[i].edge_num != -1)
         {
             Ob_sys.Les[mesh[i].edge_num] += mesh[i].ds;
+            Ob_sys.Ik2s[mesh[i].edge_num] += mesh[i].dsk2;
             //Ob_sys.Leuns[mesh[i].edge_num] += mesh[i].ds * std::sqrt(mesh[i].un2);
         }
         // crystalline energy related
@@ -127,7 +131,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
             Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
             //Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
             // Ising-like phi field interaction
-            Ob_sys.Tphi2 += 0.5 * mesh[i].phi*mesh[mesh[i].nei[j]].phi;
+            Ob_sys.Tphi2 += 0.5 * mesh[i].phi * mesh[mesh[i].nei[j]].phi;
         }
         // coupling related
         Ob_sys.Tun2 += mesh[i].un2;
@@ -568,7 +572,6 @@ void dtmc_lc::init_mobius_shape(double d0_)
             mesh[i].R[1] = (R + d0_ * w * std::cos(del_theta / 2 * t)) * std::sin(del_theta * t);
             mesh[i].R[2] = w * std::sin(del_theta / 2 * t);
 
-            //TODO: implement below putting bond code
             // put bonds
             if (wn == 0)
             {
@@ -682,14 +685,11 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
             std::cout << "b1-b2 not connected, big issue on connection\n";
             continue;
         }
-        /* no longer necessary
         if (if_near_edge(b1) || if_near_edge(b2))
         {
             // if b1 or b2 is near another edge, can't use them
-            // TODO: this line of code can be optimized
             continue;
         }
-        */
         else
         { // found the b1 b2 candidate
             break;
@@ -733,9 +733,11 @@ void dtmc_lc::Ob_init(observable &Ob)
     Ob.IK = 0;
     Ob.IKphi2 = 0;
     Ob.Les.resize(Ne);
+    Ob.Ik2s.resize(Ne);
     for (int e = 0; e < Ne; e++)
     {
         Ob.Les[e] = 0;
+        Ob.Ik2s[e] = 0;
     }
     Ob.Tp2uu = 0;
     Ob.Tuuc = 0;
