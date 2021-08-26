@@ -246,7 +246,7 @@ double dtmc_lc::E_m(observable Ob)
     for (int e = 0; e < Ne; e++)
     {
         E += Epar.lam * Ob.Les[e];
-        E += Epar.B * Ob.Ik2s[e];
+        E += 0.5 * Epar.B * Ob.Ik2s[e];
         //E += Epar.lamd * Ob.Leuns[e];
     }
     E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
@@ -319,7 +319,7 @@ double dtmc_lc::dsk2_m(int index)
     cos_jk = std::max(cos_jk, -1.0);
 
     theta_jk = std::acos(cos_jk);
-    return theta_jk * theta_jk / ds_m(index);
+    return theta_jk * theta_jk / mesh[index].ds;
 }
 double dtmc_lc::ut_m(int index)
 { // director edge tangent,[don't think I use this anymore]

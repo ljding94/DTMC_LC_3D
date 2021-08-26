@@ -19,7 +19,8 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
     Ne = par[find_cpar_ind(par_nm,"Ne")]
 
     Les_ave, Les_tau, Les_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
-    Leuns_ave, Leuns_tau, Leuns_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
+    #Leuns_ave, Leuns_tau, Leuns_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
+    Ik2s_ave, Ik2s_tau, Ik2s_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
     IdA_ave, IdA_tau, IdA_err = [], [], []
     I2H_ave, I2H_tau, I2H_err = [], [], []
     I2H2_ave, I2H2_tau, I2H2_err = [], [], []
@@ -57,7 +58,9 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
         E = data[0]/N
         Les = data[1:1+Ne]
         #Leuns = data[1+Ne:1+2*Ne]
-        IdA,I2H,I2H2,phi,Tphi2,I2H2dis,IK,IKphi2,Tp2uu,Tuuc,Bond_num,Tun2 = data[1+Ne:]
+        Ik2s = data[1+Ne:1+2*Ne]
+        #IdA,I2H,I2H2,phi,Tphi2,I2H2dis,IK,IKphi2,Tp2uu,Tuuc,Bond_num,Tun2 = data[1+Ne:]
+        IdA,I2H,I2H2,phi,Tphi2,I2H2dis,IK,IKphi2,Tp2uu,Tuuc,Bond_num,Tun2 = data[1+2*Ne:]
         phip = phi/N
         phi2p = Tphi2/Bond_num
         p2uu = Tp2uu/Bond_num

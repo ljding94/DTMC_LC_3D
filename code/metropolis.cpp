@@ -87,6 +87,15 @@ int dtmc_lc::bead_metropolis(double delta_s)
     {
         nei_ind = mesh[index].nei[j];
         distance2_cache = distance2(index, nei_ind);
+        /*
+        if (distance2_cache - l0 * l0 >= 0)
+        {
+            mesh[index].R = bead_relate[0].R;
+            // return previous position
+            return 0;
+        }
+        */
+        // used when there are two tether length limit
         if (mesh[index].edge_nei.size() != 0 &&
             (nei_ind == mesh[index].edge_nei[0] ||
              nei_ind == mesh[index].edge_nei[1]))
@@ -427,6 +436,7 @@ int dtmc_lc::bond_metropolis()
 int dtmc_lc::edge_metropolis()
 {
     std::vector<int> ind_relate;
+    int indi_edge_num_old;
     std::vector<vertex> bead_relate;
     std::vector<std::pair<int, int>> bond_relate_old, bond_relate_new;
 
@@ -480,23 +490,24 @@ int dtmc_lc::edge_metropolis()
             return 0;
         }
         // check distance, note the bond limit differes for on-edge and in-bulk bond
+        /*
         if (distance(ind_j, ind_k) >= l1 || distance(ind_i, ind_j) >= l0 ||
             distance(ind_i, ind_k) >= l0)
         {
             return 0;
         }
-        // check distance
+        */
+        // check distance, no l1 case
         /*
-        if (distance(ind_j, ind_k) >= l0 || distance(ind_i, ind_j) >= l0 ||
-            distance(ind_i, ind_k) >= l0)
+        if (distance(ind_j, ind_k) >= l0)
         {
             return 0;
         }
         */
-        /*if (distance(ind_j, ind_k) >= l1 || distance(ind_i, ind_j) >= l0 ||
+        if (distance(ind_j, ind_k) >= l1 || distance(ind_i, ind_j) >= l0 ||
             distance(ind_i, ind_k) >= l0) {
             return 0;
-        }*/
+        }
         // check # nei, can't be greater than 9
         if (mesh[ind_j].nei.size() >= 9 || mesh[ind_k].nei.size() >= 9)
         {
@@ -529,6 +540,7 @@ int dtmc_lc::edge_metropolis()
 #pragma endregion
 
 #pragma region : [shrink] store observables of affected beads
+        indi_edge_num_old = mesh[ind_i].edge_num;
         Ob_relate_old = Ob_m(ind_relate, bond_relate_old);
 #pragma endregion
 // neighbors are also sorted during the energy calculation
@@ -536,6 +548,8 @@ int dtmc_lc::edge_metropolis()
 // [update]
 #pragma region : [shrink] edge update
         mesh[ind_i].edge_nei.clear();
+        mesh[ind_i].edge_num=-1;
+        // no worries, already stored this one
 
         j_e_nei_i = list_a_nei_b(mesh[ind_j].edge_nei, ind_i);
         if (j_e_nei_i != 1)
@@ -595,7 +609,7 @@ int dtmc_lc::edge_metropolis()
             k_nei_j = k_nei_i;
         }
 
-        if (mesh[ind_i].edge_nei.size() != 0)
+        if (mesh[ind_i].edge_nei.size() != 0 || mesh[ind_i].edge_num != -1)
         {
             std::cout << "ind_i edge not clear"
                       << "\n";
@@ -611,14 +625,15 @@ int dtmc_lc::edge_metropolis()
 
 #pragma region : [shrink] Metropolis
         // [Metropolis]
+        //std::cout<<"[shrink](Ob_relate_new.E - Ob_relate_old.E)"<<(Ob_relate_new.E - Ob_relate_old.E)<<"\n";
         if (rand_uni(gen) <=
             1.0 * fedge_list.size() / (fedge_list.size() - 1) *
                 std::exp(-beta * (Ob_relate_new.E - Ob_relate_old.E)))
         {
             // [accepted]
-            edge_lists[mesh[ind_i].edge_num].erase(
-                edge_lists[mesh[ind_i].edge_num].begin() + e_ind_i);
-            mesh[ind_i].edge_num = -1;
+            // remove ind_i from it's original edge_list
+            edge_lists[indi_edge_num_old].erase(
+                edge_lists[indi_edge_num_old].begin() + e_ind_i);
 
             // update system observables
             Ob_sys_update(Ob_relate_new, Ob_relate_old);
@@ -637,6 +652,7 @@ int dtmc_lc::edge_metropolis()
             bond2.second = ind_i;
             bulk_bond_list.push_back(bond1);
             bulk_bond_list.push_back(bond2);
+            //std::cout<<"edge--\n";
             return 1;
         }
         else
@@ -829,6 +845,8 @@ int dtmc_lc::edge_metropolis()
 #pragma endregion
 // [ Metropolis]
 #pragma region : [extend] Metropolis
+        //std::cout<<"[extend](Ob_relate_new.E - Ob_relate_old.E)"<<(Ob_relate_new.E - Ob_relate_old.E)<<"\n";
+        //std::cout<<"fedge_list.size()"<<fedge_list.size()<<"\n";
         if (rand_uni(gen) <=
             1.0 * fedge_list.size() / (fedge_list.size() + 1) *
                 std::exp(-beta * (Ob_relate_new.E - Ob_relate_old.E)))
@@ -846,6 +864,7 @@ int dtmc_lc::edge_metropolis()
             // these are edge bond now
             delete_bulk_bond_list(ind_i, ind_j);
             delete_bulk_bond_list(ind_i, ind_k);
+            //std::cout<<"edge++\n";
             return 1;
         }
         else
