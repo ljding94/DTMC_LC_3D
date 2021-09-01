@@ -31,7 +31,7 @@ def mean_filter(heat,ns):
     return mean_heat
 
 
-def config_plot_xyz(filename,mesh=0,rod=1,phicolor=0,cvt_map="",cmap_smooth=0,tag="", Format="pdf",lim=15,fix_index=None):
+def config_plot_xyz(filename,mesh=0,rod=1,piwall=0,phicolor=0,cvt_map="",cmap_smooth=0,tag="", Format="pdf",lim=15,fix_index=None):
     print("plotting",filename)
     ftail = "_xyz"
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
@@ -125,6 +125,18 @@ def config_plot_xyz(filename,mesh=0,rod=1,phicolor=0,cvt_map="",cmap_smooth=0,ta
         #sm.set_array([])
         #cbar=plt.colorbar(sm, ticks=[0,0.25*np.pi,0.5*np.pi])
         #cbar.ax.set_yticklabels([r"$0$",r"$\pi/4$",r"$\pi/2$"])
+    if(piwall):
+        deg_slct=deg>0.4*np.pi
+        x_pw,y_pw,z_pw = x[deg_slct],y[deg_slct],z[deg_slct]
+        sx_pw,sy_pw,sz_pw = sx[deg_slct],sy[deg_slct],sz[deg_slct]
+        deg_pw = deg[deg_slct]
+        for i in range(len(sx_pw)):
+            d=2
+            line="-"
+            ax_xy.plot([x_pw[i]-0.5*d*sx_pw[i],x_pw[i]+0.5*d*sx_pw[i]],[y_pw[i]-0.5*d*sy_pw[i],y_pw[i]+0.5*d*sy_pw[i]],linestyle=line,linewidth=1.5,color=cmap(norm(deg_pw[i])))
+            ax_zx.plot([z_pw[i]-0.5*d*sz_pw[i],z_pw[i]+0.5*d*sz_pw[i]],[x_pw[i]-0.5*d*sx_pw[i],x_pw[i]+0.5*d*sx_pw[i]],linestyle=line,linewidth=1.5,color=cmap(norm(deg_pw[i])))
+
+
     #plot fixed bead (if have)
     if fix_index:
         ax_xy.plot([x[fix_index[0]], x[fix_index[1]]], [y[fix_index[0]], y[fix_index[1]]], marker="o",linestyle="None", color="purple")
@@ -145,7 +157,7 @@ def config_plot_xyz_seq(filename,Seq):
     for i in range(Seq):
         config_plot_xyz(filename[:-4]+"_%d.txt"%i,Format="png")
 
-def config_plot3D(filename,mesh=0,rod=0,phicolor=0,fnormal=0,cvt_map="",cmap_smooth=0):
+def config_plot3D(filename,mesh=0,rod=0,piwall=0,phicolor=0,fnormal=0,cvt_map="",cmap_smooth=0):
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
     #x,y,z,sx,sy,sz,enum, en0, en1 = data[5:14]
 
@@ -232,6 +244,21 @@ def config_plot3D(filename,mesh=0,rod=0,phicolor=0,fnormal=0,cvt_map="",cmap_smo
         cbar=plt.colorbar(sm, ticks=[0,0.25*np.pi,0.5*np.pi])
         cbar.ax.set_yticklabels([r"$0$",r"$\pi/4$",r"$\pi/2$"])
         cbar.ax.set_title(r"$(u\cdot n)^2$")
+    if(piwall):
+        deg_slct=deg>0.4*np.pi
+        x_pw,y_pw,z_pw = x[deg_slct],y[deg_slct],z[deg_slct]
+        sx_pw,sy_pw,sz_pw = sx[deg_slct],sy[deg_slct],sz[deg_slct]
+        deg_pw = deg[deg_slct]
+        #print("deg_pw[0]",deg_pw[0])
+        for i in range(len(sx_pw)):
+            ax.plot3D([x_pw[i]-0.5*d*sx_pw[i],x_pw[i]+0.5*d*sx_pw[i]],[y_pw[i]-0.5*d*sy_pw[i],y_pw[i]+0.5*d*sy_pw[i]],[z_pw[i]-0.5*d*sz_pw[i],z_pw[i]+0.5*d*sz_pw[i]],"-",color=cmap(norm(deg_pw[i])))
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
+        sm.set_array([])
+        cbar=plt.colorbar(sm, ticks=[0,0.25*np.pi,0.5*np.pi])
+        cbar.ax.set_yticklabels([r"$0$",r"$\pi/4$",r"$\pi/2$"])
+        cbar.ax.set_title(r"$(u\cdot n)^2$")
+
+
     if(fnormal):
         for i in range(len(sx)):
             ax.plot3D([x[i],x[i]+d*nx[i]],[y[i],y[i]+d*ny[i]],[z[i],z[i]+d*nz[i]],"k-")

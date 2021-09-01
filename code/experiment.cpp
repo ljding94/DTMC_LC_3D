@@ -220,8 +220,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
 
     std::cout << "l0=" << l0 << "\n";
     std::cout << "l1=" << l1 << "\n";
-    std::cout << "Epar.lam=" << Epar.B << "\n";
-    std::cout << "Epar.B=" << Epar.B << "\n";
+    //std::cout << "Epar.lam=" << Epar.B << "\n";
+    //std::cout << "Epar.B=" << Epar.B << "\n";
 
     std::clock_t c_start = std::clock();
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
@@ -240,7 +240,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             }
         }
         E_all.push_back(Ob_sys.E);
-        std::cout << "E=" << Ob_sys.E << "\n";
+        //std::cout << "E=" << Ob_sys.E << "\n";
         I2H2_all.push_back(Ob_sys.I2H2);
         phi_sum_all.push_back(Ob_sys.Iphi);
         Tphi2_all.push_back(Ob_sys.Tphi2);

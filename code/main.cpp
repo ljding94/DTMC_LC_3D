@@ -13,10 +13,10 @@ int main(int argc, char const *argv[])
     int imod = 1;    //1 for rhombus, 2 disk, 3 cylinder, 4 for mobius
     int Ne;          // number of edges
     double d0 = 1.4; // initialization distance between neighboring bead (for rhombus shape)
-    //double l0 = 1.73;
-    //double l1 = 1.73;
-    double l0 = 1.65;
-    double l1 = 1.85; // l1<l0*(4-l0^2)
+    double l0 = 1.73;
+    double l1 = 1.73;
+    //double l0 = 1.65;
+    //double l1 = 1.85; // l1<l0*(4-l0^2)
     double delta_s = 0.1;
     double delta_theta = 0.5;
     std::string folder;

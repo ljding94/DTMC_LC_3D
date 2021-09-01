@@ -104,7 +104,7 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
         E_tau.append(tau)
         E_err.append(np.sqrt(2 * tau / len(E) * cov0))
 
-        # Le and Leus
+        # Le and Ik2s
         for e in range(Ne):
             Les_ave[e].append(np.average(Les[e]))
             rho, cov0 = autocorrelation_function_fft(Les[e])
@@ -112,13 +112,13 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
             Les_tau[e].append(tau)
             Les_err[e].append(np.sqrt(2 * tau / len(Les[e]) * cov0))
 
-            '''
-            Leuns_ave[e].append(np.average(Leuns[e]))
-            rho, cov0 = autocorrelation_function_fft(Leuns[e])
+            Ik2s_ave[e].append(np.average(Ik2s[e]))
+            rho, cov0 = autocorrelation_function_fft(Ik2s[e])
             tau, tau_err = tau_int_cal_rho(rho,tau_c)
-            Leuns_tau[e].append(tau)
-            Leuns_err[e].append(np.sqrt(2 * tau / len(Leuns[e]) * cov0))
-            '''
+            Ik2s_tau[e].append(tau)
+            Ik2s_err[e].append(np.sqrt(2 * tau / len(Ik2s[e]) * cov0))
+
+
 
         # IdA
         IdA_ave.append(np.average(IdA))
@@ -208,6 +208,8 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
         # p stands for per bead
         for e in range(Ne):
             f.write(",Les_ave[%d],Les_tau[%d],Les_err[%d]"%(e,e,e))
+        for e in range(Ne):
+            f.write(",Ik2s_ave[%d],Ik2s_tau[%d],Ik2s_err[%d]"%(e,e,e))
         #for e in range(Ne):
         #    f.write(",Leuns_ave[%d],Leuns_tau[%d],Leuns_err[%d]"%(e,e,e))
 
@@ -219,6 +221,8 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
             f.write("%f,%f,%f,%f" % (cpar[i], E_ave[i], E_tau[i], E_err[i]))
             for e in range(Ne):
                 f.write(",%f,%f,%f"%(Les_ave[e][i],Les_tau[e][i], Les_err[e][i]))
+            for e in range(Ne):
+                f.write(",%f,%f,%f"%(Ik2s_ave[e][i],Ik2s_tau[e][i], Ik2s_err[e][i]))
             #for e in range(Ne):
             #    f.write(",%f,%f,%f"%(Leuns_ave[e][i],Leuns_tau[e][i], Leuns_err[e][i]))
             f.write(",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f"%(IdA_ave[i], IdA_tau[i], IdA_err[i],I2H_ave[i], I2H_tau[i], I2H_err[i],I2H2_ave[i], I2H2_tau[i], I2H2_err[i], phip_ave[i],phip_tau[i],phip_err[i], phi2p_ave[i],phi2p_tau[i],phi2p_err[i],I2H2dis_ave[i],I2H2dis_tau[i],I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i]))

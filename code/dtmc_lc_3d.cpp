@@ -95,6 +95,8 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
         mesh[i].phi = 1;
         // vertex info measurement
         mesh[i].n = n_m(i);
+        // initialize director parallel to normal
+        mesh[i].u = mesh[i].n;
         mesh[i].dAn2H = dAn2H_m(i);
         mesh[i].ds = ds_m(i);
         mesh[i].dsk2 = dsk2_m(i);
