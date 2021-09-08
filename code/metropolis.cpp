@@ -445,13 +445,18 @@ int dtmc_lc::edge_metropolis()
     // useful variables
     std::pair<int, int> bond;
     std::vector<int> fedge_list;
+    int e2update;
+    e2update = int(Ne*rand_uni(gen));
+    fedge_list = edge_lists[e2update]; // choose a edge to update with equall probability
+    //std::cout<<"e2update="<<e2update<<"\n";
+    /*
     fedge_list.clear();
     for (int i = 0; i < edge_lists.size(); i++)
     {
         fedge_list.insert(fedge_list.end(), edge_lists[i].begin(),
                           edge_lists[i].end());
     } // flatten edge_lists and put in to one int vector
-
+    */
     if (rand_uni(gen) < 0.5)
     {
         // [shrink] (add a bond:2 bulk bond-1 edge bond)
