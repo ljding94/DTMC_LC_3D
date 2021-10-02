@@ -13,13 +13,13 @@ struct observable
     double E;
     // geometric
     double I2H2;              // integral of dA (2H)^2
-    double Iphi;              // sum of phi
-    double Tphi2;             // sum of phi*phi for near sites
-    double I2H2dis;           // integral of dA (2H - 2H0)^2, dis = displacement, where 2H0 = phi*C0
+    //double Iphi;              // sum of phi
+    //double Tphi2;             // sum of phi*phi for near sites
+    //double I2H2dis;           // integral of dA (2H - 2H0)^2, dis = displacement, where 2H0 = phi*C0
     double IK;                // integral of dA(K)
-    double IKphi2;            // integral of dA(K*phi^2)
+    //double IKphi2;            // integral of dA(K*phi^2)
     std::vector<double> Les;  // list of edge length
-    std::vector<double> Ik2s; // list of edge bending
+    // std::vector<double> Ik2s; // list of edge bending
     //std::vector<double> Leuns; // edge length couples with u cdot t (edge tangent)
     // crystalline
     double Tp2uu;
@@ -35,11 +35,10 @@ struct observable
 struct E_parameter
 {
     double kar;  // mean curvature bending stiffness
-    double J;    // side-side phi field Ising-like intereaction
-    double C0;   // spontaneous absolute mean curvature (introduced by the hooping of short rods)
+    //double J;    // side-side phi field Ising-like intereaction
+    //double C0;   // spontaneous absolute mean curvature (introduced by the hooping of short rods)
     double karg; // Gaussian curvature bending stiffness
     double lam;  // line tension coefficient
-    double B;    // edge bending moduli
     double Kd;   // liquid crystal interaction moduli
     //double Ksb;  // liquid crystalline interaction for splay and bend
     //double Kt;   //liquid crystalline interaction for the twist only
@@ -52,7 +51,7 @@ struct vertex
     std::vector<double> R{0, 0, 0}; // position (x,y,z)
     std::vector<double> u{0, 0, 1}; // rod orientation (ux,uy,uz)
     std::vector<double> n{0, 0, 0}; // membrane normal
-
+    int fz; // if 1, can't move in z direction
     std::vector<int> nei; // index of neighbors
     // nei[k+1],nei[k] are connected!!!
     int edge_num; // which edge
@@ -60,12 +59,12 @@ struct vertex
     // neighbors form edge with this one (if exist)
 
     // measurement related
-    double phi; // local 2H0 = phi*C0, phi\in (-1,1) // also karg phi
+    //double phi; // local 2H0 = phi*C0, phi\in (-1,1) // also karg phi
     // interaction among phi field can be added as need
     std::vector<double> dAn2H; // in bulk: (dA, 2H), on edge (0,0)
     // energy related (directly)
     double ds;   // beads in bulk: 0 , beads on edge 0.5*(l_{i+}+l_{i-})
-    double dsk2; // edge bending
+    //double dsk2; // edge bending
     // double dskg; // in bulk: 0, on edge: kg*ds
     double dAK; // in bulk: K*dA, on edge: 0
     double un2; // local un2
@@ -78,12 +77,11 @@ public:
     // eternal parameters
     double beta; // system temperature
     int N;       // number of beads
-    int N1;      // number of short rods, accompanied by spontaneous curvature C0
     int imod;    // mode for initialization shape
     int Ne;      // number of edges
+    int lf;  //fixed distance along pulling direcion (z for cylinder)
     // also used to set fixed distance betwen two beads
     double l0; // in-bulk tether maximum length
-    double l1; // on-edge tether maximum length
 
     // system configuration
 
@@ -95,7 +93,8 @@ public:
     // notice only bond in the bulk are included, and there will be on
     // repetition due to symmetry,
     std::vector<int> fixed_beads; // beads can't be moved
-
+    std::vector<int> fixed_beads_z; // beads can't be moved in the z direction for imod3 cylinder initial shape
+    // TODO: continue finishing up the setup for pulling experiment
     void mesh_bead_info_update(std::vector<int> ind_relate);
 
     E_parameter Epar;
@@ -115,13 +114,13 @@ public:
     std::uniform_real_distribution<> rand_uni; // uniform distribution
 
     // initialization
-    dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0_, double l1_, E_parameter Epar_);
+    dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0_, double l0_, E_parameter Epar_);
     //double kar_, double lam_, double Kd_, double Kt_, double Cn_,double kard_);
 
     // put the beads and bonds in to position accordingly
     void init_rhombus_shape(double d0_);
     void init_disk_shape(double d0_);
-    void init_cylinder_shape(double d0_);
+    void init_cylinder_shape(double d0_, double lf_); // lf will over write d0_ when lf!=0
     void init_mobius_shape(double d0_);
     int add_hole_as_edge(int b0, int edgenum); // return 0 if fail to do so with b0
 
@@ -137,7 +136,7 @@ public:
     // local energy-related measurement
     // _m stand for measurement
     double ds_m(int index);                 // length of the local edge bead
-    double dsk2_m(int index);               // edge bending of local edge bead ds(index) needed
+    //double dsk2_m(int index);               // edge bending of local edge bead ds(index) needed
     double ut_m(int index);                 // director edge tangent sine angle
     std::vector<double> dAn2H_m(int index); // measure and set dA and |2H|
 

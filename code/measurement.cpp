@@ -155,7 +155,7 @@ void dtmc_lc::mesh_bead_info_update(std::vector<int> ind_relate)
         mesh[ind].n = n_m(ind);
         mesh[ind].dAn2H = dAn2H_m(ind); // signed H depends on n
         mesh[ind].ds = ds_m(ind);
-        mesh[ind].dsk2 = dsk2_m(ind);
+        //mesh[ind].dsk2 = dsk2_m(ind);
         mesh[ind].dAK = dAK_m(ind);
         mesh[ind].un2 = un2_m(ind);
     }
@@ -175,13 +175,13 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         ind = ind_relate[i];
         // geometric terms
         Ob.I2H2 += mesh[ind].dAn2H[0] * mesh[ind].dAn2H[1] * mesh[ind].dAn2H[1];
-        Ob.I2H2dis += mesh[ind].dAn2H[0] * std::pow(mesh[ind].dAn2H[1] - mesh[ind].phi * Epar.C0, 2);
+        //Ob.I2H2dis += mesh[ind].dAn2H[0] * std::pow(mesh[ind].dAn2H[1] - mesh[ind].phi * Epar.C0, 2);
         Ob.IK += mesh[ind].dAK;
-        Ob.IKphi2 += mesh[ind].dAK * mesh[ind].phi * mesh[ind].phi;
+        //Ob.IKphi2 += mesh[ind].dAK * mesh[ind].phi * mesh[ind].phi;
         if (mesh[ind].edge_num != -1)
         {
             Ob.Les[mesh[ind].edge_num] += mesh[ind].ds;
-            Ob.Ik2s[mesh[ind].edge_num] += mesh[ind].dsk2;
+            //Ob.Ik2s[mesh[ind].edge_num] += mesh[ind].dsk2;
             //Ob.Leuns[mesh[ind].edge_num] += mesh[ind].ds * std::sqrt(mesh[ind].un2);
             //Ob.Leuns[mesh[ind].edge_num] += mesh[ind].ds * ut_m(ind);
         }
@@ -200,7 +200,7 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         Ob.Tp2uu += p2uu_m(ind_i, ind_j);
         Ob.Tuuc += uuc_m(ind_i, ind_j);
         // also, Ising-like phi field tems
-        Ob.Tphi2 += mesh[ind_i].phi * mesh[ind_j].phi;
+        //Ob.Tphi2 += mesh[ind_i].phi * mesh[ind_j].phi;
         // use new LC energy that seperate twist from the splay and bend
         //Ob.Tuusb += uusb_m(ind_i, ind_j);
         //Ob.Tuut += uut_m(ind_i, ind_j);
@@ -213,15 +213,15 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
 {
     Ob_sys.E += Ob_new.E - Ob_old.E;
     Ob_sys.I2H2 += Ob_new.I2H2 - Ob_old.I2H2;
-    Ob_sys.Iphi += Ob_new.Iphi - Ob_old.Iphi;
-    Ob_sys.Tphi2 += Ob_new.Tphi2 - Ob_old.Tphi2;
-    Ob_sys.I2H2dis += Ob_new.I2H2dis - Ob_old.I2H2dis;
+    //Ob_sys.Iphi += Ob_new.Iphi - Ob_old.Iphi;
+    //Ob_sys.Tphi2 += Ob_new.Tphi2 - Ob_old.Tphi2;
+    //Ob_sys.I2H2dis += Ob_new.I2H2dis - Ob_old.I2H2dis;
     Ob_sys.IK += Ob_new.IK - Ob_old.IK;
-    Ob_sys.IKphi2 += Ob_new.IKphi2 - Ob_old.IKphi2;
+    //Ob_sys.IKphi2 += Ob_new.IKphi2 - Ob_old.IKphi2;
     for (int e = 0; e < Ne; e++)
     {
         Ob_sys.Les[e] += Ob_new.Les[e] - Ob_old.Les[e];
-        Ob_sys.Ik2s[e] += Ob_new.Ik2s[e] - Ob_old.Ik2s[e];
+        //Ob_sys.Ik2s[e] += Ob_new.Ik2s[e] - Ob_old.Ik2s[e];
         //Ob_sys.Leuns[e] += Ob_new.Leuns[e] - Ob_old.Leuns[e];
     }
     Ob_sys.Tp2uu += Ob_new.Tp2uu - Ob_old.Tp2uu;
@@ -239,14 +239,14 @@ double dtmc_lc::E_m(observable Ob)
 {
     // Energy measurement for local Ob and global Ob_sys usage
     double E = 0;
-    E += 0.5 * Epar.kar * Ob.I2H2dis;
-    E += -Epar.J * Ob.Tphi2;
-    //E += Epar.karg * Ob.IK;
-    E += Epar.karg * Ob.IKphi2;
+    E += 0.5 * Epar.kar * Ob.I2H2;
+    //E += -Epar.J * Ob.Tphi2;
+    E += Epar.karg * Ob.IK;
+    //E += Epar.karg * Ob.IKphi2;
     for (int e = 0; e < Ne; e++)
     {
         E += Epar.lam * Ob.Les[e];
-        E += 0.5 * Epar.B * Ob.Ik2s[e];
+        //E += 0.5 * Epar.B * Ob.Ik2s[e];
         //E += Epar.lamd * Ob.Leuns[e];
     }
     E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
@@ -286,15 +286,17 @@ double dtmc_lc::ds_m(int index)
     }
     return Le_l;
 }
+
+/*
 double dtmc_lc::dsk2_m(int index)
 {
     if (mesh[index].edge_num == -1)
     {
         return 0;
     }
-    /*
-    (j)===(i)===(k)
-    */
+
+    //(j)===(i)===(k)
+
     double cos_jk, theta_jk;
     double l2_ji, l2_ik;
     int ind_j, ind_k;
@@ -321,6 +323,8 @@ double dtmc_lc::dsk2_m(int index)
     theta_jk = std::acos(cos_jk);
     return theta_jk * theta_jk / mesh[index].ds;
 }
+*/
+
 double dtmc_lc::ut_m(int index)
 { // director edge tangent,[don't think I use this anymore]
     if (mesh[index].edge_num == -1)

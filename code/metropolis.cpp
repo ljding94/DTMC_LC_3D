@@ -24,6 +24,7 @@ int dtmc_lc::bead_metropolis(double delta_s)
     std::pair<int, int> bond;
     std::vector<double> delta_pos{0, 0, 0};
     double distance2_cache, uuc_cache; // some cache
+    int del_dim;                       // for normal beads it's 3, for fixed z direction it's 2
 #pragma endregion
 
 #pragma region : find update, and related beads
@@ -32,6 +33,8 @@ int dtmc_lc::bead_metropolis(double delta_s)
     {
         index = rand_pos(gen);
     } while (list_a_nei_b(fixed_beads, index) != -1);
+    // TODO: generalize the fixed bead condition, only fix update on the z direction when doing pulling experiment on catenoid, Ne2 membrane
+
     // checked, it will pass value instead of pointer
     ind_relate.clear();
     bead_relate.clear();
@@ -58,11 +61,19 @@ int dtmc_lc::bead_metropolis(double delta_s)
 #pragma endregion
 
 #pragma region : bead MC update proposal
-    for (int k = 0; k < 3; k++)
+    //if (list_a_nei_b(fixed_beads_z, index) != -1)
+    if (mesh[index].fz == 1)
+    {
+        del_dim = 2;
+    }else{
+        del_dim=3;
+    }
+    for (int k = 0; k < del_dim; k++)
     {
         delta_pos[k] = 2 * delta_s * rand_uni(gen) - delta_s;
         mesh[index].R[k] += delta_pos[k];
     }
+
 #pragma endregion
 
 #pragma region : hard bead and tether potential between all beads
@@ -96,6 +107,7 @@ int dtmc_lc::bead_metropolis(double delta_s)
         }
         */
         // used when there are two tether length limit
+        /*
         if (mesh[index].edge_nei.size() != 0 &&
             (nei_ind == mesh[index].edge_nei[0] ||
              nei_ind == mesh[index].edge_nei[1]))
@@ -107,7 +119,9 @@ int dtmc_lc::bead_metropolis(double delta_s)
                 return 0;
             }
         }
-        else if (distance2_cache - l0 * l0 >= 0)
+        else
+        */
+        if (distance2_cache - l0 * l0 >= 0)
         {
             mesh[index].R = bead_relate[0].R;
             // return previous position
@@ -446,7 +460,7 @@ int dtmc_lc::edge_metropolis()
     std::pair<int, int> bond;
     std::vector<int> fedge_list;
     int e2update;
-    e2update = int(Ne*rand_uni(gen));
+    e2update = int(Ne * rand_uni(gen));
     fedge_list = edge_lists[e2update]; // choose a edge to update with equall probability
     //std::cout<<"e2update="<<e2update<<"\n";
     /*
@@ -509,10 +523,14 @@ int dtmc_lc::edge_metropolis()
             return 0;
         }
         */
-        if (distance(ind_j, ind_k) >= l1 || distance(ind_i, ind_j) >= l0 ||
-            distance(ind_i, ind_k) >= l0) {
+        if (distance(ind_j, ind_k) >= l0)
+        {
             return 0;
         }
+        /*if (distance(ind_j, ind_k) >= l1 || distance(ind_i, ind_j) >= l0 ||
+            distance(ind_i, ind_k) >= l0) {
+            return 0;
+        }*/
         // check # nei, can't be greater than 9
         if (mesh[ind_j].nei.size() >= 9 || mesh[ind_k].nei.size() >= 9)
         {
@@ -553,7 +571,7 @@ int dtmc_lc::edge_metropolis()
 // [update]
 #pragma region : [shrink] edge update
         mesh[ind_i].edge_nei.clear();
-        mesh[ind_i].edge_num=-1;
+        mesh[ind_i].edge_num = -1;
         // no worries, already stored this one
 
         j_e_nei_i = list_a_nei_b(mesh[ind_j].edge_nei, ind_i);
@@ -963,6 +981,7 @@ int dtmc_lc::swap_metropolis()
 }
 */
 
+/*
 int dtmc_lc::hop_metropolis()
 {
     // hop update changes the relative density of short rods on the outside vs. inside
@@ -1027,3 +1046,4 @@ int dtmc_lc::hop_metropolis()
     }
 #pragma endregion
 }
+*/

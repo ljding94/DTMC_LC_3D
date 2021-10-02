@@ -12,40 +12,39 @@ int main(int argc, char const *argv[])
     int N;           // number of beads
     int imod = 1;    //1 for rhombus, 2 disk, 3 cylinder, 4 for mobius
     int Ne;          // number of edges
+    double lf;          // height of cylinder init shape, used for fix beads distance at different edges (pulling experiment, when !=0)
+
     double d0 = 1.4; // initialization distance between neighboring bead (for rhombus shape)
     double l0 = 1.73;
-    double l1 = 1.73;
-    //double l0 = 1.65;
-    //double l1 = 1.85; // l1<l0*(4-l0^2)
-    double delta_s = 0.1;
+    double delta_s = 0.2;
     double delta_theta = 0.5;
     std::string folder;
     N = std::atoi(argv[1]);
     imod = std::atoi(argv[2]); // mode of initialization
     Ne = std::atoi(argv[3]);
+    lf = std::atof(argv[4]); // for N=400, lf=17-36 works
     E_parameter Epar;
-    Epar.kar = std::atof(argv[4]);
-    Epar.J = std::atof(argv[5]);
-    Epar.C0 = std::atof(argv[6]);
-    Epar.karg = std::atof(argv[7]);
-    Epar.lam = std::atof(argv[8]);
-    Epar.B = std::atof(argv[9]);
-    Epar.Kd = std::atof(argv[10]);
+    Epar.kar = std::atof(argv[5]);
+    //Epar.C0 = std::atof(argv[6]);
+    Epar.karg = std::atof(argv[6]);
+    Epar.lam = std::atof(argv[7]);
+    Epar.Kd = std::atof(argv[8]);
     //Epar.Ksb = std::atof(argv[6]);
     //Epar.Kt = std::atof(argv[7]);
-    Epar.q = std::atof(argv[11]);
-    Epar.Cn = std::atof(argv[12]);
+    Epar.q = std::atof(argv[9]);
+    Epar.Cn = std::atof(argv[10]);
     //Epar.kard = std::atof(argv[10]);
     //Epar.lamd = std::atof(argv[11]);
 
     //Epar.ms = std::atof(argv[9]);
     //Epar.mr = std::atof(argv[10]);
     //kard = std::atof(argv[9]);
-
-    dtmc_lc membrane(beta, N, imod, Ne, d0, l0, l1, Epar);
+    dtmc_lc membrane(beta, N, imod, Ne, lf, d0, l0, Epar);
     N = membrane.mesh.size();
-    std::string finfo = "N" + std::to_string(N) + "_imod" + std::string(argv[2]) + "_Ne" + std::string(argv[3]) + "_kar" + std::string(argv[4]) + "_J" + std::string(argv[5]) + "_C0" + std::string(argv[6]) + "_karg" + std::string(argv[7]) + "_lam" + std::string(argv[8]) + "_B" + std::string(argv[9]) + "_Kd" + std::string(argv[10]) + "_q" + std::string(argv[11]) + "_Cn" + std::string(argv[12]);
-    if (argc == 14)
+
+    std::string finfo = "N" + std::to_string(N) + "_imod" + std::string(argv[2]) + "_Ne" + std::string(argv[3]) + "_lf" + std::string(argv[4]) + "_kar" + std::string(argv[5]) + "_karg" + std::string(argv[6]) + "_lam" + std::string(argv[7]) + "_Kd" + std::string(argv[8]) + "_q" + std::string(argv[9]) + "_Cn" + std::string(argv[10]);
+
+    if (argc == 12)
     {
         // use "prog name par* local" for local running
         // used for local running!
@@ -59,7 +58,7 @@ int main(int argc, char const *argv[])
 
         return 0;
     }
-    else if (argc == 13)
+    else if (argc == 11)
     {
         // ccv running
         folder = "/users/lding3/scratch";

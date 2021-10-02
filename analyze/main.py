@@ -11,34 +11,36 @@ from test_plot import *
 
 def main():
     print("hello! dtmc_lc analysis")
-    config_plot3D("../data/scratch_local/State_N200_imod1_Ne2_kar50_J0.0_C00.0_karg0.0_lam3.0_B0.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0,fnormal=0)
-    config_plot3D("../data/scratch_local/State_N200_imod1_Ne2_kar50_J0.0_C00.0_karg0.0_lam1.1_B0.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0,fnormal=0)
-    #config_plot3D("../data/Ne2/Aug21_2021/State_N300_imod1_Ne2_kar40_J0.40_C00.3_karg2.0_lam5.0_Kd4.0_q1.5_Cn4.0.csv",mesh=1,rod=1,fnormal=0)
-    #config_plot3D("../data/Ne2/Aug28_2021_1/State_N300_imod3_Ne2_kar40_J0.00_C00.0_karg0.0_lam5.0_B0.0_Kd5.0_q1.20_Cn10.0.csv",mesh=1,rod=1,piwall=0,fnormal=0)
+    config_plot3D("../data/scratch_local/State_N400_imod3_Ne2_lf18_kar100_karg0.0_lam5.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0,fnormal=0)
+    config_plot3D("../data/scratch_local/State_N400_imod3_Ne2_lf35_kar100_karg0.0_lam5.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0,fnormal=0)
+    #config_plot3D("../data/Ne1/Sep8_2021/State_N500_imod1_Ne1_kar100_J0.00_C00.0_karg0.0_lam6.0_B0.0_Kd5.0_q3.0_Cn40.0.csv",mesh=1,rod=1,fnormal=0,piwall=1)
+    #config_plot3D("../data/Ne1/Sep6_2021/State_N400_imod1_Ne1_kar50_J0.00_C00.0_karg0.0_lam6.0_B0.0_Kd9.0_q1.0_Cn40.0.csv",mesh=1,rod=0,fnormal=0,piwall=1)
+
+    #config_plot3D("../data/Ne2/Sep15_2021/State_N400_imod1_Ne2_kar100_J0.00_C00.0_karg3.0_lam6.0_B0.0_Kd1.0_q2.7_Cn30.0.csv",mesh=1,rod=0,piwall=1,fnormal=0)
     return 0
 
     #foldername = "../data/Ne2/Apr29_2021" # kinda switch to Ne2 simulation for next paper
     #foldername = "../data/Ne1/May4_2021" # mobius strip~,
-    foldername = "../data/Ne2/Sep7_2021"
-    #foldername = "../data/Ne1/Sep6_2021"
+    #foldername = "../data/Ne2/Sep7_2021"
+    foldername = "../data/Ne2/Sep20_2021_1"
     print("analyzing "+foldername)
     N = 400
     imod=3 # 1 for rhombus, 2 disk, 3 cylinder, 4 for mobius strip
-    Ne=2
-    kar = 50
+    Ne=3
+    kar = 100
     J = 0.00
     #C0s = np.arange(0.1,0.51,0.1)
     C0 = 0.0
     karg = 0.0
-    lam = 10.0
+    lam = 8.0
     B = 0.0
-    Kds = np.arange(1.0,9.1,2.0)
-    qs = np.arange(0.5,5.01,0.5)
-    Cn = 40.0
+    Kds = [3.0,5.0,7.0,9.0]
+    qs = np.arange(0.1,2.01,0.1)
+    Cn = 0.0
     pars = []
     pars1,pars2 = [],[]
     for Kd in Kds:
-        #Cn = 2*Kd
+        Cn = Kd
         pars.append([N, imod, Ne, kar, J, C0, karg, lam, B, Kd, qs, Cn])
         #pars1.append([N, 1, 1, kar, C0, karg, lam, Kd, qs, Cn])
         #pars2.append([N, 3, 2, kar, C0, karg, lam, Kd, qs, Cn])
@@ -75,5 +77,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-##!/usr/local/bin/python3

@@ -5,7 +5,7 @@
 #define PI 3.14159265358979323846
 
 // initialization
-dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0_, double l1_, E_parameter Epar_)
+dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0_, double l0_, E_parameter Epar_)
 {
     // system related
     beta = beta_;
@@ -13,16 +13,15 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     imod = imod_;
     Ne = Ne_;
     l0 = l0_; // sigma0 is always 1;
-    l1 = l1_;
-
+    lf = lf_;
     // set energy related
     // geometric
     Epar.kar = Epar_.kar;
-    Epar.J = Epar_.J;
-    Epar.C0 = Epar_.C0;
+    //Epar.J = Epar_.J;
+    //Epar.C0 = Epar_.C0;
     Epar.karg = Epar_.karg;
     Epar.lam = Epar_.lam;
-    Epar.B = Epar_.B;
+    //Epar.B = Epar_.B;
     // orientational
     Epar.Kd = Epar_.Kd;
     //Epar.Ksb = Epar_.Ksb;
@@ -59,7 +58,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     }
     else if (imod == 3)
     {
-        init_cylinder_shape(d0_);
+        init_cylinder_shape(d0_, lf_);
         num_edge_exist = 2;
     }
     else if (imod == 4)
@@ -92,14 +91,14 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     for (int i = 0; i < mesh.size(); i++)
     {
         // set phi field
-        mesh[i].phi = 1;
+        //mesh[i].phi = 1;
         // vertex info measurement
         mesh[i].n = n_m(i);
         // initialize director parallel to normal
         mesh[i].u = mesh[i].n;
         mesh[i].dAn2H = dAn2H_m(i);
         mesh[i].ds = ds_m(i);
-        mesh[i].dsk2 = dsk2_m(i);
+        //mesh[i].dsk2 = dsk2_m(i);
         mesh[i].un2 = un2_m(i);
         mesh[i].dAK = dAK_m(i);
     }
@@ -115,14 +114,14 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
     for (int i = 0; i < mesh.size(); i++)
     {
         Ob_sys.I2H2 += mesh[i].dAn2H[0] * mesh[i].dAn2H[1] * mesh[i].dAn2H[1];
-        Ob_sys.Iphi += mesh[i].phi;
-        Ob_sys.I2H2dis += mesh[i].dAn2H[0] * std::pow(mesh[i].dAn2H[1] - mesh[i].phi * Epar.C0, 2);
+        //Ob_sys.Iphi += mesh[i].phi;
+        //Ob_sys.I2H2dis += mesh[i].dAn2H[0] * std::pow(mesh[i].dAn2H[1] - mesh[i].phi * Epar.C0, 2);
         Ob_sys.IK += mesh[i].dAK;
-        Ob_sys.IKphi2 += mesh[i].dAK * mesh[i].phi * mesh[i].phi;
+        //Ob_sys.IKphi2 += mesh[i].dAK * mesh[i].phi * mesh[i].phi;
         if (mesh[i].edge_num != -1)
         {
             Ob_sys.Les[mesh[i].edge_num] += mesh[i].ds;
-            Ob_sys.Ik2s[mesh[i].edge_num] += mesh[i].dsk2;
+            //Ob_sys.Ik2s[mesh[i].edge_num] += mesh[i].dsk2;
             //Ob_sys.Leuns[mesh[i].edge_num] += mesh[i].ds * std::sqrt(mesh[i].un2);
         }
         // crystalline energy related
@@ -133,7 +132,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double d0_, double l0
             Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
             //Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
             // Ising-like phi field interaction
-            Ob_sys.Tphi2 += 0.5 * mesh[i].phi * mesh[mesh[i].nei[j]].phi;
+            //Ob_sys.Tphi2 += 0.5 * mesh[i].phi * mesh[mesh[i].nei[j]].phi;
         }
         // coupling related
         Ob_sys.Tun2 += mesh[i].un2;
@@ -448,20 +447,51 @@ void dtmc_lc::init_disk_shape(double d0_)
     } while (eind != edge_lists[0][0]);
 }
 
-void dtmc_lc::init_cylinder_shape(double d0_)
+void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
 {
     // only work for Ne>=2
     int x_n, y_n; // position of the vertex in the two vector coordinate
     // cylinder initial shape
     //use cylinder initialization
-    int L = 10; // length of the cylinder
+    int L, Lr, Lflag; // L, length of the cylinder per number of beads
+    double d1, d0;
+    d0 = d0_;
+    if (lf_ == 0)
+    {
+        L = 10;
+    }
+    else
+    {
+        // find L such that L*Lr=N, and lf/(L-1)=d0 \in (1.0,l1)
+        L = 3;
+        Lflag = 0;
+        while (L <= N / 5)
+        {
+            if (N % L == 0)
+            {
+                d1 = lf_ / (L - 1);
+                std::cout << "d1=" << d1 << "\n";
+                if (d1 > 1.1 && d1 < (l0 - 0.1))
+                {
+                    Lflag = 1;
+                    break;
+                }
+            }
+            L++;
+        }
+        if (Lflag == 0)
+        {
+            std::cout << "no appropriate L for this lf\n";
+        }
+        d0 = d1;
+    }
+    Lr = N / L; // perimeter of cylinder circular bottom
     if (N % L != 0)
     {
         std::cout << "N % L != 0 \n";
     }
-    int Lr = N / L; // perimeter of cylinder circular bottom
     double del_theta = 2 * PI / Lr;
-    double R = d0_ / (2 * std::sin(del_theta / 2));
+    double R = d0 / (2 * std::sin(del_theta / 2));
 
     mesh.resize(N);
     for (int i = 0; i < N; i++)
@@ -471,7 +501,8 @@ void dtmc_lc::init_cylinder_shape(double d0_)
         y_n = i / Lr;
         mesh[i].R[0] = R * std::cos(del_theta * (x_n + 0.5 * y_n));
         mesh[i].R[1] = R * std::sin(del_theta * (x_n + 0.5 * y_n));
-        mesh[i].R[2] = d0_ * 0.5 * std::sqrt(3) * y_n;
+        mesh[i].R[2] = d0 * 0.5 * std::sqrt(3) * y_n;
+        mesh[i].fz = 0;
 
         // put bonds
         if (y_n == 0)
@@ -541,6 +572,24 @@ void dtmc_lc::init_cylinder_shape(double d0_)
                 push_neis_back(i, {1, Lr, Lr - 1, -1, -Lr, -Lr + 1});
                 push_bneis_list(i, {1, Lr, Lr - 1, -1, -Lr, -Lr + 1});
             }
+        }
+    }
+    // add beads fixed in z direction
+    int el_len, eind;
+    if (Lflag == 1)
+    {
+        for (int e = 0; e < 2; e++)
+        {
+            el_len = edge_lists[e].size();
+            for (int j = 0; j < 3; j++)
+            {
+                // catch 3 beads on each ring
+                eind = edge_lists[e][j * int(el_len / 3)];
+                mesh[eind].fz = 1;
+            }
+            //fixed_beads_z.push_back(edge_lists[e][0]);
+            //fixed_beads_z.push_back(edge_lists[e][int(el_len / 3)]);
+            //fixed_beads_z.push_back(edge_lists[e][2 * int(el_len / 3)]);
         }
     }
 }
@@ -729,17 +778,14 @@ void dtmc_lc::Ob_init(observable &Ob)
 {
     Ob.E = 0;
     Ob.I2H2 = 0;
-    Ob.Iphi = 0;
-    Ob.Tphi2 = 0;
-    Ob.I2H2dis = 0;
+    ;
     Ob.IK = 0;
-    Ob.IKphi2 = 0;
     Ob.Les.resize(Ne);
-    Ob.Ik2s.resize(Ne);
+    //Ob.Ik2s.resize(Ne);
     for (int e = 0; e < Ne; e++)
     {
         Ob.Les[e] = 0;
-        Ob.Ik2s[e] = 0;
+        //Ob.Ik2s[e] = 0;
     }
     Ob.Tp2uu = 0;
     Ob.Tuuc = 0;

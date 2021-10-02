@@ -36,8 +36,8 @@ def config_plot_xyz(filename,mesh=0,rod=1,piwall=0,phicolor=0,cvt_map="",cmap_sm
     ftail = "_xyz"
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
 
-    #x,y,z,sx,sy,sz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:18]
-    x,y,z,sx,sy,sz,nx,ny,nz,phi,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:18]
+    x,y,z,sx,sy,sz,fz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:18]
+    #x,y,z,sx,sy,sz,nx,ny,nz,phi,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:18]
     ns = np.transpose(data[18:])
     #sx,sy,sz=d*sx,d*sy,d*sz
     #x,y,z,sx,sy,sz, enum, en0, en1 = data[5:14]
@@ -161,7 +161,7 @@ def config_plot3D(filename,mesh=0,rod=0,piwall=0,phicolor=0,fnormal=0,cvt_map=""
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
     #x,y,z,sx,sy,sz,enum, en0, en1 = data[5:14]
 
-    x,y,z,sx,sy,sz,nx,ny,nz,phi,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:18]
+    x,y,z,sx,sy,sz,fz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:18]
     #x,y,z,sx,sy,sz,phi,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:15]
     ns = np.transpose(data[18:])
 
@@ -183,6 +183,8 @@ def config_plot3D(filename,mesh=0,rod=0,piwall=0,phicolor=0,fnormal=0,cvt_map=""
     ens = np.array([en0, en1])
     fig = plt.figure(figsize=(5, 5))
     ax = plt.axes(projection="3d")
+    # fixed_z beads
+    ax.scatter3D(x[fz==1],y[fz==1],z[fz==1],marker="o",color="red")
 
     # phi field
     if(phicolor):
