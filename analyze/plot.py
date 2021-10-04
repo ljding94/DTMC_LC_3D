@@ -53,6 +53,8 @@ def config_plot_xyz(filename,mesh=0,rod=1,piwall=0,phicolor=0,cvt_map="",cmap_sm
     ax_xy = fig.add_subplot(121,aspect="equal")
     ax_zx = fig.add_subplot(122,aspect="equal")
 
+    ax_xy.scatter(x[fz==1],y[fz==1],marker="o",color="red")
+    ax_zx.scatter(z[fz==1],x[fz==1],marker="o",color="red")
     # beads
     # phi field
     if(phicolor):

@@ -12,13 +12,13 @@ struct observable
     // total energy
     double E;
     // geometric
-    double I2H2;              // integral of dA (2H)^2
+    double I2H2; // integral of dA (2H)^2
     //double Iphi;              // sum of phi
     //double Tphi2;             // sum of phi*phi for near sites
     //double I2H2dis;           // integral of dA (2H - 2H0)^2, dis = displacement, where 2H0 = phi*C0
-    double IK;                // integral of dA(K)
+    double IK; // integral of dA(K)
     //double IKphi2;            // integral of dA(K*phi^2)
-    std::vector<double> Les;  // list of edge length
+    std::vector<double> Les; // list of edge length
     // std::vector<double> Ik2s; // list of edge bending
     //std::vector<double> Leuns; // edge length couples with u cdot t (edge tangent)
     // crystalline
@@ -34,7 +34,7 @@ struct observable
 //hamiltonion parameters
 struct E_parameter
 {
-    double kar;  // mean curvature bending stiffness
+    double kar; // mean curvature bending stiffness
     //double J;    // side-side phi field Ising-like intereaction
     //double C0;   // spontaneous absolute mean curvature (introduced by the hooping of short rods)
     double karg; // Gaussian curvature bending stiffness
@@ -51,8 +51,8 @@ struct vertex
     std::vector<double> R{0, 0, 0}; // position (x,y,z)
     std::vector<double> u{0, 0, 1}; // rod orientation (ux,uy,uz)
     std::vector<double> n{0, 0, 0}; // membrane normal
-    int fz; // if 1, can't move in z direction
-    std::vector<int> nei; // index of neighbors
+    int fz;                         // if 1, can't move in z direction
+    std::vector<int> nei;           // index of neighbors
     // nei[k+1],nei[k] are connected!!!
     int edge_num; // which edge
     std::vector<int> edge_nei;
@@ -63,7 +63,7 @@ struct vertex
     // interaction among phi field can be added as need
     std::vector<double> dAn2H; // in bulk: (dA, 2H), on edge (0,0)
     // energy related (directly)
-    double ds;   // beads in bulk: 0 , beads on edge 0.5*(l_{i+}+l_{i-})
+    double ds; // beads in bulk: 0 , beads on edge 0.5*(l_{i+}+l_{i-})
     //double dsk2; // edge bending
     // double dskg; // in bulk: 0, on edge: kg*ds
     double dAK; // in bulk: K*dA, on edge: 0
@@ -79,7 +79,7 @@ public:
     int N;       // number of beads
     int imod;    // mode for initialization shape
     int Ne;      // number of edges
-    int lf;  //fixed distance along pulling direcion (z for cylinder)
+    int lf;      //fixed distance along pulling direcion (z for cylinder)
     // also used to set fixed distance betwen two beads
     double l0; // in-bulk tether maximum length
 
@@ -92,9 +92,8 @@ public:
     // bulk_bond_list[i] is a pair of two bead connected in [bulk!}
     // notice only bond in the bulk are included, and there will be on
     // repetition due to symmetry,
-    std::vector<int> fixed_beads; // beads can't be moved
+    std::vector<int> fixed_beads;   // beads can't be moved
     std::vector<int> fixed_beads_z; // beads can't be moved in the z direction for imod3 cylinder initial shape
-    // TODO: continue finishing up the setup for pulling experiment
     void mesh_bead_info_update(std::vector<int> ind_relate);
 
     E_parameter Epar;
@@ -135,7 +134,7 @@ public:
 
     // local energy-related measurement
     // _m stand for measurement
-    double ds_m(int index);                 // length of the local edge bead
+    double ds_m(int index); // length of the local edge bead
     //double dsk2_m(int index);               // edge bending of local edge bead ds(index) needed
     double ut_m(int index);                 // director edge tangent sine angle
     std::vector<double> dAn2H_m(int index); // measure and set dA and |2H|
@@ -150,6 +149,7 @@ public:
     double un2_m(int index);             // spin normal interaction of i
     double dEgeo_m(int index);           // energy of the local vertex
 
+    // Structure related measurements
     // Gyration tensor measurement
     std::vector<double> Gij_m();
     // seperation between 2 edges measurement
@@ -158,6 +158,9 @@ public:
     // (u(r)*nu)^2, how mush director twist about membrane nematic director
     std::vector<double> un2dis_m(int bin_num);
     // distribution of un2 among beads, good indication for pi wall formation
+
+    std::vector<double> comR_m();                              // center of mass measurement
+    std::vector<double> rho_rcom_m(double del_r, int bin_num); // density distribution from center of mass
 
     // useful tools
     double distance2(int ind_1, int ind_2);
@@ -206,7 +209,7 @@ public:
                  double delta_s, double delta_theta);
     // thermalisation of the system, starting from beta=0 (hot start)
     void O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
-                      double delta_s, double delta_theta, std::string folder,
+                      double delta_s, double delta_theta, double delta_r, double bin_num, std::string folder,
                       std::string finfo);
     // measure the obserables
     // energy versus lambda curve testing

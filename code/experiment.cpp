@@ -190,20 +190,14 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
 }
 
 void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
-                           double delta_s, double delta_theta, std::string folder,
+                           double delta_s, double delta_theta, double delta_r, double bin_num, std::string folder,
                            std::string finfo)
 {
     std::vector<double> E_all;
     std::vector<double> I2H2_all;
-    //std::vector<double> phi_sum_all;
-    //std::vector<double> Tphi2_all;
-    //std::vector<double> I2H2dis_all;
     std::vector<double> IK_all;
-    //std::vector<double> IKphi2_all;
     std::vector<std::vector<double>> Les_all;
     Les_all.resize(Ne);
-    //std::vector<std::vector<double>> Ik2s_all;
-    //Ik2s_all.resize(Ne);
     std::vector<double> Tp2uu_all;
     std::vector<double> Tuuc_all;
     std::vector<double> Tun2_all;
@@ -213,6 +207,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
 
     std::vector<double> D_edge_all;
     std::vector<std::vector<double>> Gij_all;
+    std::vector<std::vector<double>> rhor_all;
 
     double bead_accept = 0;
     double spin_accept = 0;
@@ -243,13 +238,9 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         E_all.push_back(Ob_sys.E);
         //std::cout << "E=" << Ob_sys.E << "\n";
         I2H2_all.push_back(Ob_sys.I2H2);
-        //phi_sum_all.push_back(Ob_sys.Iphi);
-        //Tphi2_all.push_back(Ob_sys.Tphi2);
-        //I2H2dis_all.push_back(Ob_sys.I2H2dis);
         for (int e = 0; e < Ne; e++)
         {
             Les_all[e].push_back(Ob_sys.Les[e]);
-            //Ik2s_all[e].push_back(Ob_sys.Ik2s[e]);
         }
         Tp2uu_all.push_back(Ob_sys.Tp2uu);
         Tuuc_all.push_back(Ob_sys.Tuuc);
@@ -264,6 +255,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         {
             Gij_all.push_back(Gij_m());
             D_edge_all.push_back(D_edge_com_m());
+            rhor_all.push_back(rho_rcom_m(delta_r, bin_num));
         }
     }
 
@@ -335,4 +327,19 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     fG.close();
+
+    std::ofstream frhor(folder + "/rhor_" + finfo + ".csv");
+    if (frhor.is_open())
+    {
+        for (int i = 0; i < rhor_all.size(); i++)
+        {
+            frhor << rhor_all[i][0];
+            for (int j = 1; j < rhor_all[i].size(); j++)
+            {
+                frhor << "," << rhor_all[i][j];
+            }
+            frhor << "\n";
+        }
+    }
+    frhor.close();
 }

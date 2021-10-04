@@ -743,4 +743,37 @@ double dtmc_lc::D_edge_com_m()
     D_edge = std::sqrt(D_edge);
     return D_edge;
 }
+
+std::vector<double> dtmc_lc::comR_m()
+{
+    std::vector<double> comR = {0, 0, 0};
+    for (int i = 0; i < mesh.size(); i++)
+    {
+        for (int k = 0; k < 3; k++)
+        {
+            comR[k] += mesh[i].R[k];
+        }
+    }
+    for (int k = 0; k < 3; k++)
+    {
+        comR[k] /= mesh.size();
+    }
+    return comR;
+}
+
+std::vector<double> dtmc_lc::rho_rcom_m(double del_r, int bin_num){
+    std::vector<double> rhor(bin_num,0);
+    int bin;
+    double r;
+    std::vector<double> comR = comR_m();
+    for (int i = 0; i < mesh.size(); i++)
+    {
+        r = distancefp(i,comR);
+        bin = int(r/del_r);
+        if(bin<bin_num){
+            rhor[bin]+=1;
+        }
+    }
+    return rhor;
+}
 #pragma endregion

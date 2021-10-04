@@ -19,21 +19,16 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
     Ne = par[find_cpar_ind(par_nm,"Ne")]
 
     Les_ave, Les_tau, Les_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
-    #Leuns_ave, Leuns_tau, Leuns_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
-    Ik2s_ave, Ik2s_tau, Ik2s_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
     IdA_ave, IdA_tau, IdA_err = [], [], []
     I2H_ave, I2H_tau, I2H_err = [], [], []
     I2H2_ave, I2H2_tau, I2H2_err = [], [], []
-    phip_ave,phip_err,phip_tau = [], [], [] # phi per bead
-    phi2p_ave,phi2p_err, phi2p_tau = [],[],[] # phi interaction per bond
-    I2H2dis_ave, I2H2dis_tau, I2H2dis_err = [], [], []
+
     IK_ave, IK_tau, IK_err = [], [], []
     p2uu_ave, p2uu_tau, p2uu_err = [], [], []
     uuc_ave, uuc_tau, uuc_err = [], [], []
     # may need to add uuc2 to study the spontaneous symmetry breaking
     un2_ave,un2_tau,un2_err = [],[],[]
     un2p_ave,un2p_tau,un2p_err = [],[],[]
-    IKun2_ave, IKun2_tau, IKun2_err = [], [], []
     if(Ne==2):
         Ledif_ave,Ledif_tau,Ledif_err=[],[],[]
     cpar_ind = find_cpar_ind(par_nm,mode)
@@ -57,12 +52,7 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
         N = par_dealing[0]
         E = data[0]/N
         Les = data[1:1+Ne]
-        #Leuns = data[1+Ne:1+2*Ne]
-        Ik2s = data[1+Ne:1+2*Ne]
-        #IdA,I2H,I2H2,phi,Tphi2,I2H2dis,IK,IKphi2,Tp2uu,Tuuc,Bond_num,Tun2 = data[1+Ne:]
-        IdA,I2H,I2H2,phi,Tphi2,I2H2dis,IK,IKphi2,Tp2uu,Tuuc,Bond_num,Tun2 = data[1+2*Ne:]
-        phip = phi/N
-        phi2p = Tphi2/Bond_num
+        IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2 = data[1+Ne:]
         p2uu = Tp2uu/Bond_num
         uuc = Tuuc/Bond_num
         N =par[find_cpar_ind(par_nm,"N")]
@@ -112,14 +102,6 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
             Les_tau[e].append(tau)
             Les_err[e].append(np.sqrt(2 * tau / len(Les[e]) * cov0))
 
-            Ik2s_ave[e].append(np.average(Ik2s[e]))
-            rho, cov0 = autocorrelation_function_fft(Ik2s[e])
-            tau, tau_err = tau_int_cal_rho(rho,tau_c)
-            Ik2s_tau[e].append(tau)
-            Ik2s_err[e].append(np.sqrt(2 * tau / len(Ik2s[e]) * cov0))
-
-
-
         # IdA
         IdA_ave.append(np.average(IdA))
         rho, cov0 = autocorrelation_function_fft(IdA)
@@ -142,26 +124,6 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
         I2H2_tau.append(tau)
         I2H2_err.append(np.sqrt(2 * tau / len(I2H2) * cov0))
 
-        # phi
-        phip_ave.append(np.average(phip))
-        rho, cov0 = autocorrelation_function_fft(phip)
-        tau, tau_err = tau_int_cal_rho(rho,tau_c)
-        phip_tau.append(tau)
-        phip_err.append(np.sqrt(2 * tau / len(phip) * cov0))
-
-        # Tphi2
-        phi2p_ave.append(np.average(phi2p))
-        rho, cov0 = autocorrelation_function_fft(phi2p)
-        tau, tau_err = tau_int_cal_rho(rho,tau_c)
-        phi2p_tau.append(tau)
-        phi2p_err.append(np.sqrt(2 * tau / len(phi2p) * cov0))
-
-        # I2H2dis
-        I2H2dis_ave.append(np.average(I2H2dis))
-        rho, cov0 = autocorrelation_function_fft(I2H2dis)
-        tau, tau_err = tau_int_cal_rho(rho,tau_c)
-        I2H2dis_tau.append(tau)
-        I2H2dis_err.append(np.sqrt(2 * tau / len(I2H2dis) * cov0))
 
         # IK
         IK_ave.append(np.average(IK))
@@ -208,12 +170,8 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
         # p stands for per bead
         for e in range(Ne):
             f.write(",Les_ave[%d],Les_tau[%d],Les_err[%d]"%(e,e,e))
-        for e in range(Ne):
-            f.write(",Ik2s_ave[%d],Ik2s_tau[%d],Ik2s_err[%d]"%(e,e,e))
-        #for e in range(Ne):
-        #    f.write(",Leuns_ave[%d],Leuns_tau[%d],Leuns_err[%d]"%(e,e,e))
 
-        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,phip_ave,phip_tau,phip_err,phi2p_ave,phi2p_tau,phi2p_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err")
+        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err")
         if(Ne==2):
             f.write(",Ledif_ave,Ledif_tau,Ledif_err")
         f.write("\n")
@@ -221,11 +179,8 @@ def O_stat_ana(foldername,par,par_nm,par_dg, mode, CnequalsKc=0, tau_c=6):
             f.write("%f,%f,%f,%f" % (cpar[i], E_ave[i], E_tau[i], E_err[i]))
             for e in range(Ne):
                 f.write(",%f,%f,%f"%(Les_ave[e][i],Les_tau[e][i], Les_err[e][i]))
-            for e in range(Ne):
-                f.write(",%f,%f,%f"%(Ik2s_ave[e][i],Ik2s_tau[e][i], Ik2s_err[e][i]))
-            #for e in range(Ne):
-            #    f.write(",%f,%f,%f"%(Leuns_ave[e][i],Leuns_tau[e][i], Leuns_err[e][i]))
-            f.write(",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f"%(IdA_ave[i], IdA_tau[i], IdA_err[i],I2H_ave[i], I2H_tau[i], I2H_err[i],I2H2_ave[i], I2H2_tau[i], I2H2_err[i], phip_ave[i],phip_tau[i],phip_err[i], phi2p_ave[i],phi2p_tau[i],phi2p_err[i],I2H2dis_ave[i],I2H2dis_tau[i],I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i]))
+
+            f.write(",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f"%(IdA_ave[i], IdA_tau[i], IdA_err[i],I2H_ave[i], I2H_tau[i], I2H_err[i],I2H2_ave[i], I2H2_tau[i], I2H2_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i]))
             if(Ne==2):
                 f.write(",%f,%f,%f"%(Ledif_ave[i], Ledif_tau[i], Ledif_err[i]))
             f.write("\n")

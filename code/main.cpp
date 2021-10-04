@@ -18,6 +18,9 @@ int main(int argc, char const *argv[])
     double l0 = 1.73;
     double delta_s = 0.2;
     double delta_theta = 0.5;
+    double delta_r = 0.2;
+    double bin_num = 80;
+
     std::string folder;
     N = std::atoi(argv[1]);
     imod = std::atoi(argv[2]); // mode of initialization
@@ -53,7 +56,7 @@ int main(int argc, char const *argv[])
 
         membrane.State_write(folder + "/State_" + finfo + "_init.csv");
         //membrane.Thermal(20, int(N / (delta_s * delta_s)) + 1, 1, delta_s, delta_theta);
-        membrane.O_MC_measure(20, 5, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, folder, finfo);
+        membrane.O_MC_measure(20, 5, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 
         return 0;
@@ -66,7 +69,7 @@ int main(int argc, char const *argv[])
         membrane.Thermal(1000, int(N / (delta_s * delta_s)), 100, delta_s,
                          delta_theta);
         membrane.O_MC_measure(2000, 10, int(N / (delta_s * delta_s)) + 1, delta_s,
-                              delta_theta, folder, finfo);
+                              delta_theta, delta_r,bin_num, folder, finfo);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 
         return 0;
