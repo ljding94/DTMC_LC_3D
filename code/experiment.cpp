@@ -27,7 +27,7 @@ void dtmc_lc::State_write(std::string filename)
         f << "l0=" << l0 << "\n";
         f << "max_nei_size=" << max_nei_size << "\n";
         //f << "x,y,z,ux,uy,uz,nx,ny,nz,phi,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
-        f << "x,y,z,ux,uy,uz,fz,nx,ny,nz,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
+        f << "x,y,z,ux,uy,uz,nx,ny,nz,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
         //f << "x,y,z,ux,uy,uz,phi,dA,2H,ds,dAK,un2,edge_num,edge_neibs,neibs";
         for (int i = 0; i < mesh.size(); i++)
         {
@@ -35,7 +35,6 @@ void dtmc_lc::State_write(std::string filename)
               << mesh[i].R[0] << "," << mesh[i].R[1] << "," << mesh[i].R[2];
             f << "," << mesh[i].u[0] << "," << mesh[i].u[1] << ","
               << mesh[i].u[2];
-            f << "," << mesh[i].fz;
             f << "," << mesh[i].n[0] << "," << mesh[i].n[1] << "," << mesh[i].n[2];
             //f << "," << mesh[i].phi;
             f << "," << mesh[i].dAn2H[0] << "," << mesh[i].dAn2H[1] << ","

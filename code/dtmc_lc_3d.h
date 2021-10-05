@@ -51,7 +51,6 @@ struct vertex
     std::vector<double> R{0, 0, 0}; // position (x,y,z)
     std::vector<double> u{0, 0, 1}; // rod orientation (ux,uy,uz)
     std::vector<double> n{0, 0, 0}; // membrane normal
-    int fz;                         // if 1, can't move in z direction
     std::vector<int> nei;           // index of neighbors
     // nei[k+1],nei[k] are connected!!!
     int edge_num; // which edge
@@ -94,6 +93,7 @@ public:
     // repetition due to symmetry,
     std::vector<int> fixed_beads;   // beads can't be moved
     std::vector<int> fixed_beads_z; // beads can't be moved in the z direction for imod3 cylinder initial shape
+    std::vector<double> edge_zlim;
     void mesh_bead_info_update(std::vector<int> ind_relate);
 
     E_parameter Epar;

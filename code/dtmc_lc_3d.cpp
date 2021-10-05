@@ -454,7 +454,7 @@ void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
     // cylinder initial shape
     //use cylinder initialization
     int L, Lr, Lflag; // L, length of the cylinder per number of beads
-    double d1, d0;
+    double d0;
     d0 = d0_;
     if (lf_ == 0)
     {
@@ -469,10 +469,12 @@ void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
         {
             if (N % L == 0)
             {
-                d1 = lf_ / (L - 1);
-                std::cout << "d1=" << d1 << "\n";
-                if (d1 > 1.1 && d1 < (l0 - 0.1))
+                //d1 = (lf_ + 1) / (L - 1); //0.5 cushion for each side of the edge at the initial
+                //std::cout << "d1=" << d1 << "\n";
+                //if (d1 > 1.1 && d1 < (l0 - 0.1))
+                if(d0*(L-1)*0.5*std::sqrt(3)>(lf+1))
                 {
+                    std::cout << "L=" << L << "\n";
                     Lflag = 1;
                     break;
                 }
@@ -483,7 +485,11 @@ void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
         {
             std::cout << "no appropriate L for this lf\n";
         }
-        d0 = d1;
+        else
+        {
+            edge_zlim = {-0.5*lf, 0.5*lf};
+        }
+
     }
     Lr = N / L; // perimeter of cylinder circular bottom
     if (N % L != 0)
@@ -501,8 +507,7 @@ void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
         y_n = i / Lr;
         mesh[i].R[0] = R * std::cos(del_theta * (x_n + 0.5 * y_n));
         mesh[i].R[1] = R * std::sin(del_theta * (x_n + 0.5 * y_n));
-        mesh[i].R[2] = d0 * 0.5 * std::sqrt(3) * y_n;
-        mesh[i].fz = 0;
+        mesh[i].R[2] = d0 * 0.5 * std::sqrt(3) * (y_n - 0.5*(L-1)); // 0.5 is for the extra cushion
 
         // put bonds
         if (y_n == 0)
@@ -572,24 +577,6 @@ void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
                 push_neis_back(i, {1, Lr, Lr - 1, -1, -Lr, -Lr + 1});
                 push_bneis_list(i, {1, Lr, Lr - 1, -1, -Lr, -Lr + 1});
             }
-        }
-    }
-    // add beads fixed in z direction
-    int el_len, eind;
-    if (Lflag == 1)
-    {
-        for (int e = 0; e < 2; e++)
-        {
-            el_len = edge_lists[e].size();
-            for (int j = 0; j < 3; j++)
-            {
-                // catch 3 beads on each ring
-                eind = edge_lists[e][j * int(el_len / 3)];
-                mesh[eind].fz = 1;
-            }
-            //fixed_beads_z.push_back(edge_lists[e][0]);
-            //fixed_beads_z.push_back(edge_lists[e][int(el_len / 3)]);
-            //fixed_beads_z.push_back(edge_lists[e][2 * int(el_len / 3)]);
         }
     }
 }

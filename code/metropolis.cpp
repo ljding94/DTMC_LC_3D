@@ -29,10 +29,11 @@ int dtmc_lc::bead_metropolis(double delta_s)
 
 #pragma region : find update, and related beads
 
-    do
+    /*do
     {
         index = rand_pos(gen);
     } while (list_a_nei_b(fixed_beads, index) != -1);
+    */
     // TODO: generalize the fixed bead condition, only fix update on the z direction when doing pulling experiment on catenoid, Ne2 membrane
 
     // checked, it will pass value instead of pointer
@@ -62,13 +63,8 @@ int dtmc_lc::bead_metropolis(double delta_s)
 
 #pragma region : bead MC update proposal
     //if (list_a_nei_b(fixed_beads_z, index) != -1)
-    if (mesh[index].fz == 1)
-    {
-        del_dim = 2;
-    }else{
-        del_dim=3;
-    }
-    for (int k = 0; k < del_dim; k++)
+
+    for (int k = 0; k < 3; k++)
     {
         delta_pos[k] = 2 * delta_s * rand_uni(gen) - delta_s;
         mesh[index].R[k] += delta_pos[k];
@@ -77,6 +73,21 @@ int dtmc_lc::bead_metropolis(double delta_s)
 #pragma endregion
 
 #pragma region : hard bead and tether potential between all beads
+    // limit on edge beads
+    if(lf!=0){
+        if(mesh[index].edge_num==0 and mesh[index].R[2]>edge_zlim[0]){
+            // edge bead out of range
+            mesh[index].R = bead_relate[0].R;
+            // return previous position
+            return 0;
+        }else if(mesh[index].edge_num==1 and mesh[index].R[2]<edge_zlim[1]){
+            // edge bead out of range
+            mesh[index].R = bead_relate[0].R;
+            // return previous position
+            return 0;
+        }
+    }
+
     // hard bead potential
     for (int nei_ind = 0; nei_ind < mesh.size(); nei_ind++)
     {
@@ -758,6 +769,17 @@ int dtmc_lc::edge_metropolis()
         {
             // std::cout << "couldn't find ind_i!!?\n";
             return 0;
+        }
+        // check for ind_i, position, need to comply with edge limit in pulling case
+        if(lf!=0){
+            if(mesh[ind_j].edge_num==0 && mesh[ind_i].R[2]>edge_zlim[0]){
+                // bottom edge beads has to be z<=0
+                return 0;
+            }
+            if(mesh[ind_j].edge_num==1 && mesh[ind_i].R[2]<edge_zlim[1]){
+                // top edge beads has to be z>=lf
+                return 0;
+            }
         }
 
         // for Ne>1 check if i has neighbour on the other edge

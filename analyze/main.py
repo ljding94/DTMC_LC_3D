@@ -11,13 +11,13 @@ from test_plot import *
 
 def main():
     print("hello! dtmc_lc analysis")
-    #config_plot3D("../data/scratch_local/State_N400_imod3_Ne2_lf18_kar100_karg0.0_lam5.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0,fnormal=0)
+    config_plot3D("../data/scratch_local/State_N400_imod3_Ne2_lf20_kar100_karg0.0_lam5.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0,fnormal=0)
     #config_plot3D("../data/scratch_local/State_N400_imod3_Ne2_lf35_kar100_karg0.0_lam5.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0,fnormal=0)
     #config_plot3D("../data/Ne1/Sep8_2021/State_N500_imod1_Ne1_kar100_J0.00_C00.0_karg0.0_lam6.0_B0.0_Kd5.0_q3.0_Cn40.0.csv",mesh=1,rod=1,fnormal=0,piwall=1)
     #config_plot3D("../data/Ne1/Sep6_2021/State_N400_imod1_Ne1_kar50_J0.00_C00.0_karg0.0_lam6.0_B0.0_Kd9.0_q1.0_Cn40.0.csv",mesh=1,rod=0,fnormal=0,piwall=1)
 
     #config_plot3D("../data/Ne2/Sep15_2021/State_N400_imod1_Ne2_kar100_J0.00_C00.0_karg3.0_lam6.0_B0.0_Kd1.0_q2.7_Cn30.0.csv",mesh=1,rod=0,piwall=1,fnormal=0)
-    #return 0
+    return 0
 
     #foldername = "../data/Ne2/Apr29_2021" # kinda switch to Ne2 simulation for next paper
     #foldername = "../data/Ne1/May4_2021" # mobius strip~,
