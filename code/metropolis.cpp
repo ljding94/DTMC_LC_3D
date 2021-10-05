@@ -75,12 +75,12 @@ int dtmc_lc::bead_metropolis(double delta_s)
 #pragma region : hard bead and tether potential between all beads
     // limit on edge beads
     if(lf!=0){
-        if(mesh[index].edge_num==0 and mesh[index].R[2]>edge_zlim[0]){
+        if(mesh[index].edge_num==0 && mesh[index].R[2]>edge_zlim[0]){
             // edge bead out of range
             mesh[index].R = bead_relate[0].R;
             // return previous position
             return 0;
-        }else if(mesh[index].edge_num==1 and mesh[index].R[2]<edge_zlim[1]){
+        }else if(mesh[index].edge_num==1 && mesh[index].R[2]<edge_zlim[1]){
             // edge bead out of range
             mesh[index].R = bead_relate[0].R;
             // return previous position

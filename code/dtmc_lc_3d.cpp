@@ -472,7 +472,7 @@ void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
                 //d1 = (lf_ + 1) / (L - 1); //0.5 cushion for each side of the edge at the initial
                 //std::cout << "d1=" << d1 << "\n";
                 //if (d1 > 1.1 && d1 < (l0 - 0.1))
-                if(d0*(L-1)*0.5*std::sqrt(3)>(lf+1))
+                if(d0*(L-1)*0.5*std::sqrt(3)>(lf_+1))
                 {
                     std::cout << "L=" << L << "\n";
                     Lflag = 1;
@@ -487,7 +487,7 @@ void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
         }
         else
         {
-            edge_zlim = {-0.5*lf, 0.5*lf};
+            edge_zlim = {-0.5*lf_, 0.5*lf_};
         }
 
     }
