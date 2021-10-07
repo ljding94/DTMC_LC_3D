@@ -34,6 +34,7 @@ int dtmc_lc::bead_metropolis(double delta_s)
         index = rand_pos(gen);
     } while (list_a_nei_b(fixed_beads, index) != -1);
     */
+    index = rand_pos(gen);
     // TODO: generalize the fixed bead condition, only fix update on the z direction when doing pulling experiment on catenoid, Ne2 membrane
 
     // checked, it will pass value instead of pointer
@@ -75,12 +76,22 @@ int dtmc_lc::bead_metropolis(double delta_s)
 #pragma region : hard bead and tether potential between all beads
     // limit on edge beads
     if(lf!=0){
+        // pulling for 2 edges
         if(mesh[index].edge_num==0 && mesh[index].R[2]>edge_zlim[0]){
             // edge bead out of range
             mesh[index].R = bead_relate[0].R;
             // return previous position
             return 0;
         }else if(mesh[index].edge_num==1 && mesh[index].R[2]<edge_zlim[1]){
+            // edge bead out of range
+            mesh[index].R = bead_relate[0].R;
+            // return previous position
+            return 0;
+        }
+    }
+    else if(Epar.g!=0){
+        // pull edge 0 when there is gravity
+        if(mesh[index].edge_num==0 && mesh[index].R[2]>0){
             // edge bead out of range
             mesh[index].R = bead_relate[0].R;
             // return previous position
@@ -771,13 +782,22 @@ int dtmc_lc::edge_metropolis()
             return 0;
         }
         // check for ind_i, position, need to comply with edge limit in pulling case
+
         if(lf!=0){
+            // pulling experiment for Ne2
             if(mesh[ind_j].edge_num==0 && mesh[ind_i].R[2]>edge_zlim[0]){
                 // bottom edge beads has to be z<=0
                 return 0;
             }
             if(mesh[ind_j].edge_num==1 && mesh[ind_i].R[2]<edge_zlim[1]){
                 // top edge beads has to be z>=lf
+                return 0;
+            }
+        }
+        else if (Epar.g!=0){
+            // graviti experiment for edge 0
+            if(mesh[ind_j].edge_num==0 && mesh[ind_i].R[2]>0){
+                // bottom edge beads has to be z<=0
                 return 0;
             }
         }

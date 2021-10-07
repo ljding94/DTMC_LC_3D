@@ -50,12 +50,17 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
     un2_grad,un2_grad_err = [],[]
     cpar_tsqN = []
     #some special cases
+    F_ave,F_err=[],[] # just for calculating the pulling force
     for i in range(len(pars)):
         if(mode=="q"):
             uuc_grad.append(np.gradient(uuc_ave[i],cpar[i]))
             uuc_grad_err.append(np.zeros(len(cpar[i])))
             un2_grad.append(np.gradient(un2_ave[i],cpar[i]))
             un2_grad_err.append(np.zeros(len(cpar[i])))
+        if(mode=="lf"):
+            fa,fe = Chi2_gradient(cpar[i],E_ave[i],E_err[i],4)
+            F_ave.append(fa)
+            F_err.append(fe)
     ppi = 72
     # LineWidth, FontSize, LabelSize = 1, 9, 8
     plt.figure()
@@ -67,6 +72,9 @@ def Os_pars_plot(foldername, pars,par_nm,par_dg, mode):
                 cpar, colors, alphas)
     O_cpar_plot(axs[1,0], Le_ave, Le_err, O_label, "Le", r"$\int ds$",cpar, colors, alphas)
     if Ne==2:
+        if(mode=="lf"):
+            O_cpar_plot(axs[0,1], F_ave, F_err, O_label, "F", r"$\partial{E/N}/\partial{l_f}$",cpar, colors, alphas)
+            axs[0,1].set_ylim(0,)
         Le_ave_diff = np.abs(Les_ave[1]-Les_ave[0])
         Le_err_diff = np.sqrt(np.power(Les_err[1],2)+np.power(Les_err[0],2))
         O_cpar_plot(axs[1,1], Le_ave_diff, Le_err_diff, O_label, "Le_diff", r"$|\left<\int_0 ds\right>-\left<\int_1 ds\right>|$",cpar, colors, alphas)

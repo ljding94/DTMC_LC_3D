@@ -30,6 +30,8 @@ struct observable
     double IdA;   // integral of dA
     double I2H;   // integral of dA(2H)
     int Bond_num; // total number of bonds0
+    // gravitational
+    double TRz;
 };
 //hamiltonion parameters
 struct E_parameter
@@ -44,6 +46,7 @@ struct E_parameter
     //double Kt;   //liquid crystalline interaction for the twist only
     double q;  // liquid crystall twist constant
     double Cn; // liquid crystal to membrane normal moduli
+    double g; // g field for beads gravity
 };
 struct vertex
 {
@@ -78,7 +81,7 @@ public:
     int N;       // number of beads
     int imod;    // mode for initialization shape
     int Ne;      // number of edges
-    int lf;      //fixed distance along pulling direcion (z for cylinder)
+    double lf;      //fixed distance along pulling direcion (z for cylinder)
     // also used to set fixed distance betwen two beads
     double l0; // in-bulk tether maximum length
 
@@ -119,7 +122,7 @@ public:
     // put the beads and bonds in to position accordingly
     void init_rhombus_shape(double d0_);
     void init_disk_shape(double d0_);
-    void init_cylinder_shape(double d0_, double lf_); // lf will over write d0_ when lf!=0
+    void init_cylinder_shape(double d0_); // when lf!=0
     void init_mobius_shape(double d0_);
     int add_hole_as_edge(int b0, int edgenum); // return 0 if fail to do so with b0
 

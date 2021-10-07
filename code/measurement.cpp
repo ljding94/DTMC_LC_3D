@@ -191,6 +191,7 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         // miscellany terms
         Ob.IdA += mesh[ind].dAn2H[0];
         Ob.I2H += mesh[ind].dAn2H[0] * mesh[ind].dAn2H[1];
+        Ob.TRz += mesh[ind].R[2];
     }
     // crystalline terms
     for (int i = 0; i < bond_relate.size(); i++)
@@ -232,6 +233,7 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
     //Ob_sys.IKun2 += Ob_new.IKun2 - Ob_old.IKun2;
     Ob_sys.IdA += Ob_new.IdA - Ob_old.IdA;
     Ob_sys.I2H += Ob_new.I2H - Ob_old.I2H;
+    Ob_sys.TRz += Ob_new.TRz - Ob_old.TRz;
 
     Ob_sys.Bond_num += Ob_new.Bond_num - Ob_old.Bond_num;
 }
@@ -252,6 +254,7 @@ double dtmc_lc::E_m(observable Ob)
     E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
     //E += Epar.Ksb * Ob.Tuusb + Epar.Kt * Ob.Tuut; // use different moduli for twist and the other two
     E += -0.5 * Epar.Cn * Ob.Tun2;
+    E += -Epar.g * Ob.TRz;
     //E += Epar.kard * Ob.IKun2;
 
     //E += -0.5 * (Epar.Cn * Ob.Tun2 + Epar.Cnp * Ob.Tun2p);
@@ -761,17 +764,19 @@ std::vector<double> dtmc_lc::comR_m()
     return comR;
 }
 
-std::vector<double> dtmc_lc::rho_rcom_m(double del_r, int bin_num){
-    std::vector<double> rhor(bin_num,0);
+std::vector<double> dtmc_lc::rho_rcom_m(double del_r, int bin_num)
+{
+    std::vector<double> rhor(bin_num, 0);
     int bin;
     double r;
     std::vector<double> comR = comR_m();
     for (int i = 0; i < mesh.size(); i++)
     {
-        r = distancefp(i,comR);
-        bin = int(r/del_r);
-        if(bin<bin_num){
-            rhor[bin]+=1;
+        r = distancefp(i, comR);
+        bin = int(r / del_r);
+        if (bin < bin_num)
+        {
+            rhor[bin] += 1;
         }
     }
     return rhor;

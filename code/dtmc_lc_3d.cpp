@@ -29,6 +29,8 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     Epar.q = Epar_.q;
     // coupling
     Epar.Cn = Epar_.Cn;
+    // gravitational
+    Epar.g = Epar_.g;  // if g!=0, edge 0 z position can't be greater than 0
     //Epar.kard = Epar_.kard;
     //Epar.lamd = Epar_.lamd;
     //Epar.ms = Epar_.ms;
@@ -58,7 +60,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     }
     else if (imod == 3)
     {
-        init_cylinder_shape(d0_, lf_);
+        init_cylinder_shape(d0_);
         num_edge_exist = 2;
     }
     else if (imod == 4)
@@ -185,7 +187,7 @@ void dtmc_lc::init_rhombus_shape(double d0_)
 
         mesh[i].R[0] = d0_ * (x_n + 0.5 * y_n);
         mesh[i].R[1] = d0_ * 0.5 * std::sqrt(3) * y_n;
-        mesh[i].R[2] = 0;
+        mesh[i].R[2] = -0.5;
 
         // put bonds
         if (x_n == L - 1)
@@ -350,7 +352,7 @@ void dtmc_lc::init_disk_shape(double d0_)
         y_n = i / (4 * rb + 1) - 2 * rb; //-2r is for centralization
         init_mesh[i].R[0] = d0_ * (x_n + 0.5 * y_n);
         init_mesh[i].R[1] = d0_ * 0.5 * std::sqrt(3) * y_n;
-        init_mesh[i].R[2] = 0;
+        init_mesh[i].R[2] = -0.5;
         // put neighbors as if every on is in-bulk
         init_mesh[i].edge_num = -1;
         //ignore bead on init_mesh edge
@@ -447,7 +449,7 @@ void dtmc_lc::init_disk_shape(double d0_)
     } while (eind != edge_lists[0][0]);
 }
 
-void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
+void dtmc_lc::init_cylinder_shape(double d0_)
 {
     // only work for Ne>=2
     int x_n, y_n; // position of the vertex in the two vector coordinate
@@ -456,7 +458,7 @@ void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
     int L, Lr, Lflag; // L, length of the cylinder per number of beads
     double d0;
     d0 = d0_;
-    if (lf_ == 0)
+    if (lf == 0)
     {
         L = 10;
     }
@@ -469,10 +471,10 @@ void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
         {
             if (N % L == 0)
             {
-                //d1 = (lf_ + 1) / (L - 1); //0.5 cushion for each side of the edge at the initial
+                //d1 = (lf + 1) / (L - 1); //0.5 cushion for each side of the edge at the initial
                 //std::cout << "d1=" << d1 << "\n";
                 //if (d1 > 1.1 && d1 < (l0 - 0.1))
-                if(d0*(L-1)*0.5*std::sqrt(3)>(lf_+1))
+                if(d0*(L-1)*0.5*std::sqrt(3)>(lf+1))
                 {
                     std::cout << "L=" << L << "\n";
                     Lflag = 1;
@@ -487,7 +489,8 @@ void dtmc_lc::init_cylinder_shape(double d0_, double lf_)
         }
         else
         {
-            edge_zlim = {-0.5*lf_, 0.5*lf_};
+            edge_zlim.resize(2);
+            edge_zlim = {-0.5*lf, 0.5*lf};
         }
 
     }
