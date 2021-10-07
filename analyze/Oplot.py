@@ -163,6 +163,63 @@ def Geig_pars_plot(foldername, pars,par_nm,par_dg, mode):
     plt.savefig(foldername + "/Gij_" + mode + ".pdf",format="pdf", bbox_extra_artists=(lgd,), bbox_inches='tight', transparent=True)
     plt.close()
 
+def rhor_ave_plot(foldername, par, par_nm, par_dg, mode, del_r, tag="",leg_num=5):
+    # plot density distribution from the center of mass
+    rhor_all = []
+    cpar_ind = find_cpar_ind(par_nm,mode)
+    print("par,cpar_ind")
+    print(par,cpar_ind)
+    cpar = par[cpar_ind]
+    for i in range(len(cpar)):
+        par_dealing = par[:]
+        par_dealing[cpar_ind] = par[cpar_ind][i]
+        f2rtail = "/rhor"
+        for j in range(0,len(par_dealing)):
+            f2rtail+="_"+par_nm[j]+"%.*f"%(par_dg[j],par_dealing[j])
+        f2rtail+=".csv"
+        file2read = foldername +f2rtail
+        rhodata = np.loadtxt(file2read, skiprows=0, delimiter=",", unpack=True)
+        rhor_all.append(np.average(rhodata,axis=1))
+    # save result to file
+    f2stail = "/rhor"
+    for j in range(0,len(par)):
+        if(j==cpar_ind):
+            f2stail+="_"+par_nm[j]+"s"
+        else:
+            f2stail+="_"+par_nm[j]+"%.*f"%(par_dg[j],par_dealing[j])
+    f2stail+="_ana.csv"
+    savefile = foldername + f2stail
+
+    if(leg_num>len(cpar)):
+        leg_num=cpar
+    leg_ind = np.linspace(0,len(cpar)-1,leg_num,dtype=np.int)
+    rhor_shift = np.linspace(0,2,len(cpar)) ## this is negotiable
+
+    ppi = 72
+    fig= plt.figure(figsize=(246 / ppi*1, 246 / ppi * 0.8))
+    ax = fig.add_subplot(111)
+    bin_num = len(rhor_all[0])
+    rplot = np.linspace(0.5*del_r,bin_num*del_r-0.5*del_r,bin_num)
+
+    for i in range(len(cpar)):
+        cpar_plot = np.ones(bin_num)*cpar[i]
+        LS = ":"
+        Lb = None
+        if(i in leg_ind):
+            LS = "-"
+            Lb = mode+"=%.*f"%(par_dg[cpar_ind],cpar[i])
+
+        ylabel = r"$\rho(r)/4\pi r^2\delta r$+ shift"
+        ax.plot(rplot,rhor_all[i]/(4*np.pi*rplot*rplot*del_r)+rhor_shift[i],linestyle=LS,label=Lb)
+
+    ax.set_xlabel(r"r")
+
+    ax.set_ylabel(ylabel)
+    ax.legend(title=tag)
+    plt.tight_layout()
+    plt.savefig(savefile[:-4]+".pdf", format="pdf")
+    plt.close()
+
 
 def O_cpar_plot(ax, O, O_err, O_label, O_name, O_latex, cpar, Colors, Alphas, Xscale="linear", Yscale="linear",ylim=None,Ms=3):
     print("plotting %s vs cpar" % O_name)

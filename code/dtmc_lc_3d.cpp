@@ -787,6 +787,7 @@ void dtmc_lc::Ob_init(observable &Ob)
     {
         Ob.Bond_num += edge_lists[n].size();
     }
+    Ob.TRz = 0;
 }
 
 int dtmc_lc::if_near_edge(int b)

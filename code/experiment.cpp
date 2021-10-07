@@ -203,6 +203,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<double> IdA_all;
     std::vector<double> I2H_all;
     std::vector<int> Bond_num_all;
+    std::vector<double> TRz_all;
 
     std::vector<double> D_edge_all;
     std::vector<std::vector<double>> Gij_all;
@@ -249,6 +250,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         IK_all.push_back(Ob_sys.IK);
         //IKphi2_all.push_back(Ob_sys.IKphi2);
         Bond_num_all.push_back(Ob_sys.Bond_num);
+        TRz_all.push_back(Ob_sys.TRz);
 
         if (sweep_n % sweep_p_G == 0)
         {
@@ -293,7 +295,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             f << "Ik2s[" << e << "],";
         }*/
         //f << "IdA,I2H,I2H2,phi_sum,Tphi2,I2H2dis,IK,IKphi2,Tp2uu,Tuuc,Bond_num,Tun2\n";
-        f << "IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2\n";
+        f << "IdA,I2H,I2H2,IK,Tp2uu,Tuuc,Bond_num,Tun2,TRz\n";
         for (int i = 0; i < E_all.size(); i++)
         {
             f << E_all[i] << ",";
@@ -307,7 +309,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
                 f << Ik2s_all[e][i] << ",";
             }*/
             //f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << phi_sum_all[i] << "," << Tphi2_all[i] << "," << I2H2dis_all[i] << "," << IK_all[i] << "," << IKphi2_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << "," << Bond_num_all[i] << "," << Tun2_all[i] << "\n";
-            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << IK_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << "," << Bond_num_all[i] << "," << Tun2_all[i] << "\n";
+            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << IK_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << "," << Bond_num_all[i] << "," << Tun2_all[i] << "," << TRz_all[i] << "\n";
         }
     }
     f.close();

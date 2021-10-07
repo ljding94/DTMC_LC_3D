@@ -39,6 +39,7 @@ def config_plot_xyz(filename,mesh=0,rod=1,piwall=0,phicolor=0,cvt_map="",cmap_sm
     x,y,z,sx,sy,sz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:17]
     #x,y,z,sx,sy,sz,nx,ny,nz,phi,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:18]
     ns = np.transpose(data[17:])
+    #ns = np.transpose(data[18:])
     #sx,sy,sz=d*sx,d*sy,d*sz
     #x,y,z,sx,sy,sz, enum, en0, en1 = data[5:14]
     x_min, x_max = np.min(x),np.max(x)
