@@ -18,7 +18,7 @@ int main(int argc, char const *argv[])
     double l0 = 1.73;
     double delta_s = 0.1;
     double delta_theta = 0.5;
-    double delta_r = 0.2;
+    double delta_r = 0.1;
     double bin_num = 80;
 
     std::string folder;
@@ -28,15 +28,15 @@ int main(int argc, char const *argv[])
     lf = std::atof(argv[4]); // for N=400, lf=17-36 works
     E_parameter Epar;
     Epar.kar = std::atof(argv[5]);
-    //Epar.C0 = std::atof(argv[6]);
-    Epar.karg = std::atof(argv[6]);
-    Epar.lam = std::atof(argv[7]);
-    Epar.Kd = std::atof(argv[8]);
+    Epar.C0 = std::atof(argv[6]);
+    Epar.karg = std::atof(argv[7]);
+    Epar.lam = std::atof(argv[8]);
+    Epar.Kd = std::atof(argv[9]);
     //Epar.Ksb = std::atof(argv[6]);
     //Epar.Kt = std::atof(argv[7]);
-    Epar.q = std::atof(argv[9]);
-    Epar.Cn = std::atof(argv[10]);
-    Epar.g = std::atof(argv[11]);
+    Epar.q = std::atof(argv[10]);
+    Epar.Cn = std::atof(argv[11]);
+    // Epar.g = std::atof(argv[12]);
     //Epar.kard = std::atof(argv[10]);
     //Epar.lamd = std::atof(argv[11]);
 
@@ -46,7 +46,7 @@ int main(int argc, char const *argv[])
     dtmc_lc membrane(beta, N, imod, Ne, lf, d0, l0, Epar);
     N = membrane.mesh.size();
 
-    std::string finfo = "N" + std::to_string(N) + "_imod" + std::string(argv[2]) + "_Ne" + std::string(argv[3]) + "_lf" + std::string(argv[4]) + "_kar" + std::string(argv[5]) + "_karg" + std::string(argv[6]) + "_lam" + std::string(argv[7]) + "_Kd" + std::string(argv[8]) + "_q" + std::string(argv[9]) + "_Cn" + std::string(argv[10])+ "_g" + std::string(argv[11]);
+    std::string finfo = "N" + std::to_string(N) + "_imod" + std::string(argv[2]) + "_Ne" + std::string(argv[3]) + "_lf" + std::string(argv[4]) + "_kar" + std::string(argv[5])+ "_C0" + std::string(argv[6]) + "_karg" + std::string(argv[7]) + "_lam" + std::string(argv[8]) + "_Kd" + std::string(argv[9]) + "_q" + std::string(argv[10]) + "_Cn" + std::string(argv[11]);
 
     if (argc == 13)
     {

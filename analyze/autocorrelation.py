@@ -10,7 +10,8 @@ chapter 4, i.e. Sokal's windowing method.
 
 
 def autocorrelation_function_fft(ts_):
-    ts = np.asarray(ts_, dtype=np.float64)
+    ts = ts_.copy()
+    ts = np.asarray(ts, dtype=np.float64)
     ts -= ts.mean()
     ts_len = len(ts)
     cov = fftconvolve(ts, ts[::-1], mode='full')

@@ -15,7 +15,7 @@ struct observable
     double I2H2; // integral of dA (2H)^2
     //double Iphi;              // sum of phi
     //double Tphi2;             // sum of phi*phi for near sites
-    //double I2H2dis;           // integral of dA (2H - 2H0)^2, dis = displacement, where 2H0 = phi*C0
+    double I2H2dis;           // integral of dA (2H - C0)^2, dis = displacement
     double IK; // integral of dA(K)
     //double IKphi2;            // integral of dA(K*phi^2)
     std::vector<double> Les; // list of edge length
@@ -38,7 +38,7 @@ struct E_parameter
 {
     double kar; // mean curvature bending stiffness
     //double J;    // side-side phi field Ising-like intereaction
-    //double C0;   // spontaneous absolute mean curvature (introduced by the hooping of short rods)
+    double C0;   // spontaneous absolute mean curvature (introduced by the hooping of short rods)
     double karg; // Gaussian curvature bending stiffness
     double lam;  // line tension coefficient
     double Kd;   // liquid crystal interaction moduli

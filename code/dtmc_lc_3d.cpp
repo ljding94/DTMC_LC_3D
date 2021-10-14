@@ -18,7 +18,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     // geometric
     Epar.kar = Epar_.kar;
     //Epar.J = Epar_.J;
-    //Epar.C0 = Epar_.C0;
+    Epar.C0 = Epar_.C0;
     Epar.karg = Epar_.karg;
     Epar.lam = Epar_.lam;
     //Epar.B = Epar_.B;
@@ -30,7 +30,8 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     // coupling
     Epar.Cn = Epar_.Cn;
     // gravitational
-    Epar.g = Epar_.g;  // if g!=0, edge 0 z position can't be greater than 0
+    //Epar.g = Epar_.g;  // if g!=0, edge 0 z position can't be greater than 0
+    Epar.g = 0; // g!=0 case will be studied in a another project
     //Epar.kard = Epar_.kard;
     //Epar.lamd = Epar_.lamd;
     //Epar.ms = Epar_.ms;
@@ -474,7 +475,7 @@ void dtmc_lc::init_cylinder_shape(double d0_)
                 //d1 = (lf + 1) / (L - 1); //0.5 cushion for each side of the edge at the initial
                 //std::cout << "d1=" << d1 << "\n";
                 //if (d1 > 1.1 && d1 < (l0 - 0.1))
-                if(d0*(L-1)*0.5*std::sqrt(3)>(lf+1))
+                if (d0 * (L - 1) * 0.5 * std::sqrt(3) > (lf + 1))
                 {
                     std::cout << "L=" << L << "\n";
                     Lflag = 1;
@@ -490,9 +491,8 @@ void dtmc_lc::init_cylinder_shape(double d0_)
         else
         {
             edge_zlim.resize(2);
-            edge_zlim = {-0.5*lf, 0.5*lf};
+            edge_zlim = {-0.5 * lf, 0.5 * lf};
         }
-
     }
     Lr = N / L; // perimeter of cylinder circular bottom
     if (N % L != 0)
@@ -510,7 +510,7 @@ void dtmc_lc::init_cylinder_shape(double d0_)
         y_n = i / Lr;
         mesh[i].R[0] = R * std::cos(del_theta * (x_n + 0.5 * y_n));
         mesh[i].R[1] = R * std::sin(del_theta * (x_n + 0.5 * y_n));
-        mesh[i].R[2] = d0 * 0.5 * std::sqrt(3) * (y_n - 0.5*(L-1)); // 0.5 is for the extra cushion
+        mesh[i].R[2] = d0 * 0.5 * std::sqrt(3) * (y_n - 0.5 * (L - 1)); // 0.5 is for the extra cushion
 
         // put bonds
         if (y_n == 0)
@@ -768,7 +768,7 @@ void dtmc_lc::Ob_init(observable &Ob)
 {
     Ob.E = 0;
     Ob.I2H2 = 0;
-    ;
+    Ob.I2H2dis = 0;
     Ob.IK = 0;
     Ob.Les.resize(Ne);
     //Ob.Ik2s.resize(Ne);
