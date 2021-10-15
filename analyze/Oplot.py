@@ -45,7 +45,7 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     Le_ave = np.sum(Les_ave, axis=0)
     Le_err = np.sqrt(np.sum(np.power(Les_err, 2), axis=0))
 
-    IdA_ave, IdA_tau, IdA_err, I2H_ave, I2H_tau, I2H_err, I2H2_ave, I2H2_tau, I2H2_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err, uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, Rz_ave, Rz_tau, Rz_err = data[7 + 3 * (Ne - 1) : 31 + 3 * (Ne - 1)]
+    IdA_ave, IdA_tau, IdA_err, I2H_ave, I2H_tau, I2H_err, I2H2_ave, I2H2_tau, I2H2_err , I2H2dis_ave, I2H2dis_tau, I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err, uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err = data[7 + 3 * (Ne - 1) : 31 + 3 * (Ne - 1)]
     if Ne == 2:
         Ledif_ave, Ledif_tau, Ledif_err = data[31 + 3 * (Ne - 1) :]
     uuc_grad, uuc_grad_err = [], []
@@ -93,15 +93,16 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
 
     O_cpar_plot(axs[2, 0], IdA_ave, IdA_err, O_label, "IdA", r"$\int dA$", cpar, colors, alphas)
     O_cpar_plot(axs[3, 0], I2H_ave, I2H_err, O_label, "I2H", r"$\int dA (2H)$", cpar, colors, alphas)
-    print("I2H_ave-I2H2_ave", I2H_ave - I2H2_ave)
-    O_cpar_plot(axs[4, 0], I2H2_ave / (16 * np.pi), I2H2_err / (16 * np.pi), O_label, "I2H2", r"$\int dA (2H)^2/(16\pi)$", cpar, colors, alphas)
 
-    O_cpar_plot(axs[5, 0], IK_ave, IK_err, O_label, "IK", r"$\int dA K$", cpar, colors, alphas)
-    O_cpar_plot(axs[6, 0], p2uu_ave, p2uu_err, O_label, "p2uu", r"$\left<1.5 (u_i\cdot u_j)^2-0.5\right>_{(i,j)}$", cpar, colors, alphas)
-    O_cpar_plot(axs[7, 0], uuc_ave, uuc_err, O_label, "uuc", r"$u_c=\left<(u_i\times u_j)\cdot\hat{r}_{ij} (u_i\cdot u_j)\right>_{(i,j)}$", cpar, colors, alphas)
+    O_cpar_plot(axs[4, 0], I2H2_ave / (16 * np.pi), I2H2_err / (16 * np.pi), O_label, "I2H2", r"$\int dA (2H)^2/(16\pi)$", cpar, colors, alphas)
+    O_cpar_plot(axs[5, 0], I2H2dis_ave, I2H2dis_err, O_label, "I2H2dis", r"$\int dA (2H-C_0)^2$", cpar, colors, alphas)
+
+    O_cpar_plot(axs[6, 0], IK_ave, IK_err, O_label, "IK", r"$\int dA K$", cpar, colors, alphas)
+    O_cpar_plot(axs[7, 0], p2uu_ave, p2uu_err, O_label, "p2uu", r"$\left<1.5 (u_i\cdot u_j)^2-0.5\right>_{(i,j)}$", cpar, colors, alphas)
+    O_cpar_plot(axs[8, 0], uuc_ave, uuc_err, O_label, "uuc", r"$u_c=\left<(u_i\times u_j)\cdot\hat{r}_{ij} (u_i\cdot u_j)\right>_{(i,j)}$", cpar, colors, alphas)
     # plot the differential if mode is q
-    O_cpar_plot(axs[8, 0], un2_ave, un2_err, O_label, "un2", r"$u_n=\left<(u_i\cdot n_i)^2\right>_{i}$", cpar, colors, alphas)
-    O_cpar_plot(axs[9, 0], Rz_ave, Rz_err, O_label, "Rz", r"$\sum{z}/N$", cpar, colors, alphas)
+    O_cpar_plot(axs[9, 0], un2_ave, un2_err, O_label, "un2", r"$u_n=\left<(u_i\cdot n_i)^2\right>_{i}$", cpar, colors, alphas)
+
     if mode == "q":
         O_cpar_plot(axs[7, 1], uuc_grad, uuc_grad_err, O_label, "uuc_grad", r"$\partial u_c /\partial q$", cpar, colors, alphas)
         O_cpar_plot(axs[8, 1], un2_grad, un2_grad_err, O_label, "un2_grad", r"$\partial u_n /\partial q$", cpar, colors, alphas)

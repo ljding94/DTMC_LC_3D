@@ -118,7 +118,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     {
         Ob_sys.I2H2 += mesh[i].dAn2H[0] * mesh[i].dAn2H[1] * mesh[i].dAn2H[1];
         //Ob_sys.Iphi += mesh[i].phi;
-        //Ob_sys.I2H2dis += mesh[i].dAn2H[0] * std::pow(mesh[i].dAn2H[1] - mesh[i].phi * Epar.C0, 2);
+        Ob_sys.I2H2dis += mesh[i].dAn2H[0] * std::pow(mesh[i].dAn2H[1] - Epar.C0, 2);
         Ob_sys.IK += mesh[i].dAK;
         //Ob_sys.IKphi2 += mesh[i].dAK * mesh[i].phi * mesh[i].phi;
         if (mesh[i].edge_num != -1)

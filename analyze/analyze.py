@@ -24,7 +24,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
     IdA_ave, IdA_tau, IdA_err = [], [], []
     I2H_ave, I2H_tau, I2H_err = [], [], []
     I2H2_ave, I2H2_tau, I2H2_err = [], [], []
-
+    I2H2dis_ave, I2H2dis_tau, I2H2dis_err = [], [], []
     IK_ave, IK_tau, IK_err = [], [], []
     p2uu_ave, p2uu_tau, p2uu_err = [], [], []
     uuc_ave, uuc_tau, uuc_err = [], [], []
@@ -55,7 +55,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         N = par_dealing[0]
         E = data[0] / N
         Les = data[1 : 1 + Ne]
-        IdA, I2H, I2H2, IK, Tp2uu, Tuuc, Bond_num, Tun2, TRz = data[1 + Ne :]
+        IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2 = data[1 + Ne :]
         p2uu = Tp2uu / Bond_num
         uuc = Tuuc / Bond_num
         N = par[find_cpar_ind(par_nm, "N")]
@@ -63,7 +63,6 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         # Np = int(N*rCnp)
         # un2=Tun2/(N-Np)
         un2 = Tun2 / N
-        Rz = TRz / N
         # un2p=Tun2p/Np if Np>0 else Tun2p
         # Ne2 case, need Ledif for additional info
         if Ne == 2:
@@ -128,6 +127,14 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         I2H2_tau.append(tau)
         I2H2_err.append(np.sqrt(2 * tau / len(I2H2) * cov0))
 
+        # I2H2dis
+        I2H2dis_ave.append(np.average(I2H2dis))
+        rho, cov0 = autocorrelation_function_fft(I2H2dis)
+        tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        # autocorrelation_plot(rho, tau, file2read[:-4] + "_autoI2H2.pdf")
+        I2H2dis_tau.append(tau)
+        I2H2dis_err.append(np.sqrt(2 * tau / len(I2H2) * cov0))
+
         # IK
         IK_ave.append(np.average(IK))
         rho, cov0 = autocorrelation_function_fft(IK)
@@ -156,12 +163,6 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         un2_tau.append(tau)
         un2_err.append(np.sqrt(2 * tau / len(un2) * cov0))
 
-        # Rz
-        Rz_ave.append(np.average(Rz))
-        rho, cov0 = autocorrelation_function_fft(Rz)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        Rz_tau.append(tau)
-        Rz_err.append(np.sqrt(2 * tau / len(Rz) * cov0))
 
     # generalize using par_nm list
     f2stail = "MC"
@@ -180,7 +181,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         for e in range(Ne):
             f.write(",Les_ave[%d],Les_tau[%d],Les_err[%d]" % (e, e, e))
 
-        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,Rz_ave,Rz_tau,Rz_err")
+        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err")
         if Ne == 2:
             f.write(",Ledif_ave,Ledif_tau,Ledif_err")
         f.write("\n")
@@ -189,7 +190,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
             for e in range(Ne):
                 f.write(",%f,%f,%f" % (Les_ave[e][i], Les_tau[e][i], Les_err[e][i]))
 
-            f.write(",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f" % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i], Rz_ave[i], Rz_tau[i], Rz_err[i]))
+            f.write(",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f" % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i] , I2H2dis_ave[i], I2H2dis_tau[i], I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i]))
             if Ne == 2:
                 f.write(",%f,%f,%f" % (Ledif_ave[i], Ledif_tau[i], Ledif_err[i]))
             f.write("\n")
@@ -236,7 +237,6 @@ def Gij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
         Geig0_tau.append(tau)
         Geig0_err.append(np.sqrt(2 * tau / len(Geigs[0]) * cov0))
 
-
         Geig1_ave.append(np.average(Geigs[1]))
         rho, cov0 = autocorrelation_function_fft(Geigs[1])
         tau, tau_err = tau_int_cal_rho(rho, tau_c)
@@ -249,8 +249,8 @@ def Gij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
         Geig2_tau.append(tau)
         Geig2_err.append(np.sqrt(2 * tau / len(Geigs[2]) * cov0))
 
-        Geig02_ave.append(np.average(Geigs[0]/Geigs[2]))
-        rho, cov02 = autocorrelation_function_fft(Geigs[0]/Geigs[2])
+        Geig02_ave.append(np.average(Geigs[0] / Geigs[2]))
+        rho, cov02 = autocorrelation_function_fft(Geigs[0] / Geigs[2])
         tau, tau_err = tau_int_cal_rho(rho, tau_c)
         Geig02_tau.append(tau)
         Geig02_err.append(np.sqrt(2 * tau / len(Geigs[0]) * cov02))
