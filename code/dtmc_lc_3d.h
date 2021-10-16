@@ -30,8 +30,10 @@ struct observable
     double IdA;   // integral of dA
     double I2H;   // integral of dA(2H)
     int Bond_num; // total number of bonds0
+    double Tuz2; // sum of uz.uz, see how director field goes from in xy plane to z direction driven by the chirality
+
     // gravitational
-    double TRz;
+    //double TRz;
 };
 //hamiltonion parameters
 struct E_parameter
@@ -161,6 +163,7 @@ public:
     // (u(r)*nu)^2, how mush director twist about membrane nematic director
     std::vector<double> un2dis_m(int bin_num);
     // distribution of un2 among beads, good indication for pi wall formation
+
 
     std::vector<double> comR_m();                              // center of mass measurement
     std::vector<double> rho_rcom_m(double del_r, int bin_num); // density distribution from center of mass

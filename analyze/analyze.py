@@ -197,6 +197,9 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
 
 
 def Gij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
+    # TODO: add shape descriptors ref: https://en.wikipedia.org/wiki/Gyration_tensor
+    # GRg, Gb, Gc, Gkap
+
     Geig0_ave, Geig0_tau, Geig0_err = [], [], []
     Geig1_ave, Geig1_tau, Geig1_err = [], [], []
     Geig2_ave, Geig2_tau, Geig2_err = [], [], []

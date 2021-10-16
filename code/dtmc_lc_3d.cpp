@@ -143,6 +143,12 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
         // miscellany
         Ob_sys.IdA += mesh[i].dAn2H[0];
         Ob_sys.I2H += mesh[i].dAn2H[1] * mesh[i].dAn2H[0];
+        Ob_sys.Tuz2 += mesh[i].u[2] * mesh[i].u[2];
+    }
+    Ob_sys.Bond_num = 0.5 * bulk_bond_list.size();
+    for (int n = 0; n < Ne; n++)
+    {
+        Ob_sys.Bond_num += edge_lists[n].size();
     }
     //Ob_sys.E = 0.5 * Epar.Cn * (N - Np) + 0.5 * Epar.Cn * Np;
     Ob_sys.E = 0.5 * Epar.Cn * N; // offset tilt energy
@@ -782,12 +788,9 @@ void dtmc_lc::Ob_init(observable &Ob)
     Ob.Tun2 = 0;
     Ob.IdA = 0;
     Ob.I2H = 0;
-    Ob.Bond_num = 0.5 * bulk_bond_list.size();
-    for (int n = 0; n < Ne; n++)
-    {
-        Ob.Bond_num += edge_lists[n].size();
-    }
-    Ob.TRz = 0;
+    Ob.Bond_num = 0;
+    Ob.Tuz2 = 0;
+    //Ob.TRz = 0;
 }
 
 int dtmc_lc::if_near_edge(int b)

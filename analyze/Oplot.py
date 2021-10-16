@@ -60,7 +60,7 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
             un2_grad.append(np.gradient(un2_ave[i], cpar[i]))
             un2_grad_err.append(np.zeros(len(cpar[i])))
         if mode == "lf":
-            fa, fe = Chi2_gradient(cpar[i], E_ave[i], E_err[i], k=1) #use near 2k+1 points
+            fa, fe = Chi2_gradient(cpar[i], E_ave[i], E_err[i], k=2) #use near 2k+1 points
             F_ave.append(fa)
             F_err.append(fe)
     ppi = 72
