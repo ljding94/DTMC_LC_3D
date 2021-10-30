@@ -11,35 +11,40 @@ from test_plot import *
 
 def main():
     print("hello! dtmc_lc analysis")
-    config_plot3D("../data/scratch_local/State_N200_imod3_Ne2_lf15.0_kar50_C00.0_karg0.0_lam5.0_Kd5.0_q0.0_Cn3.0.csv",mesh=0,rod=1,fnormal=0)
-    # config_plot3D("../data/scratch_local/State_N200_imod3_Ne2_lf15.0_kar50_C02.0_karg0.0_lam5.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0,fnormal=0)
-    #config_plot3D("../data/Ne2/Oct16_2021/State_N400_imod3_Ne2_lf20.0_kar100_C00.0_karg0.0_lam5.0_Kd6.0_q0.7_Cn6.0.csv",mesh=1,rod=1,fnormal=0,piwall=0)
+    # config_plot3D("../data/scratch_local/State_N200_imod3_Ne2_lf15.0_kar50_C00.0_karg0.0_lam5.0_Kd5.0_q0.0_Cn3.0.csv", mesh=0, rod=1, fnormal=0)
+    config_plot3D("../data/scratch_local/State_N100_imod1_Ne1_lf0.0_kar20_C00.0_karg0.0_lam10.0_Kd0.0_q0.0_Cn0.0_init.csv",mesh=1,rod=0,fnormal=0)
+    config_plot3D("../data/scratch_local/State_N100_imod1_Ne1_lf0.0_kar20_C00.0_karg0.0_lam10.0_Kd0.0_q0.0_Cn0.0.csv",mesh=1,rod=0,fnormal=0)
+    #config_plot3D("../data/Ne2/Oct28_2021/State_N300_imod1_Ne3_lf0.0_kar40_C00.05_karg0.0_lam5.0_Kd9.0_q2.6_Cn9.0.csv",mesh=1,rod=0,fnormal=0,piwall=1)
     return 0
 
-    foldername = "../data/Ne2/Oct16_2021"
+    foldername = "../data/Ne2/Oct28_2021"
     print("analyzing " + foldername)
-    N = 400
-    imod = 3  # 1 for rhombus, 2 disk, 3 cylinder, 4 for mobius strip
+    N = 300
+    imod = 1  # 1 for rhombus, 2 disk, 3 cylinder, 4 for mobius strip
     Ne = 2
-    #lfs = np.arange(5.0, 23.1, 2.0)
-    lf = 20.0
-    kar = 100
-    # C0s = np.arange(0.0,0.41,0.1)
-    C0 = 0.0
+    # lfs = np.arange(6.0, 35.1, 1.0)
+    lfs = [0.0,2.0,4.0,6.0]
+    lf = 0.0
+    kars = [20, 40, 60, 80]
+    kar = 40
+    C0s = [0.1, 0.2, 0.3]
+    C0 = 0.10
     karg = 0.0
     # lams = np.arange(5.0,10.1,1.0)
     lam = 5.0
-    Kds = np.arange(3.0,9.1,3.0)
-    qs = np.arange(0.0,0.91,0.1)
-    #q = 0.0
-    Cns = [0.0,3.0,6.0,9.0]
-    #Cn = 5.0
+    Kd = 9.0
+    # Kds = np.arange(1.0, 7.1, 0.4)
+    Kds = [3.0, 6.0, 9.0]
+    qs = np.arange(0.0, 4.01, 0.2)
+    q = 0.0
+    Cns = [1.0, 3.0, 5.0, 7.0]
+    Cn = 9.0
     pars = []
     for Kd in Kds[:]:
         Cn = Kd
         pars.append([N, imod, Ne, lf, kar, C0, karg, lam, Kd, qs, Cn])
     par_nm = ["N", "imod", "Ne", "lf", "kar", "C0", "karg", "lam", "Kd", "q", "Cn"]
-    par_dg = [0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1]  # number of digit for each
+    par_dg = [0, 0, 0, 1, 0, 2, 1, 1, 1, 1, 1, 1, 1]  # number of digit for each
     mod = "q"
 
     # run test plot
@@ -57,10 +62,10 @@ def main():
 
         for q in qs[::1]:
             if i % 1 == 0:
-                filename = foldername + "/State_N%.0f_imod%.0f_Ne%.0f_lf%.1f_kar%.0f_C0%.1f_karg%.1f_lam%.1f_Kd%.1f_q%.1f_Cn%.1f.csv" % (N, imod, Ne, lf, kar, C0, karg, lam, Kd, q, Cn)
+                filename = foldername + "/State_N%.0f_imod%.0f_Ne%.0f_lf%.1f_kar%.0f_C0%.2f_karg%.1f_lam%.1f_Kd%.1f_q%.1f_Cn%.1f.csv" % (N, imod, Ne, lf, kar, C0, karg, lam, Kd, q, Cn)
                 ctag = r"$l_f=%.1f,C_0=%.1f,\lambda=%.1f$" % (lf, C0, lam)
-                config_plot_xyz(filename, mesh=0, rod=1, piwall=0, tag=ctag, Format="png")
-                # config_plot_xyz(filename,mesh=0,rod=1,tag=ctag,Format="png")
+                config_plot_xyz(filename, mesh=1, rod=0, piwall=1, tag=ctag, Format="png")
+                #config_plot_xyz(filename,mesh=0,rod=1,tag=ctag,Format="png")
 
     colors = None
     alphas = None

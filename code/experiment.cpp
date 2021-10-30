@@ -187,6 +187,35 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
         }
     }
 }
+void dtmc_lc::Thermal_kar1(int MC_sweeps, int step_p_sweep, double kar1,
+                           double delta_s, double delta_theta)
+{
+    double kar0;
+    kar0 = Epar.kar;
+    Epar.kar = kar1;
+    Ob_sys.E += Ob_sys.I2H2dis * (kar1 - kar0);
+    for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
+    {
+        for (int i = 0; i < step_p_sweep; i++)
+        {
+            bead_metropolis(delta_s);
+            spin_metropolis(delta_theta);
+            bond_metropolis();
+            bond_metropolis();
+            //hop_metropolis();
+            if (i % int(std::sqrt(N)) == 0)
+            {
+                edge_metropolis();
+            }
+        }
+        // std::cout << "thermo, beta=" << beta << "," << sweep_n << "/"<<
+        // MC_sweeps << "\n";
+    }
+
+    Epar.kar = kar0;
+    Ob_sys.E += Ob_sys.I2H2dis * (kar0 - kar1);
+    // correct energy for new kar0
+}
 
 void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
                            double delta_s, double delta_theta, double delta_r, double bin_num, std::string folder,

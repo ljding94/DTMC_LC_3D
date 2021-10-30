@@ -31,7 +31,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
     # may need to add uuc2 to study the spontaneous symmetry breaking
     un2_ave, un2_tau, un2_err = [], [], []
     un2p_ave, un2p_tau, un2p_err = [], [], []
-    Rz_ave, Rz_tau, Rz_err = [], [], []
+    uz2_ave, uz2_tau, uz2_err = [], [], []
     if Ne == 2:
         Ledif_ave, Ledif_tau, Ledif_err = [], [], []
     cpar_ind = find_cpar_ind(par_nm, mode)
@@ -55,7 +55,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         N = par_dealing[0]
         E = data[0] / N
         Les = data[1 : 1 + Ne]
-        IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2 = data[1 + Ne :]
+        IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2, Tuz2 = data[1 + Ne :]
         p2uu = Tp2uu / Bond_num
         uuc = Tuuc / Bond_num
         N = par[find_cpar_ind(par_nm, "N")]
@@ -63,6 +63,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         # Np = int(N*rCnp)
         # un2=Tun2/(N-Np)
         un2 = Tun2 / N
+        uz2 = Tuz2 / N
         # un2p=Tun2p/Np if Np>0 else Tun2p
         # Ne2 case, need Ledif for additional info
         if Ne == 2:
@@ -163,6 +164,12 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         un2_tau.append(tau)
         un2_err.append(np.sqrt(2 * tau / len(un2) * cov0))
 
+        # uz2
+        uz2_ave.append(np.average(uz2))
+        rho, cov0 = autocorrelation_function_fft(uz2)
+        tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        uz2_tau.append(tau)
+        uz2_err.append(np.sqrt(2 * tau / len(uz2) * cov0))
 
     # generalize using par_nm list
     f2stail = "MC"
@@ -181,7 +188,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         for e in range(Ne):
             f.write(",Les_ave[%d],Les_tau[%d],Les_err[%d]" % (e, e, e))
 
-        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err")
+        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,uz2_ave,uz2_tau,uz2_err")
         if Ne == 2:
             f.write(",Ledif_ave,Ledif_tau,Ledif_err")
         f.write("\n")
@@ -190,7 +197,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
             for e in range(Ne):
                 f.write(",%f,%f,%f" % (Les_ave[e][i], Les_tau[e][i], Les_err[e][i]))
 
-            f.write(",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f" % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i] , I2H2dis_ave[i], I2H2dis_tau[i], I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i]))
+            f.write(",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f" % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i], I2H2dis_ave[i], I2H2dis_tau[i], I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i], uz2_ave[i], uz2_tau[i], uz2_err[i]))
             if Ne == 2:
                 f.write(",%f,%f,%f" % (Ledif_ave[i], Ledif_tau[i], Ledif_err[i]))
             f.write("\n")
@@ -200,10 +207,16 @@ def Gij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
     # TODO: add shape descriptors ref: https://en.wikipedia.org/wiki/Gyration_tensor
     # GRg, Gb, Gc, Gkap
 
+    Gxx_ave, Gxx_tau, Gxx_err = [], [], []  # just simplying analyze the xx component
+    Gyy_ave, Gyy_tau, Gyy_err = [], [], []
+    Gzz_ave, Gzz_tau, Gzz_err = [], [], []
     Geig0_ave, Geig0_tau, Geig0_err = [], [], []
     Geig1_ave, Geig1_tau, Geig1_err = [], [], []
     Geig2_ave, Geig2_tau, Geig2_err = [], [], []
-    Geig02_ave, Geig02_tau, Geig02_err = [], [], []  # eig0/eig2 ratio
+    # Geig02_ave, Geig02_tau, Geig02_err = [], [], []  # eig0/eig2 ratio
+    GRg2_ave, GRg2_tau, GRg2_err = [], [], []  # Rg^2 = sum eig_i
+    Gb_ave, Gb_tau, Gb_err = [], [], []  # b =  eig2 - (eig0+eig1)/2
+    Gkap2_ave, Gkap2_tau, Gkap2_err = [], [], []  # kap^2 = 3/2(sum eigi^2/ (sum eig_i)^2) -1/2
     Dedge_ave, Dedge_tau, Dedge_err = [], [], []
     cpar_ind = find_cpar_ind(par_nm, mode)
     cpar = par[cpar_ind]
@@ -227,13 +240,35 @@ def Gij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
 
         # get eigenvalues of Gij
         Gijs = np.transpose(Gdata[1:])
+        Gxxs,Gyys,Gzzs = Gdata[1],Gdata[5],Gdata[9]
         Geigs = []
         for Gij in Gijs:
             w, v = np.linalg.eig(np.reshape(Gij, (3, 3)))
             Geigs.append(np.sort(w))
-        Geigs = np.transpose(Geigs)
+        Geigs = np.transpose(Geigs)  # Geigs become np.array() after transpose using numpy
+        GRg2s = Geigs[0] + Geigs[1] + Geigs[2]
+        Gbs = Geigs[2] - (Geigs[0] + Geigs[1]) / 2
+        Gkap2s = 3 / 2 * (Geigs[0] * Geigs[0] + Geigs[1] * Geigs[1] + Geigs[2] * Geigs[2]) / (GRg2s * GRg2s) - 1 / 2
 
-        # put into
+        # put into Observables contaners
+        Gxx_ave.append(np.average(Gxxs))
+        rho, cov0 = autocorrelation_function_fft(Gxxs)
+        tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        Gxx_tau.append(tau)
+        Gxx_err.append(np.sqrt(2 * tau / len(Gxxs) * cov0))
+
+        Gyy_ave.append(np.average(Gyys))
+        rho, cov0 = autocorrelation_function_fft(Gyys)
+        tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        Gyy_tau.append(tau)
+        Gyy_err.append(np.sqrt(2 * tau / len(Gyys) * cov0))
+
+        Gzz_ave.append(np.average(Gzzs))
+        rho, cov0 = autocorrelation_function_fft(Gzzs)
+        tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        Gzz_tau.append(tau)
+        Gzz_err.append(np.sqrt(2 * tau / len(Gzzs) * cov0))
+
         Geig0_ave.append(np.average(Geigs[0]))
         rho, cov0 = autocorrelation_function_fft(Geigs[0])
         tau, tau_err = tau_int_cal_rho(rho, tau_c)
@@ -252,11 +287,23 @@ def Gij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
         Geig2_tau.append(tau)
         Geig2_err.append(np.sqrt(2 * tau / len(Geigs[2]) * cov0))
 
-        Geig02_ave.append(np.average(Geigs[0] / Geigs[2]))
-        rho, cov02 = autocorrelation_function_fft(Geigs[0] / Geigs[2])
+        GRg2_ave.append(np.average(GRg2s))
+        rho, cov0 = autocorrelation_function_fft(GRg2s)
         tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        Geig02_tau.append(tau)
-        Geig02_err.append(np.sqrt(2 * tau / len(Geigs[0]) * cov02))
+        GRg2_tau.append(tau)
+        GRg2_err.append(np.sqrt(2 * tau / len(GRg2s) * cov0))
+
+        Gb_ave.append(np.average(Gbs))
+        rho, cov0 = autocorrelation_function_fft(Gbs)
+        tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        Gb_tau.append(tau)
+        Gb_err.append(np.sqrt(2 * tau / len(Gbs) * cov0))
+
+        Gkap2_ave.append(np.average(Gkap2s))
+        rho, cov0 = autocorrelation_function_fft(Gkap2s)
+        tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        Gkap2_tau.append(tau)
+        Gkap2_err.append(np.sqrt(2 * tau / len(Gkap2s) * cov0))
 
     # save result to file
     f2stail = "/Gij"
@@ -269,7 +316,11 @@ def Gij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
     # only changed "lam" and "B" mode here, others waiting for further decision
     savefile = foldername + f2stail
 
+    # TODO: add additional observables to file
     with open(savefile, "w") as f:
-        f.write(mode + ",Dedge_ave,Dedge_tau,Dedge_err,Geig0_ave,Geig0_tau,Geig0_err,Geig1_ave,Geig1_tau,Geig1_err,Geig2_ave,Geig2_tau,Geig2_err,Geig02_ave,Geig02_tau,Geig02_err\n")
+        f.write(mode + ",Dedge_ave,Dedge_tau,Dedge_err,Gxx_ave,Gxx_tau,Gxx_err,Gyy_ave,Gyy_tau,Gyy_err,Gzz_ave,Gzz_tau,Gzz_err,Geig0_ave,Geig0_tau,Geig0_err,Geig1_ave,Geig1_tau,Geig1_err,Geig2_ave,Geig2_tau,Geig2_err,GRg2_ave,GRg2_tau,GRg2_err,Gb_ave,Gb_tau,Gb_err,Gkap2_ave,Gkap2_tau,Gkap2_err\n")
         for i in range(len(cpar)):
-            f.write("%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n" % (cpar[i], Dedge_ave[i], Dedge_tau[i], Dedge_err[i], Geig0_ave[i], Geig0_tau[i], Geig0_err[i], Geig1_ave[i], Geig1_tau[i], Geig1_err[i], Geig2_ave[i], Geig2_tau[i], Geig2_err[i], Geig02_ave[i], Geig02_tau[i], Geig02_err[i]))
+            f.write(
+                "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n"
+                % (cpar[i], Dedge_ave[i], Dedge_tau[i], Dedge_err[i], Gxx_ave[i], Gxx_tau[i], Gxx_err[i], Gyy_ave[i], Gyy_tau[i], Gyy_err[i], Gzz_ave[i], Gzz_tau[i], Gzz_err[i], Geig0_ave[i], Geig0_tau[i], Geig0_err[i], Geig1_ave[i], Geig1_tau[i], Geig1_err[i], Geig2_ave[i], Geig2_tau[i], Geig2_err[i], GRg2_ave[i], GRg2_tau[i], GRg2_err[i], Gb_ave[i], Gb_tau[i], Gb_err[i], Gkap2_ave[i], Gkap2_tau[i], Gkap2_err[i])
+            )

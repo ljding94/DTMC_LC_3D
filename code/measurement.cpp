@@ -674,7 +674,8 @@ double dtmc_lc::un2_m(int index)
 #pragma region : membrane structure related
 std::vector<double> dtmc_lc::Gij_m()
 {
-    // G_ij = 1/(2N)\sum_n\sum_m{(r_i(n)-r_i(m))(r_j(n)-r_j(m))}
+    // G_ij = 1/(2N^2)\sum_n\sum_m{(r_i(n)-r_i(m))(r_j(n)-r_j(m))}
+    // G_ij = 1/N\sum_n r_i(n)r_j(n)
     // G_ij = <r_i r_j> - <r_i><r_j>
     std::vector<double> Gij(9, 0);
     double xc = 0, yc = 0, zc = 0;

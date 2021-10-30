@@ -30,6 +30,7 @@ struct observable
     double IdA;   // integral of dA
     double I2H;   // integral of dA(2H)
     int Bond_num; // total number of bonds0
+    double Tlb; // total bond length, to quantify pulling stage TODO: implement this
     double Tuz2; // sum of uz.uz, see how director field goes from in xy plane to z direction driven by the chirality
 
     // gravitational
@@ -214,6 +215,9 @@ public:
     void Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
                  double delta_s, double delta_theta);
     // thermalisation of the system, starting from beta=0 (hot start)
+    void Thermal_kar1(int MC_sweeps, int step_p_sweep, double kar1,
+                 double delta_s, double delta_theta);
+    // thermalisation with on kappa=1, to form vesicle at first
     void O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
                       double delta_s, double delta_theta, double delta_r, double bin_num, std::string folder,
                       std::string finfo);
