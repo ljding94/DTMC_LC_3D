@@ -28,6 +28,7 @@ def A_z1_e_theta1_demo():
 
     f = interpolate.interp2d(e,lf,theta1,kind="cubic")
 
+
     plt.show()
     plt.close()
 

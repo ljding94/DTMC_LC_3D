@@ -201,6 +201,7 @@ observable dtmc_lc::Ob_m(std::vector<int> ind_relate,
         ind_j = bond_relate[i].second;
         Ob.Tp2uu += p2uu_m(ind_i, ind_j);
         Ob.Tuuc += uuc_m(ind_i, ind_j);
+        Ob.Tlb += distance(ind_i, ind_j);
         // also, Ising-like phi field tems
         //Ob.Tphi2 += mesh[ind_i].phi * mesh[ind_j].phi;
         // use new LC energy that seperate twist from the splay and bend
@@ -234,7 +235,8 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
     //Ob_sys.IKun2 += Ob_new.IKun2 - Ob_old.IKun2;
     Ob_sys.IdA += Ob_new.IdA - Ob_old.IdA;
     Ob_sys.I2H += Ob_new.I2H - Ob_old.I2H;
-    Ob_sys.Tuz2+=Ob_new.Tuz2 - Ob_old.Tuz2;
+    Ob_sys.Tuz2 += Ob_new.Tuz2 - Ob_old.Tuz2;
+    Ob_sys.Tlb += Ob_new.Tlb - Ob_old.Tlb;
     //Ob_sys.TRz += Ob_new.TRz - Ob_old.TRz;
 
     Ob_sys.Bond_num += Ob_new.Bond_num - Ob_old.Bond_num;

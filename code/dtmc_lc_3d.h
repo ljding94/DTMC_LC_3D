@@ -30,7 +30,7 @@ struct observable
     double IdA;   // integral of dA
     double I2H;   // integral of dA(2H)
     int Bond_num; // total number of bonds0
-    double Tlb; // total bond length, to quantify pulling stage TODO: implement this
+    double Tlb; // total bond length, to quantify pulling stage
     double Tuz2; // sum of uz.uz, see how director field goes from in xy plane to z direction driven by the chirality
 
     // gravitational

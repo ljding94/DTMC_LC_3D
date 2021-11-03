@@ -10,6 +10,7 @@ def force_normalized_kar_pull_data_get():
     foldername = "../data/Ne2/Oct18_2021"
     kar0=40
     kars=[20,40,60,80]
+    N=300
     datas, labels, colors, markers = [], [], [], []
     colors = ["red", "green", "blue", "royalblue"]
     markers = ["v", "s", "p", "h", "o"]
@@ -18,7 +19,7 @@ def force_normalized_kar_pull_data_get():
         datas.append(np.loadtxt(fname, skiprows=1, delimiter=",", unpack=True))
 
     datas = np.transpose(np.array(datas), axes=(1, 0, 2))
-    lfs, E_aves, E_errs = datas[0], datas[1], datas[3]
+    lfs, E_aves, E_errs = datas[0], N*datas[1], N*datas[3]
     f_kar_norm_aves, f_kar_norm_errs = [], []
     for i in range(len(E_aves)):
         fa, fe = Chi2_gradient(lfs[i], E_aves[i], E_errs[i], k=2)

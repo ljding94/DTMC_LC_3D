@@ -25,7 +25,7 @@ int main(int argc, char const *argv[])
     N = std::atoi(argv[1]);
     imod = std::atoi(argv[2]); // mode of initialization
     Ne = std::atoi(argv[3]);
-    lf = std::atof(argv[4]); // for N=400, lf=17-36 works
+    lf = std::atof(argv[4]); //
     E_parameter Epar;
     Epar.kar = std::atof(argv[5]);
     Epar.C0 = std::atof(argv[6]);
@@ -56,7 +56,7 @@ int main(int argc, char const *argv[])
         folder = "../data/scratch_local";
 
         membrane.State_write(folder + "/State_" + finfo + "_init.csv");
-        membrane.Thermal_kar1(100, int(N / (delta_s * delta_s)) + 1, 5, delta_s, delta_theta);
+        //membrane.Thermal_kar1(100, int(N / (delta_s * delta_s)) + 1, 5, delta_s, delta_theta);
         membrane.Thermal(20, int(N / (delta_s * delta_s)) + 1, 1, delta_s, delta_theta);
         membrane.O_MC_measure(20, 5, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
@@ -68,8 +68,7 @@ int main(int argc, char const *argv[])
         // ccv running
         folder = "/users/lding3/scratch/dtmc_lc_3d";
         // used 2000, 4000 for manuscript
-        membrane.Thermal_kar1(500, int(N / (delta_s * delta_s)), 5, delta_s,
-                         delta_theta);
+        //membrane.Thermal_kar1(500, int(N / (delta_s * delta_s)), 5, delta_s,delta_theta);
         membrane.Thermal(2000, int(N / (delta_s * delta_s)), 1, delta_s,
                          delta_theta);
         membrane.O_MC_measure(1000, 10, int(N / (delta_s * delta_s)) + 1, delta_s,

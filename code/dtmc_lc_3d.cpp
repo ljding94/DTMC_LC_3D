@@ -136,6 +136,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
             //Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
             // Ising-like phi field interaction
             //Ob_sys.Tphi2 += 0.5 * mesh[i].phi * mesh[mesh[i].nei[j]].phi;
+            Ob_sys.Tlb += 0.5* distance(i, mesh[i].nei[j]);
         }
         // coupling related
         Ob_sys.Tun2 += mesh[i].un2;
@@ -789,6 +790,7 @@ void dtmc_lc::Ob_init(observable &Ob)
     Ob.IdA = 0;
     Ob.I2H = 0;
     Ob.Bond_num = 0;
+    Ob.Tlb = 0;
     Ob.Tuz2 = 0;
     //Ob.TRz = 0;
 }

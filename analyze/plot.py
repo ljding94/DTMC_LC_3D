@@ -185,19 +185,6 @@ def config_plot3D(filename,mesh=0,rod=0,piwall=0,phicolor=0,fnormal=0,cvt_map=""
     ax = plt.axes(projection="3d")
     # fixed_z beads
 
-    # phi field
-    if(phicolor):
-        phicmap = cm.get_cmap("PuOr")
-        phinorm=Normalize(vmin=-1,vmax=1)
-        ax.scatter3D(x,y,z,c=phi,marker="o",cmap=phicmap,norm=phinorm,facecolor="None")
-        ax.plot3D([x[0],x[0]+3*nx[0]],[y[0],y[0]+3*ny[0]],[z[0],z[0]+3*nz[0]],"k-")
-        phism = plt.cm.ScalarMappable(cmap=phicmap, norm=phinorm)
-        phism.set_array([])
-        phicbar=plt.colorbar(phism, ticks=[-1,-0.5,0,0.5,1])
-        phicbar.ax.set_title(r"$\phi$")
-        #ax.scatter3D(x[phi==1],y[phi==1],z[phi==1],marker="o",facecolor="None",edgecolor="black")
-        #ax.scatter3D(x[phi==-1],y[phi==-1],z[phi==-1],marker="o",color="dimgray")
-
     if(mesh):
         for i in range(len(ns)):
             for j in range(len(ns[0])):
@@ -217,10 +204,11 @@ def config_plot3D(filename,mesh=0,rod=0,piwall=0,phicolor=0,fnormal=0,cvt_map=""
     if(cvt_map=="Mean"):
         #ftail+="_mmap"
         #norm=Normalize(vmin=0,vmax=0.5*np.pi)
-        heat = dA*d2H
+        #heat = dA*d2H
+        heat = d2H
         for m in range(cmap_smooth):
             heat = mean_filter(heat,ns)
-        ax.scatter3D(x,y,z,c=cmap(heat))
+        ax.scatter3D(x,y,z,c=cmap(heat),s=10)
         sm = plt.cm.ScalarMappable(cmap=cmap)
         sm.set_array([])
         cbar=plt.colorbar(sm)
