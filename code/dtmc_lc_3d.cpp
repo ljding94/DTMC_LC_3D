@@ -136,7 +136,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
             //Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
             // Ising-like phi field interaction
             //Ob_sys.Tphi2 += 0.5 * mesh[i].phi * mesh[mesh[i].nei[j]].phi;
-            Ob_sys.Tlb += 0.5* distance(i, mesh[i].nei[j]);
+            Ob_sys.Tlb += 0.5 * distance(i, mesh[i].nei[j]);
         }
         // coupling related
         Ob_sys.Tun2 += mesh[i].un2;
@@ -713,8 +713,18 @@ void dtmc_lc::init_mobius_shape(double d0_)
 
 int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
 {
+    // TODO: update this function to add hole with more bead(6), as a larger
     // add a hole as edge[edge_num], and i0 is one of the edge beads.
+    // implement larger initial hole
+    //b0-b01-b1-b12-b2-b20-b0
+    //b0-b1-b2-b0 is the center triangle.
+
     int b1, b2; // another two beads to include for the new triangle edge
+    int b01, b12, b20;
+    int b0_nei_b1, b0_nei_b2, b0_nei_b01;
+    int b1_nei_b2, b1_nei_b0, b1_nei_b12;
+    int b2_nei_b0, b2_nei_b1, b2_nei_b20;
+
     // check if b0 is near the edge, if yes, it can't be on the new edge
     if (if_near_edge(b0))
     {
@@ -738,18 +748,55 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
             // if b1 or b2 is near another edge, can't use them
             continue;
         }
-        else
-        { // found the b1 b2 candidate
+        // found the b1 b2 candidate
+        // continue looking for b01, b12 and b20
+        //find big triangle hole vertices // borrow idea from bond flip update
+        b0_nei_b1 = list_a_nei_b(mesh[b0].nei, b1);
+        b0_nei_b2 = list_a_nei_b(mesh[b0].nei, b2);
+        b0_nei_b01 = 2 * b0_nei_b1 - b0_nei_b2;
+        b01 = mesh[b0].nei[b0_nei_b01];
+        // similarly, find b12 and b20
+        b1_nei_b2 = list_a_nei_b(mesh[b1].nei, b2);
+        b1_nei_b0 = list_a_nei_b(mesh[b1].nei, b0);
+        b1_nei_b12 = 2 * b1_nei_b2 - b1_nei_b0;
+        b12 = mesh[b1].nei[b1_nei_b12];
+        // and
+        b2_nei_b0 = list_a_nei_b(mesh[b2].nei, b0);
+        b2_nei_b1 = list_a_nei_b(mesh[b2].nei, b1);
+        b2_nei_b20 = 2 * b2_nei_b0 - b2_nei_b1;
+        b20 = mesh[b2].nei[b2_nei_b20];
+        if( if_near_edge(b01) || if_near_edge(b12) || if_near_edge(b20)){
+            // one of b01, b12, b20 is near another edge, can't use them
+            continue;
+        }else{
+            // found good candidates.
             break;
         }
         i_nei += 1;
     }
-    // b0-b1-b2-b0 as new edge
+
     if (i_nei == mesh[b0].nei.size())
     {
         // didn't find appropriate candidate around b0
         return 0;
     }
+
+    // should check the connecting by ploting configuration TODO: []
+
+    // remove b0-b1-b2-b0 three bonds TODO: []
+    mesh[b0].nei.erase(mesh[b0].nei.begin()+b0_nei_b1);
+    mesh[b1].nei.erase(mesh[b1].nei.begin()+b1_nei_b0);
+
+    mesh[b1].nei.erase(mesh[b1].nei.begin()+b1_nei_b2);
+    mesh[b2].nei.erase(mesh[b2].nei.begin()+b2_nei_b1);
+
+    mesh[b2].nei.erase(mesh[b2].nei.begin()+b2_nei_b0);
+    mesh[b0].nei.erase(mesh[b0].nei.begin()+b0_nei_b2);
+
+    // add new edge bonds accordingly TODO: []
+
+    // check
+
     // add edge bond, but also keep the b0-b1-b2-b0 order
     mesh[b0].edge_num = edgenum;
     mesh[b0].edge_nei = {b2, b1};

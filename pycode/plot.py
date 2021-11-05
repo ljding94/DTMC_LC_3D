@@ -1,4 +1,4 @@
-from unduloid import *
+from unduloid_cal import *
 import matplotlib.pyplot as plt
 from scipy import interpolate
 

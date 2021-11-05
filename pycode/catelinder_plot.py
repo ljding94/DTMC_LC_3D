@@ -2,13 +2,25 @@ import matplotlib.pyplot as plt
 from catelinder_cal import *
 
 
-def F_smooth(n):
+def F_smooth(f,n):
     # smooth force curve with near points
-    pass
+    Fs = []
+    m = len(f)
+    for i in range(m):
+        if (i<n):
+            #print(i,"<n")
+            Fs.append(np.average(f[:i+n+1]))
+        elif (i>m-n-1):
+            #print(i,">m-n-1")
+            Fs.append(np.average(f[i-n:]))
+        else:
+            #print(i,"else")
+            Fs.append(np.average(f[i-n:i+n+1]))
+    return Fs
+
 
 def catelinder_F_plot():
     print("plotting catelinder extension force")
-
     kars = [20, 40, 60, 80]
     lam = 2.0
     A = 300
@@ -28,22 +40,25 @@ def catelinder_F_plot():
         opths.append([])
         optls.append([])
         for j in range(len(lfs)):
-            res = opt_bh_E(lam, kars[i], lfs[j], A)
+            res = opt_catelinder_E(lam, kars[i], lfs[j], A)
             Es[i].append(res.fun)
             optbs[i].append(res.x[0])
             opths[i].append(res.x[1])
             optls[i].append(res.x[2])
             As[i].append(catelinder_A(res.x[0], res.x[1], res.x[2]))
-        Fs.append(np.gradient(Es[i]) / 1)
+        Fs.append(np.gradient(Es[i])/(lfs[1]-lfs[0]))
     optbs=np.array(optbs)
     opths=np.array(opths)
     optls=np.array(optls)
 
+    ppi = 72
     plt.figure()
     fig, axs = plt.subplots(8, 2, figsize=(246 / ppi * 2, 246 / ppi * 4), sharex=True)
     for i in range(len(kars)):
         axs[0,0].plot(lfs, Es[i], "+", label=r"$\kappa=%.0f$" % kars[i])
         axs[1,0].plot(lfs, Fs[i], "+", label=r"$\kappa=%.0f$" % kars[i])
+        axs[1,1].plot(lfs, F_smooth(Fs[i],2), "+", label=r"$\kappa=%.0f$" % kars[i])
+        axs[2,1].plot(lfs, F_smooth(Fs[i],4), "+", label=r"$\kappa=%.0f$" % kars[i])
         axs[2,0].plot(lfs, As[i], "+", label=r"$\kappa=%.0f$" % kars[i])
         axs[3,0].plot(lfs, optbs[i], "+", label=r"$\kappa=%.0f$" % kars[i])
         axs[4,0].plot(lfs, opths[i], "+", label=r"$\kappa=%.0f$" % kars[i])
@@ -55,6 +70,8 @@ def catelinder_F_plot():
 
     axs[0,0].set_ylabel("E")
     axs[1,0].set_ylabel("F")
+    axs[1,1].set_ylabel("F_smooth n=2")
+    axs[2,1].set_ylabel("F_smooth n=4")
     axs[2,0].set_ylabel("A")
     #axs[2,0].set_ylim(0, 800)
 
@@ -67,7 +84,7 @@ def catelinder_F_plot():
     axs[0,0].legend()
     plt.tight_layout(pad=0.1)
 
-    plt.savefig("caetelinder_F.pdf", format="pdf")
+    plt.savefig("catelinder_F.pdf", format="pdf")
     plt.close()
 
 

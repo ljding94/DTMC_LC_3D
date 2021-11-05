@@ -35,7 +35,6 @@ int dtmc_lc::bead_metropolis(double delta_s)
     } while (list_a_nei_b(fixed_beads, index) != -1);
     */
     index = rand_pos(gen);
-    // TODO: generalize the fixed bead condition, only fix update on the z direction when doing pulling experiment on catenoid, Ne2 membrane
 
     // checked, it will pass value instead of pointer
     ind_relate.clear();
@@ -512,6 +511,7 @@ int dtmc_lc::edge_metropolis()
 
 #pragma region : [shrink] find update and related beads.
         int ve_ind_i, e_ind_i, ind_i;
+        // fedge_list is choosen from one of the edges with equal proabability
         ve_ind_i = int(fedge_list.size() * rand_uni(gen));
         ind_i = fedge_list[ve_ind_i];
         e_ind_i = list_a_nei_b(edge_lists[mesh[ind_i].edge_num], ind_i);
@@ -525,6 +525,11 @@ int dtmc_lc::edge_metropolis()
 
         ind_j = mesh[ind_i].edge_nei[0];
         ind_k = mesh[ind_i].edge_nei[1];
+        // check number of beads on the edge, need to be greater than 5?
+        if(fedge_list.size()<=5){
+            // # beads for each edge need to be > 5
+            return 0;
+        }
         // check j k connection
         if (list_a_nei_b(mesh[ind_j].nei, ind_k) != -1)
         {

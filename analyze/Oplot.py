@@ -45,9 +45,9 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     Le_ave = np.sum(Les_ave, axis=0)
     Le_err = np.sqrt(np.sum(np.power(Les_err, 2), axis=0))
 
-    IdA_ave, IdA_tau, IdA_err, I2H_ave, I2H_tau, I2H_err, I2H2_ave, I2H2_tau, I2H2_err, I2H2dis_ave, I2H2dis_tau, I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err, uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, uz2_ave, uz2_tau, uz2_err = data[7 + 3 * (Ne - 1) : 34 + 3 * (Ne - 1)]
+    IdA_ave, IdA_tau, IdA_err, I2H_ave, I2H_tau, I2H_err, I2H2_ave, I2H2_tau, I2H2_err, I2H2dis_ave, I2H2dis_tau, I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err, uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, uz2_ave, uz2_tau, uz2_err, lb_ave, lb_tau, lb_err = data[7 + 3 * (Ne - 1) : 37 + 3 * (Ne - 1)]
     if Ne == 2:
-        Ledif_ave, Ledif_tau, Ledif_err = data[34 + 3 * (Ne - 1) :]
+        Ledif_ave, Ledif_tau, Ledif_err = data[37 + 3 * (Ne - 1) :]
     uuc_grad, uuc_grad_err = [], []
     un2_grad, un2_grad_err = [], []
     cpar_tsqN = []
@@ -60,21 +60,22 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
             un2_grad.append(np.gradient(un2_ave[i], cpar[i]))
             un2_grad_err.append(np.zeros(len(cpar[i])))
         if mode == "lf":
-            fa, fe = Chi2_gradient(cpar[i], E_ave[i], E_err[i], k=3)  # use near 2k+1 points
+            fa, fe = Chi2_gradient(cpar[i], E_ave[i], E_err[i], k=2)  # use near 2k+1 points
             F_ave.append(fa)
             F_err.append(fe)
     ppi = 72
     # LineWidth, FontSize, LabelSize = 1, 9, 8
     plt.figure()
     plt.rc("text", usetex=True)
-    fig, axs = plt.subplots(11, 2, figsize=(246 / ppi * 2, 246 / ppi * 5.5), sharex=True)  # , sharex=True
+    na = 12
+    fig, axs = plt.subplots(na, 2, figsize=(246 / ppi * 2, 246 / ppi * 0.5 * na), sharex=True)  # , sharex=True
     # cpar_aj = cpar-np.outer([2.8, 2.0, 1.5, 0.8, 0], np.ones(len(cpar[0])))
     O_cpar_plot(axs[0, 0], E_ave, E_err, O_label, "E", r"$E/N$", cpar, colors, alphas)
     O_cpar_plot(axs[1, 0], Le_ave, Le_err, O_label, "Le", r"$\int ds$", cpar, colors, alphas)
     if Ne == 2:
         if mode == "lf":
             O_cpar_plot(axs[0, 1], F_ave, F_err, O_label, "F", r"$\partial{E/N}/\partial{l_f}$", cpar, colors, alphas)
-            axs[0, 1].set_ylim(-0.1,0.5)
+            axs[0, 1].set_ylim(-0.1, 0.5)
         Le_ave_diff = np.abs(Les_ave[1] - Les_ave[0])
         Le_err_diff = np.sqrt(np.power(Les_err[1], 2) + np.power(Les_err[0], 2))
         O_cpar_plot(axs[1, 1], Le_ave_diff, Le_err_diff, O_label, "Le_diff", r"$|\left<\int_0 ds\right>-\left<\int_1 ds\right>|$", cpar, colors, alphas)
@@ -101,11 +102,12 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     # plot the differential if mode is q
     O_cpar_plot(axs[9, 0], un2_ave, un2_err, O_label, "un2", r"$u_n=\left<(u_i\cdot n_i)^2\right>_{i}$", cpar, colors, alphas)
     O_cpar_plot(axs[10, 0], uz2_ave, uz2_err, O_label, "uz2", r"$u_z^2=\left<(u_i\cdot \hat{z})^2\right>_{i}$", cpar, colors, alphas)
+    O_cpar_plot(axs[11, 0], lb_ave, lb_err, O_label, "lb", r"$\left<l_{ij}\right>$", cpar, colors, alphas)
 
     if mode == "q":
         O_cpar_plot(axs[7, 1], uuc_grad, uuc_grad_err, O_label, "uuc_grad", r"$\partial u_c /\partial q$", cpar, colors, alphas)
         O_cpar_plot(axs[8, 1], un2_grad, un2_grad_err, O_label, "un2_grad", r"$\partial u_n /\partial q$", cpar, colors, alphas)
-    # O_cpar_plot(axs[10,0], IKun2_ave, IKun2_err, O_label, "IKun2", r"$\left<\int dA K (u_i\cdot n_i)\right>$",cpar, colors, alphas)
+    # O_cpar_plot(axs[10,0], IKun2_ave, IKun2_err, O_label, "IKun2", r"$\left<\int dA K (u_i\cdot n_i)\right>$",cp ar, colors, alphas)
     # O_cpar_plot(axs[9,0], Itau2_ave, Itau2_err, O_label, "Itau2", r"$\left<\int ds \tau^2\right>$",cpar, colors, alphas)
     axs[10, 0].set_xlabel(xLabel)
     # axs[0,0].xaxis.set_major_locator(MultipleLocator(2))
@@ -137,31 +139,30 @@ def Geig_pars_plot(foldername, pars, par_nm, par_dg, mode):
         data.append(np.loadtxt(filename, skiprows=1, delimiter=",", unpack=True))
         O_label.append(label)
     data = np.transpose(np.array(data), axes=(1, 0, 2))
-    cpar, Dedge_ave,Dedge_tau,Dedge_err,Gxx_ave,Gxx_tau,Gxx_err,Gyy_ave,Gyy_tau,Gyy_err,Gzz_ave,Gzz_tau,Gzz_err,Geig0_ave,Geig0_tau,Geig0_err,Geig1_ave,Geig1_tau,Geig1_err,Geig2_ave,Geig2_tau,Geig2_err,GRg2_ave,GRg2_tau,GRg2_err,Gb_ave,Gb_tau,Gb_err,Gkap2_ave,Gkap2_tau,Gkap2_err = data
+    cpar, Dedge_ave, Dedge_tau, Dedge_err, Gxx_ave, Gxx_tau, Gxx_err, Gyy_ave, Gyy_tau, Gyy_err, Gzz_ave, Gzz_tau, Gzz_err, Geig0_ave, Geig0_tau, Geig0_err, Geig1_ave, Geig1_tau, Geig1_err, Geig2_ave, Geig2_tau, Geig2_err, GRg2_ave, GRg2_tau, GRg2_err, Gb_ave, Gb_tau, Gb_err, Gkap2_ave, Gkap2_tau, Gkap2_err = data
 
     ppi = 72
     plt.figure()
     plt.rc("text", usetex=True)
-    fig, axs = plt.subplots(4, 3, figsize=(246 / ppi* 3, 246 / ppi * 0.6 * 4), sharex=True, sharey=False)
+    fig, axs = plt.subplots(4, 3, figsize=(246 / ppi * 3, 246 / ppi * 0.6 * 4), sharex=True, sharey=False)
 
-    O_cpar_plot(axs[0,0], Gxx_ave, Gxx_err, O_label, "Gxx", r"$G_{xx}$", cpar, colors, alphas)
-    O_cpar_plot(axs[1,0], Gyy_ave, Gyy_err, O_label, "Gyy", r"$G_{yy}$", cpar, colors, alphas)
-    O_cpar_plot(axs[2,0], Gzz_ave, Gzz_err, O_label, "Gzz", r"$G_{zz}$", cpar, colors, alphas)
+    O_cpar_plot(axs[0, 0], Gxx_ave, Gxx_err, O_label, "Gxx", r"$G_{xx}$", cpar, colors, alphas)
+    O_cpar_plot(axs[1, 0], Gyy_ave, Gyy_err, O_label, "Gyy", r"$G_{yy}$", cpar, colors, alphas)
+    O_cpar_plot(axs[2, 0], Gzz_ave, Gzz_err, O_label, "Gzz", r"$G_{zz}$", cpar, colors, alphas)
 
-    O_cpar_plot(axs[0,1], Geig0_ave, Geig0_err, O_label, "Geig0", r"$\lambda_0^G$", cpar, colors, alphas)
-    O_cpar_plot(axs[1,1], Geig1_ave, Geig1_err, O_label, "Geig1", r"$\lambda_1^G$", cpar, colors, alphas)
-    O_cpar_plot(axs[2,1], Geig2_ave, Geig2_err, O_label, "Geig2", r"$\lambda_2^G$", cpar, colors, alphas)
-    O_cpar_plot(axs[3,1], Dedge_ave, Dedge_err, O_label, "Dedge", r"$D_{e}$", cpar, colors, alphas)
+    O_cpar_plot(axs[0, 1], Geig0_ave, Geig0_err, O_label, "Geig0", r"$\lambda_0^G$", cpar, colors, alphas)
+    O_cpar_plot(axs[1, 1], Geig1_ave, Geig1_err, O_label, "Geig1", r"$\lambda_1^G$", cpar, colors, alphas)
+    O_cpar_plot(axs[2, 1], Geig2_ave, Geig2_err, O_label, "Geig2", r"$\lambda_2^G$", cpar, colors, alphas)
+    O_cpar_plot(axs[3, 1], Dedge_ave, Dedge_err, O_label, "Dedge", r"$D_{e}$", cpar, colors, alphas)
 
-    O_cpar_plot(axs[0,2], GRg2_ave, GRg2_err, O_label, "GRg2", r"$R_g^2$", cpar, colors, alphas)
-    O_cpar_plot(axs[1,2], Gb_ave, Gb_err, O_label, "Gb", r"$b_{G}$", cpar, colors, alphas)
-    O_cpar_plot(axs[2,2], Gkap2_ave, Gkap2_err, O_label, "Gkap2", r"$\kappa^2_{G}$", cpar, colors, alphas)
+    O_cpar_plot(axs[0, 2], GRg2_ave, GRg2_err, O_label, "GRg2", r"$R_g^2$", cpar, colors, alphas)
+    O_cpar_plot(axs[1, 2], Gb_ave, Gb_err, O_label, "Gb", r"$b_{G}$", cpar, colors, alphas)
+    O_cpar_plot(axs[2, 2], Gkap2_ave, Gkap2_err, O_label, "Gkap2", r"$\kappa^2_{G}$", cpar, colors, alphas)
 
-
-    axs[2,1].set_xlabel(xLabel)
+    axs[2, 1].set_xlabel(xLabel)
     # axs[0].set_ylim = (ylim_min,ylim_max)
     # axs[0].xaxis.set_minor_locator(MultipleLocator(0.5))
-    lgd = axs[0,0].legend(loc="upper center", bbox_to_anchor=(0.5, 0.7 + 0.25 * 4))
+    lgd = axs[0, 0].legend(loc="upper center", bbox_to_anchor=(0.5, 0.7 + 0.25 * 4))
     plt.tight_layout(pad=0.5)
     plt.savefig(foldername + "/Gij_" + mode + ".pdf", format="pdf", bbox_extra_artists=(lgd,), bbox_inches="tight", transparent=True)
     plt.close()
