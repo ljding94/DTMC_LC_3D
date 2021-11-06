@@ -8,7 +8,7 @@ from unduloid_plot import *
 def main():
     print("python code for numerical calculation of pulling experiment on unduloid")
     #A_z1_e_theta1_demo()
-    res = opt_unduloid_E(2.0, 40, 0.3, 20, 300)
+    res = opt_unduloid_E(5.0, 40, 0.1, 35, 300)
     print(res)
     print("res.fun",res.fun)
     print("res.x",res.x)

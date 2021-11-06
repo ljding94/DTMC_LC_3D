@@ -39,7 +39,7 @@ int main(int argc, char const *argv[])
     // Epar.g = std::atof(argv[12]);
     //Epar.kard = std::atof(argv[10]);
     //Epar.lamd = std::atof(argv[11]);
-
+    std::cout<<"argc = " <<argc<<"\n";
     //Epar.ms = std::atof(argv[9]);
     //Epar.mr = std::atof(argv[10]);
     //kard = std::atof(argv[9]);
@@ -47,6 +47,7 @@ int main(int argc, char const *argv[])
     N = membrane.mesh.size();
 
     std::string finfo = "N" + std::to_string(N) + "_imod" + std::string(argv[2]) + "_Ne" + std::string(argv[3]) + "_lf" + std::string(argv[4]) + "_kar" + std::string(argv[5])+ "_C0" + std::string(argv[6]) + "_karg" + std::string(argv[7]) + "_lam" + std::string(argv[8]) + "_Kd" + std::string(argv[9]) + "_q" + std::string(argv[10]) + "_Cn" + std::string(argv[11]);
+
 
     if (argc == 13)
     {

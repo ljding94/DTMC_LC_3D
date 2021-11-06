@@ -70,7 +70,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
         num_edge_exist = 1;
     }
     // N is updated based on initialization procedure, especially will decrease if using disk-shape
-    hole_pos = N / 4; // add hole at a random position
+    hole_pos = N / 2; // add hole at a position
     while (num_edge_exist < Ne)
     {
         //std::cout << "num_edge_exist," << num_edge_exist << std::endl;
@@ -82,7 +82,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
             std::cout << "successfully added a hole NO." << num_edge_exist << "\n";
             std::cout << "at hole_pos." << hole_pos << std::endl;
         }
-        hole_pos += 4;
+        hole_pos += 12;
         //std::cout << "hole_pos=" << hole_pos << std::endl;
     }
     // above shape setting take care of beads position
@@ -753,22 +753,25 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
         //find big triangle hole vertices // borrow idea from bond flip update
         b0_nei_b1 = list_a_nei_b(mesh[b0].nei, b1);
         b0_nei_b2 = list_a_nei_b(mesh[b0].nei, b2);
-        b0_nei_b01 = 2 * b0_nei_b1 - b0_nei_b2;
+        b0_nei_b01 = (2 * b0_nei_b1 - b0_nei_b2 + mesh[b0].nei.size()) % mesh[b0].nei.size();
         b01 = mesh[b0].nei[b0_nei_b01];
         // similarly, find b12 and b20
         b1_nei_b2 = list_a_nei_b(mesh[b1].nei, b2);
         b1_nei_b0 = list_a_nei_b(mesh[b1].nei, b0);
-        b1_nei_b12 = 2 * b1_nei_b2 - b1_nei_b0;
+        b1_nei_b12 = (2 * b1_nei_b2 - b1_nei_b0 + mesh[b1].nei.size()) % mesh[b1].nei.size();
         b12 = mesh[b1].nei[b1_nei_b12];
         // and
         b2_nei_b0 = list_a_nei_b(mesh[b2].nei, b0);
         b2_nei_b1 = list_a_nei_b(mesh[b2].nei, b1);
-        b2_nei_b20 = 2 * b2_nei_b0 - b2_nei_b1;
+        b2_nei_b20 = (2 * b2_nei_b0 - b2_nei_b1 + mesh[b2].nei.size()) % mesh[b2].nei.size();
         b20 = mesh[b2].nei[b2_nei_b20];
-        if( if_near_edge(b01) || if_near_edge(b12) || if_near_edge(b20)){
+        if (if_near_edge(b01) || if_near_edge(b12) || if_near_edge(b20))
+        {
             // one of b01, b12, b20 is near another edge, can't use them
             continue;
-        }else{
+        }
+        else
+        {
             // found good candidates.
             break;
         }
@@ -784,19 +787,53 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
     // should check the connecting by ploting configuration TODO: []
 
     // remove b0-b1-b2-b0 three bonds TODO: []
-    mesh[b0].nei.erase(mesh[b0].nei.begin()+b0_nei_b1);
-    mesh[b1].nei.erase(mesh[b1].nei.begin()+b1_nei_b0);
+    mesh[b0].nei.erase(mesh[b0].nei.begin() + b0_nei_b1);
+    mesh[b1].nei.erase(mesh[b1].nei.begin() + b1_nei_b2);
+    mesh[b2].nei.erase(mesh[b2].nei.begin() + b2_nei_b0);
+    // b0_nei etc changed after above operation
+    b0_nei_b2 = list_a_nei_b(mesh[b0].nei,b2);
+    b1_nei_b0 = list_a_nei_b(mesh[b1].nei,b0);
+    b2_nei_b1 = list_a_nei_b(mesh[b2].nei,b1);
+    mesh[b0].nei.erase(mesh[b0].nei.begin() + b0_nei_b2);
+    mesh[b1].nei.erase(mesh[b1].nei.begin() + b1_nei_b0);
+    mesh[b2].nei.erase(mesh[b2].nei.begin() + b2_nei_b1);
 
-    mesh[b1].nei.erase(mesh[b1].nei.begin()+b1_nei_b2);
-    mesh[b2].nei.erase(mesh[b2].nei.begin()+b2_nei_b1);
 
-    mesh[b2].nei.erase(mesh[b2].nei.begin()+b2_nei_b0);
-    mesh[b0].nei.erase(mesh[b0].nei.begin()+b0_nei_b2);
+    delete_bulk_bond_list(b0, b1);
+    delete_bulk_bond_list(b1, b2);
+    delete_bulk_bond_list(b2, b0);
 
     // add new edge bonds accordingly TODO: []
+    // b0-b01-b1-b12-b2-b20-b0 is the new edge
+    mesh[b0].edge_num = edgenum;
+    mesh[b0].edge_nei = {b20, b01};
+    edge_lists[edgenum].push_back(b0);
+    delete_bulk_bond_list(b0, b01);
+    mesh[b01].edge_num = edgenum;
+    mesh[b01].edge_nei = {b0, b1};
+    edge_lists[edgenum].push_back(b01);
+    delete_bulk_bond_list(b01, b1);
+    mesh[b1].edge_num = edgenum;
+    mesh[b1].edge_nei = {b01, b12};
+    edge_lists[edgenum].push_back(b1);
+    delete_bulk_bond_list(b1, b12);
+    mesh[b12].edge_num = edgenum;
+    mesh[b12].edge_nei = {b1, b2};
+    edge_lists[edgenum].push_back(b12);
+    delete_bulk_bond_list(b12, b2);
+    mesh[b2].edge_num = edgenum;
+    mesh[b2].edge_nei = {b12, b20};
+    edge_lists[edgenum].push_back(b2);
+    delete_bulk_bond_list(b2, b20);
+    mesh[b20].edge_num = edgenum;
+    mesh[b20].edge_nei = {b2, b0};
+    edge_lists[edgenum].push_back(b20);
+    delete_bulk_bond_list(b20, b0);
 
     // check
 
+    // old 3-bead edge code
+    /*
     // add edge bond, but also keep the b0-b1-b2-b0 order
     mesh[b0].edge_num = edgenum;
     mesh[b0].edge_nei = {b2, b1};
@@ -811,6 +848,7 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
     delete_bulk_bond_list(b0, b1);
     delete_bulk_bond_list(b1, b2);
     delete_bulk_bond_list(b2, b0);
+    */
     return 1;
 }
 

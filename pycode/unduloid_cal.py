@@ -66,7 +66,8 @@ def nlc_unduloid(A,lf):
 def opt_unduloid_E(lam,kar,C0,lf,A):
     paras = (lam,kar,C0)
     xs0=(A/(2*np.pi*lf),0.0,0.5*np.pi) # a,e,theta1
-    #boundsx=[(0,np.inf),(-1,1),(0,np.pi)]
+    #boundsx=[(0,np.inf),(-1,1),(0,np.inf)]
+    #boundsx=[(),(-1,1),()]
     nlcs = nlc_unduloid(A, lf)
     res = minimize(obj_unduloid_E, xs0,args=paras,constraints=nlcs)#,bounds=boundsx)
     return res

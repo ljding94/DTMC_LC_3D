@@ -183,7 +183,9 @@ def config_plot3D(filename,mesh=0,rod=0,piwall=0,phicolor=0,fnormal=0,cvt_map=""
     ens = np.array([en0, en1])
     fig = plt.figure(figsize=(5, 5))
     ax = plt.axes(projection="3d")
-    # fixed_z beads
+
+    #for i in range(len(x)):
+    #    ax.text(x[i],y[i],z[i],i)
 
     if(mesh):
         for i in range(len(ns)):
