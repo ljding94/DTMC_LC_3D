@@ -164,7 +164,6 @@ def config_plot3D(filename,mesh=0,rod=0,piwall=0,phicolor=0,fnormal=0,cvt_map=""
     x,y,z,sx,sy,sz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:17]
     #x,y,z,sx,sy,sz,phi,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:15]
     ns = np.transpose(data[17:])
-
     # just for illustrating surface normal
     #x,y,z,sx,sy,sz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:17]
     #ns = np.transpose(data[17:])

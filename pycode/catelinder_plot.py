@@ -21,10 +21,12 @@ def F_smooth(f,n):
 
 def catelinder_F_plot():
     print("plotting catelinder extension force")
-    kars = [20, 40, 60, 80]
-    lam = 2.0
+    kars = [20,40,60]
+    #kars  = [30]
+    lam = 10.0
+    mu = 0.5
     A = 300
-    lfs = np.arange(10, 20, 0.2)
+    lfs = np.arange(5, 35, 1.0)
     Es = []
     Fs = []
     As = []
@@ -40,12 +42,15 @@ def catelinder_F_plot():
         opths.append([])
         optls.append([])
         for j in range(len(lfs)):
-            res = opt_catelinder_E(lam, kars[i], lfs[j], A)
+            print("\t lf=%.1f"%lfs[j])
+            res = opt_catelinder_E(lam, kars[i], mu, lfs[j], A)
             Es[i].append(res.fun)
+            print("res.x",res.x)
             optbs[i].append(res.x[0])
             opths[i].append(res.x[1])
             optls[i].append(res.x[2])
             As[i].append(catelinder_A(res.x[0], res.x[1], res.x[2]))
+            #As[i].append(catelinder_A(res.x[0], res.x[1], lfs[j]))
         Fs.append(np.gradient(Es[i])/(lfs[1]-lfs[0]))
     optbs=np.array(optbs)
     opths=np.array(opths)
@@ -53,10 +58,12 @@ def catelinder_F_plot():
 
     ppi = 72
     plt.figure()
-    fig, axs = plt.subplots(8, 2, figsize=(246 / ppi * 2, 246 / ppi * 4), sharex=True)
+    fig, axs = plt.subplots(8, 2, figsize=(246 / ppi * 2, 246 / ppi * 6), sharex=True)
+    fig.suptitle(r"$\lambda=%.1f,\mu=%.1f,A=%.1f$"%(lam,mu,A))
     for i in range(len(kars)):
         axs[0,0].plot(lfs, Es[i], "+", label=r"$\kappa=%.0f$" % kars[i])
         axs[1,0].plot(lfs, Fs[i], "+", label=r"$\kappa=%.0f$" % kars[i])
+        axs[0,1].plot(lfs, Fs[i]/kars[i], "+", label=r"$\kappa=%.0f$" % kars[i])
         axs[1,1].plot(lfs, F_smooth(Fs[i],2), "+", label=r"$\kappa=%.0f$" % kars[i])
         axs[2,1].plot(lfs, F_smooth(Fs[i],4), "+", label=r"$\kappa=%.0f$" % kars[i])
         axs[2,0].plot(lfs, As[i], "+", label=r"$\kappa=%.0f$" % kars[i])
@@ -64,11 +71,12 @@ def catelinder_F_plot():
         axs[4,0].plot(lfs, opths[i], "+", label=r"$\kappa=%.0f$" % kars[i])
         axs[5,0].plot(lfs, optls[i], "+", label=r"$\kappa=%.0f$" % kars[i])
         axs[6,0].plot(lfs, optbs[i]*4*np.pi*np.cosh(0.5*opths[i]/optbs[i]), "+", label=r"$\kappa=%.0f$" % kars[i])
-        axs[7,0].plot(lfs, 2*np.pi*(optls[i]-opths[i])/optbs[i], "+", label=r"$\kappa=%.0f$" % kars[i])
+        #axs[7,0].plot(lfs, 2*np.pi*(optls[i]-opths[i])/optbs[i], "+", label=r"$\kappa=%.0f$" % kars[i])
     axs[4,0].plot(lfs, lfs, "--", label=r"$lf=lf$")
     axs[5,0].plot(lfs, lfs, "--", label=r"$lf=lf$")
 
     axs[0,0].set_ylabel("E")
+    axs[0,1].set_ylabel("F/kar")
     axs[1,0].set_ylabel("F")
     axs[1,1].set_ylabel("F_smooth n=2")
     axs[2,1].set_ylabel("F_smooth n=4")

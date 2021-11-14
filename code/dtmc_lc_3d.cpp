@@ -751,6 +751,7 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
         // found the b1 b2 candidate
         // continue looking for b01, b12 and b20
         //find big triangle hole vertices // borrow idea from bond flip update
+
         b0_nei_b1 = list_a_nei_b(mesh[b0].nei, b1);
         b0_nei_b2 = list_a_nei_b(mesh[b0].nei, b2);
         b0_nei_b01 = (2 * b0_nei_b1 - b0_nei_b2 + mesh[b0].nei.size()) % mesh[b0].nei.size();
@@ -784,9 +785,7 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
         return 0;
     }
 
-    // should check the connecting by ploting configuration TODO: []
 
-    // remove b0-b1-b2-b0 three bonds TODO: []
     mesh[b0].nei.erase(mesh[b0].nei.begin() + b0_nei_b1);
     mesh[b1].nei.erase(mesh[b1].nei.begin() + b1_nei_b2);
     mesh[b2].nei.erase(mesh[b2].nei.begin() + b2_nei_b0);
@@ -930,7 +929,9 @@ void dtmc_lc::delete_bulk_bond_list(int ind_i, int ind_j)
     {
         if (bulk_bond_list[i] == bond0 || bulk_bond_list[i] == bond1)
         {
+            //std::cout<<"delete:"<<bulk_bond_list[i].first<<"-"<<bulk_bond_list[i].second<<"\n";
             bulk_bond_list.erase(bulk_bond_list.begin() + i);
+            //std::cout<<"bulk_bond_list.size()="<<bulk_bond_list.size()<<"\n";
             i--;
         }
     }

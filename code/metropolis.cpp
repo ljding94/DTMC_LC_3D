@@ -303,15 +303,34 @@ int dtmc_lc::bond_metropolis()
     {
         return 0;
     }
-    bondlist_ind_i = int(bulk_bond_list.size() * rand_uni(gen));
-    ind_i = bulk_bond_list[bondlist_ind_i].first;
-    ind_o = bulk_bond_list[bondlist_ind_i].second;
+    int num_com_nei;
+    // commen neighbor shared by connected bead a and b
+    // should <=2, can't connect beads sharing >2 common neighbors!!
+    do
+    {
+        bondlist_ind_i = int(bulk_bond_list.size() * rand_uni(gen));
+        ind_i = bulk_bond_list[bondlist_ind_i].first;
+        ind_o = bulk_bond_list[bondlist_ind_i].second;
+        i_nei_o = list_a_nei_b(mesh[ind_i].nei, ind_o);
+        i_nei_a = (i_nei_o + 1) % mesh[ind_i].nei.size();
+        i_nei_b = (i_nei_o - 1 + mesh[ind_i].nei.size()) % mesh[ind_i].nei.size();
+        ind_a = mesh[ind_i].nei[i_nei_a];
+        ind_b = mesh[ind_i].nei[i_nei_b];
+        // check common neighbors
+        num_com_nei = 0;
+        for (int l = 0; l < mesh[ind_a].nei.size(); l++)
+        {
+            for (int m = 0; m < mesh[ind_b].nei.size(); m++)
+            {
+                if (mesh[ind_a].nei[l] == mesh[ind_b].nei[m])
+                {
+                    num_com_nei += 1;
+                    break;
+                }
+            }
+        }
+    } while (num_com_nei > 2);
 
-    i_nei_o = list_a_nei_b(mesh[ind_i].nei, ind_o);
-    i_nei_a = (i_nei_o + 1) % mesh[ind_i].nei.size();
-    i_nei_b = (i_nei_o - 1 + mesh[ind_i].nei.size()) % mesh[ind_i].nei.size();
-    ind_a = mesh[ind_i].nei[i_nei_a];
-    ind_b = mesh[ind_i].nei[i_nei_b];
     if (list_a_nei_b(mesh[ind_a].nei, ind_b) != -1)
     {
         // a and b can't be connected
@@ -534,8 +553,8 @@ int dtmc_lc::edge_metropolis()
         // check number of beads on the edge, need to be greater than 5?
         if (fedge_list.size() <= 6)
         {
-            // # beads for each edge need to be > 5
-            return 0;
+        // # beads for each edge need to be > 5
+        return 0;
         }
         // check j k connection
         if (list_a_nei_b(mesh[ind_j].nei, ind_k) != -1)
