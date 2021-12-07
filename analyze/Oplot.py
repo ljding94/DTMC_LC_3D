@@ -156,8 +156,8 @@ def Geig_pars_plot(foldername, pars, par_nm, par_dg, mode):
     O_cpar_plot(axs[3, 1], Dedge_ave, Dedge_err, O_label, "Dedge", r"$D_{e}$", cpar, colors, alphas)
 
     O_cpar_plot(axs[0, 2], GRg2_ave, GRg2_err, O_label, "GRg2", r"$R_g^2$", cpar, colors, alphas)
-    O_cpar_plot(axs[1, 2], Gb_ave, Gb_err, O_label, "Gb", r"$b_{G}$", cpar, colors, alphas)
-    O_cpar_plot(axs[2, 2], Gkap2_ave, Gkap2_err, O_label, "Gkap2", r"$\kappa^2_{G}$", cpar, colors, alphas)
+    O_cpar_plot(axs[1, 2], Gb_ave, Gb_err, O_label, "Gb", r"$asphericity:b_{G}$", cpar, colors, alphas)
+    O_cpar_plot(axs[2, 2], Gkap2_ave, Gkap2_err, O_label, "Gkap2", r"$anisotropy:\kappa^2_{G}$", cpar, colors, alphas)
 
     axs[2, 1].set_xlabel(xLabel)
     # axs[0].set_ylim = (ylim_min,ylim_max)

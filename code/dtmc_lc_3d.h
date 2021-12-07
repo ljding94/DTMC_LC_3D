@@ -15,8 +15,8 @@ struct observable
     double I2H2; // integral of dA (2H)^2
     //double Iphi;              // sum of phi
     //double Tphi2;             // sum of phi*phi for near sites
-    double I2H2dis;           // integral of dA (2H - C0)^2, dis = displacement
-    double IK; // integral of dA(K)
+    double I2H2dis; // integral of dA (2H - C0)^2, dis = displacement
+    double IK;      // integral of dA(K)
     //double IKphi2;            // integral of dA(K*phi^2)
     std::vector<double> Les; // list of edge length
     // std::vector<double> Ik2s; // list of edge bending
@@ -30,8 +30,8 @@ struct observable
     double IdA;   // integral of dA
     double I2H;   // integral of dA(2H)
     int Bond_num; // total number of bonds0
-    double Tlb; // total bond length, to quantify pulling stage
-    double Tuz2; // sum of uz.uz, see how director field goes from in xy plane to z direction driven by the chirality
+    double Tlb;   // total bond length, to quantify pulling stage
+    double Tuz2;  // sum of uz.uz, see how director field goes from in xy plane to z direction driven by the chirality
 
     // gravitational
     //double TRz;
@@ -49,7 +49,7 @@ struct E_parameter
     //double Kt;   //liquid crystalline interaction for the twist only
     double q;  // liquid crystall twist constant
     double Cn; // liquid crystal to membrane normal moduli
-    double g; // g field for beads gravity
+    double g;  // g field for beads gravity
 };
 struct vertex
 {
@@ -84,7 +84,7 @@ public:
     int N;       // number of beads
     int imod;    // mode for initialization shape
     int Ne;      // number of edges
-    double lf;      //fixed distance along pulling direcion (z for cylinder)
+    double lf;   //fixed distance along pulling direcion (z for cylinder)
     // also used to set fixed distance betwen two beads
     double l0; // in-bulk tether maximum length
 
@@ -165,7 +165,6 @@ public:
     std::vector<double> un2dis_m(int bin_num);
     // distribution of un2 among beads, good indication for pi wall formation
 
-
     std::vector<double> comR_m();                              // center of mass measurement
     std::vector<double> rho_rcom_m(double del_r, int bin_num); // density distribution from center of mass
 
@@ -195,6 +194,13 @@ public:
     int edge_metropolis();
     // execute bond remove/add update
     // return 1: accepted, 0: rejected
+    int edge_shrink(int ind_boi, int num_edge_bead); // input is the bead of interest ind, for shrink, it's ind_i
+    int edge_extend(int ind_boi, int num_edge_bead); // for extend it's ind_j
+    int lifted_edge_metropolis();
+    int lifted_rep = 1;
+    // replica indicator
+    // [+1] make longest(shorter) edge longer(shorter);
+    // [-1]make lonest(shorter) edge shorter(longer);
 
     int hop_metropolis();
     // nearing short - long rods exchange update
@@ -216,7 +222,7 @@ public:
                  double delta_s, double delta_theta);
     // thermalisation of the system, starting from beta=0 (hot start)
     void Thermal_kar1(int MC_sweeps, int step_p_sweep, double kar1,
-                 double delta_s, double delta_theta);
+                      double delta_s, double delta_theta);
     // thermalisation with on kappa=1, to form vesicle at first
     void O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
                       double delta_s, double delta_theta, double delta_r, double bin_num, std::string folder,

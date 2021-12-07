@@ -169,7 +169,7 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
         beta += 1.0 / beta_steps;
         for (int sweep_n = 0; sweep_n < MC_sweeps / beta_steps; sweep_n++)
         {
-            // std::cout << sweep_n << "/" << MC_sweeps << "\n";
+            std::cout << sweep_n << "/" << MC_sweeps << "\n";
             for (int i = 0; i < step_p_sweep; i++)
             {
                 bead_metropolis(delta_s);
@@ -179,7 +179,8 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
                 //hop_metropolis();
                 if (i % int(std::sqrt(N)) == 0)
                 {
-                    edge_metropolis();
+                    //edge_metropolis();
+                    lifted_edge_metropolis(); // it should works faster
                 }
             }
             // std::cout << "thermo, beta=" << beta << "," << sweep_n << "/"<<
@@ -206,6 +207,7 @@ void dtmc_lc::Thermal_kar1(int MC_sweeps, int step_p_sweep, double kar1,
             if (i % int(std::sqrt(N)) == 0)
             {
                 edge_metropolis();
+                //lifted_edge_metropolis(); // it should works faster
             }
         }
         // std::cout << "thermo, beta=" << beta << "," << sweep_n << "/"<<
@@ -263,7 +265,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             //hop_accept += hop_metropolis();
             if (i % int(std::sqrt(N)) == 0)
             {
-                edge_accept += edge_metropolis();
+                //edge_accept += edge_metropolis();
+                edge_accept += lifted_edge_metropolis();
             }
         }
         E_all.push_back(Ob_sys.E);

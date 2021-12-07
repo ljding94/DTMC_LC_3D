@@ -5,7 +5,7 @@ from config_plot import *
 
 
 def tilt_Kds_Cn_data_get():
-    foldername = "../data/Ne2/Oct18_2021"
+    foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     lf = 20.0
     Cns = [1.0,3.0,5.0,7.0]
     datas, labels, colors, markers = [], [], [], []
@@ -29,7 +29,7 @@ def tilt_Kds_Cn_data_get():
 
 
 def tilt_Kds_config_data_get():
-    foldername = "../data/Ne2/Oct18_2021"
+    foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     lf=20.0
     Cn = 5.0
     Kds = [4.2,1.8]
@@ -56,7 +56,7 @@ def tilt_Kds_config_data_get():
     return [Kdp,fnames,povs,rotxyzs, xyshift, zslice]
 
 def tilt_Kds_lf_data_get():
-    foldername = "../data/Ne2/Oct18_2021"
+    foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     Cn=5.0
     lfs = [10.0,20.0,30.0]
     lf0 = 20.0
@@ -98,8 +98,9 @@ def tilt_Kd_plot(LineWidth, FontSize, LabelSize):
     for i in range(len(Kds)):
         ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, pov=povs[i], rotxyz=rotxyzs[i],xshift=xyshifts[i][0],yshift=xyshifts[i][1], zslice=zslices[i], mesh=1, bead=0,rod=1,d=1)
         if(i%3==0):
-            axcfg.text(xyshifts[i][0]-10,xyshifts[i][1]-5.5,r"$\epsilon_{LL}=%.1f$"%Kds[i],fontsize=FontSize)
-    #axcfg.text(-10,11,r"$C=5$",fontsize=FontSize)
+            #axcfg.text(xyshifts[i][0]-10,xyshifts[i][1]-5.5,r"$\epsilon_{LL}=%.1f$"%Kds[i],fontsize=FontSize)
+            axcfg.text(xyshifts[i][0]-10,xyshifts[i][1]-5.5,r"$K=%.1f$"%Kds[i],fontsize=FontSize)
+    axcfg.text(-10,11,r"$C=5$",fontsize=FontSize)
     axcfg.tick_params(which="both",direction="in", bottom="off",top="off", right="off",left="off",labelbottom=False,labelleft=False, labelsize=LabelSize)
 
     ## tilt drops as Kd increases
@@ -129,7 +130,7 @@ def tilt_Kd_plot(LineWidth, FontSize, LabelSize):
 
 
 def twist_q_data_get():
-    foldername = "../data/Ne2/Oct18_2021"
+    foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     lf=20.0
     Kds=[3.0,5.0,7.0]
     Cn=5.0
@@ -148,7 +149,7 @@ def twist_q_data_get():
 
 
 def twist_q_config_data_get():
-    foldername = "../data/Ne2/Oct18_2021"
+    foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     lf=20.0
     Kd=5.0
     Cn=5.0
@@ -177,7 +178,8 @@ def twist_q_plot(LineWidth, FontSize, LabelSize):
     qs,fnames,povs,rotxyzs = twist_q_config_data_get()
     for i in range(len(qs)):
         ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, pov=povs[i], rotxyz=rotxyzs[i],xshift=14*i, mesh=1, bead=0,rod=1, d=1)
-        axcfg.text(14*i-3,-14,r"$k_c=%.1f$"%qs[i],fontsize=FontSize)
+        #axcfg.text(14*i-3,-14,r"$k_c=%.1f$"%qs[i],fontsize=FontSize)
+        axcfg.text(14*i-3,-14,r"$q=%.1f$"%qs[i],fontsize=FontSize)
     axcfg.tick_params(which="both",direction="in", bottom="off",top="off", right="off",left="off",labelbottom=False,labelleft=False, labelsize=LabelSize)
 
     # o vs q plot
