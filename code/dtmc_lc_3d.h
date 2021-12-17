@@ -167,6 +167,7 @@ public:
 
     std::vector<double> comR_m();                              // center of mass measurement
     std::vector<double> rho_rcom_m(double del_r, int bin_num); // density distribution from center of mass
+    std::vector<double> uucdis_m(int bin_num); // distribution of twist, take from 0 to pi/4
 
     // useful tools
     double distance2(int ind_1, int ind_2);

@@ -16,7 +16,7 @@ int main(int argc, char const *argv[])
 
     double d0 = 1.4; // initialization distance between neighboring bead (for rhombus shape)
     double l0 = 1.73;
-    double delta_s = 0.1;
+    double delta_s = 0.15;
     double delta_theta = 0.5;
     double delta_r = 0.1;
     double bin_num = 80;
@@ -58,7 +58,7 @@ int main(int argc, char const *argv[])
 
         membrane.State_write(folder + "/State_" + finfo + "_init.csv");
         //membrane.Thermal_kar1(10, int(N / (delta_s * delta_s)) + 1, 5, delta_s, delta_theta);
-        membrane.Thermal(50, int(N / (delta_s * delta_s)) + 1, 1, delta_s, delta_theta);
+        //membrane.Thermal(50, int(N / (delta_s * delta_s)) + 1, 1, delta_s, delta_theta);
         membrane.O_MC_measure(50, 5, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 

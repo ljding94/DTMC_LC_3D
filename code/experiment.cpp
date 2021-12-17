@@ -240,7 +240,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
 
     std::vector<double> D_edge_all;
     std::vector<std::vector<double>> Gij_all;
-    std::vector<std::vector<double>> rhor_all;
+    //std::vector<std::vector<double>> rhor_all;
+    std::vector<std::vector<double>> uucdis_all;
 
     double bead_accept = 0;
     double spin_accept = 0;
@@ -292,7 +293,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         {
             Gij_all.push_back(Gij_m());
             D_edge_all.push_back(D_edge_com_m());
-            rhor_all.push_back(rho_rcom_m(delta_r, bin_num));
+            //rhor_all.push_back(rho_rcom_m(delta_r, bin_num));
+            uucdis_all.push_back(uucdis_m(bin_num));
         }
     }
 
@@ -365,6 +367,22 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     }
     fG.close();
 
+    std::ofstream fuuc(folder + "/uucdis_" + finfo + ".csv");
+    if (fuuc.is_open())
+    {
+        for (int i = 0; i < uucdis_all.size(); i++)
+        {
+            fuuc << uucdis_all[i][0];
+            for (int j = 1; j < uucdis_all[i].size(); j++)
+            {
+                fuuc << "," << uucdis_all[i][j];
+            }
+            fuuc << "\n";
+        }
+    }
+    fuuc.close();
+
+    /*
     std::ofstream frhor(folder + "/rhor_" + finfo + ".csv");
     if (frhor.is_open())
     {
@@ -379,4 +397,5 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     frhor.close();
+    */
 }

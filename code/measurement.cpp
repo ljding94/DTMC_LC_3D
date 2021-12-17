@@ -257,7 +257,7 @@ double dtmc_lc::E_m(observable Ob)
         //E += Epar.lamd * Ob.Leuns[e];
     }
     E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
-    E += 0.5*Ob.Bond_num * Epar.q * Epar.q;
+    E += 0.5 * Ob.Bond_num * Epar.Kd * Epar.q * Epar.q;
     //E += Epar.Ksb * Ob.Tuusb + Epar.Kt * Ob.Tuut; // use different moduli for twist and the other two
     E += -0.5 * Epar.Cn * Ob.Tun2;
     //E += -Epar.g * Ob.TRz;
@@ -788,4 +788,45 @@ std::vector<double> dtmc_lc::rho_rcom_m(double del_r, int bin_num)
     }
     return rhor;
 }
+
+std::vector<double> dtmc_lc::uucdis_m(int bin_num)
+{
+    // modified this for tilt angle distribution
+    std::vector<double> uucdis;
+    double del_uuc = 2.0 / bin_num;               // uuc take [-1,1]
+    double uuc_increment = 0.5 / Ob_sys.Bond_num; // bonds are double counted
+    int bond_count=0;
+    int bin;
+    double uuc_buff;
+    uucdis.clear();
+    for (int k = 0; k < bin_num; k++)
+    {
+        uucdis.push_back(0);
+    }
+
+    for (int i = 0; i < mesh.size(); i++)
+    {
+        for (int j = 0; j < mesh[i].nei.size(); j++)
+        {
+            bond_count+=1;
+            uuc_buff = uuc_m(i, mesh[i].nei[j]);
+            //if(uuc_buff>=1 || uuc_buff<=0){
+
+            //std::cout << "uuc=" << uuc_buff << "\n";
+            //}
+
+            bin = int((uuc_buff + 1) / del_uuc);
+            if (bin >= bin_num)
+            {
+                std::cout << "out of range for uucdis bin_num\n";
+            }
+            uucdis[bin] += uuc_increment;
+        }
+    }
+    //std::cout<<"Ob_sys.Bond_num="<<Ob_sys.Bond_num<<"\n";
+    //std::cout<<"Bondcount="<<bond_count<<"\n";
+    // checked it's correct, bond_count = 2*Bond_num
+    return uucdis;
+}
+
 #pragma endregion
