@@ -16,6 +16,24 @@ def find_cpar_ind(par_nm, mode):
     return cpar_ind
 
 
+def O_stat_cal(O, tau_c, wnu=1, wnu_ave=1, wnu_err=0):
+    # for each O, return O_ave,O_tau and O_err using O and wnu of bias
+    if wnu_ave!=1:
+        # with bias wnu
+        Obias_ave = np.average(O * wnu)
+        O_ave = Obias_ave / wnu_ave
+        rho, cov0 = autocorrelation_function_fft(O * wnu)
+        O_tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        Obias_err = np.sqrt(2 * O_tau / len(O) * cov0)
+        O_err = O_ave * np.sqrt(np.power(Obias_err / Obias_ave, 2) + np.power(wnu_err / wnu_ave, 2))
+    else:
+        O_ave = np.average(O)
+        rho, cov0 = autocorrelation_function_fft(O)
+        O_tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        O_err = np.sqrt(2 * O_tau / len(O) * cov0)
+    return (O_ave, O_tau, O_err)
+
+
 def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
     E_ave, E_tau, E_err = [], [], []
     Ne = par[find_cpar_ind(par_nm, "Ne")]
@@ -33,6 +51,8 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
     un2p_ave, un2p_tau, un2p_err = [], [], []
     uz2_ave, uz2_tau, uz2_err = [], [], []
     lb_ave, lb_tau, lb_err = [], [], []  # average length of bond
+    Eu_ave, Eu_tau, Eu_err = [], [], []  # average length of bond
+    wnu_ave, wnu_tau, wnu_err = [], [], []  # <wu^-1> = <1/wu>=<exp(Eu)>
     if Ne == 2:
         Ledif_ave, Ledif_tau, Ledif_err = [], [], []
     cpar_ind = find_cpar_ind(par_nm, mode)
@@ -52,11 +72,12 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         f2rtail += ".csv"
         # print("f2rtail",f2rtail)
         file2read = foldername + "/O_" + f2rtail
+        print("file2read", file2read)
         data = np.loadtxt(file2read, skiprows=14, delimiter=",", unpack=True)
         N = par_dealing[0]
         E = data[0] / N
         Les = data[1 : 1 + Ne]
-        IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2, Tuz2, Tlb = data[1 + Ne :]
+        IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2, Tuz2, Tlb, Eu = data[1 + Ne :]
         p2uu = Tp2uu / Bond_num
         uuc = Tuuc / Bond_num
         lb = Tlb / Bond_num
@@ -66,15 +87,9 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         # un2=Tun2/(N-Np)
         un2 = Tun2 / N
         uz2 = Tuz2 / N
+        wnu = np.exp(Eu)  # biased weight function, assumed beta=1
         # un2p=Tun2p/Np if Np>0 else Tun2p
         # Ne2 case, need Ledif for additional info
-        if Ne == 2:
-            Ledif = np.abs(Les[0] - Les[1])
-            Ledif_ave.append(np.average(Ledif))
-            rho, cov0 = autocorrelation_function_fft(Ledif)
-            tau, tau_err = tau_int_cal_rho(rho, tau_c)
-            Ledif_tau.append(tau)
-            Ledif_err.append(np.sqrt(2 * tau / len(Ledif) * cov0))
         # was used for checking energy
         # again, it's correct
         """
@@ -92,93 +107,102 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         Et=Et+0.5*par[find_cpar_ind(par_nm,"Cn")]*(Tun2-N)
         print("E-0.5kar*I2H2-lam*L+Kd*Tp2uu+Kd*q*Tuuc+0.5Cn*(Tun2-N)",Et)
         """
+        # TODO: [ ] write following analysis in to one function!
+        # TODO: [ ] include bias energy
+        # TODO: analysis depends on bias Eu
+        # wnu first!
+        # wnu = 1 when Enu=0
+
+        wnu_avei, wnu_taui, wnu_erri = O_stat_cal(wnu, tau_c)
+        wnu_ave.append(wnu_avei)
+        wnu_tau.append(wnu_taui)
+        wnu_err.append(wnu_erri)
+        print("wnu_avei, wnu_taui, wnu_erri",wnu_avei, wnu_taui, wnu_erri)
 
         # E
-        E_ave.append(np.average(E))
-        rho, cov0 = autocorrelation_function_fft(E)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        E_tau.append(tau)
-        E_err.append(np.sqrt(2 * tau / len(E) * cov0))
+        E_avei, E_taui, E_erri = O_stat_cal(E, tau_c, wnu, wnu_avei, wnu_erri)
+        E_ave.append(E_avei)
+        E_tau.append(E_taui)
+        E_err.append(E_erri)
 
         # Le and Ik2s
         for e in range(Ne):
-            Les_ave[e].append(np.average(Les[e]))
-            rho, cov0 = autocorrelation_function_fft(Les[e])
-            tau, tau_err = tau_int_cal_rho(rho, tau_c)
-            Les_tau[e].append(tau)
-            Les_err[e].append(np.sqrt(2 * tau / len(Les[e]) * cov0))
+            Le_avei, Le_taui, Le_erri = O_stat_cal(Les[e], tau_c, wnu, wnu_avei, wnu_erri)
+            Les_ave[e].append(Le_avei)
+            Les_tau[e].append(Le_taui)
+            Les_err[e].append(Le_erri)
+
+        if Ne == 2:
+            Ledif = np.abs(Les[0] - Les[1])
+            Ledif_avei, Ledif_taui, Ledif_erri = O_stat_cal(Ledif, tau_c, wnu, wnu_avei, wnu_erri)
+            Ledif_ave.append(Ledif_avei)
+            Ledif_tau.append(Ledif_taui)
+            Ledif_err.append(Ledif_erri)
 
         # IdA
-        IdA_ave.append(np.average(IdA))
-        rho, cov0 = autocorrelation_function_fft(IdA)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        IdA_tau.append(tau)
-        IdA_err.append(np.sqrt(2 * tau / len(IdA) * cov0))
+        IdA_avei, IdA_taui, IdA_erri = O_stat_cal(IdA, tau_c, wnu, wnu_avei, wnu_erri)
+        IdA_ave.append(IdA_avei)
+        IdA_tau.append(IdA_taui)
+        IdA_err.append(IdA_erri)
 
         # I2H
-        I2H_ave.append(np.average(I2H))
-        rho, cov0 = autocorrelation_function_fft(I2H)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        I2H_tau.append(tau)
-        I2H_err.append(np.sqrt(2 * tau / len(I2H) * cov0))
+        I2H_avei, I2H_taui, I2H_erri = O_stat_cal(I2H, tau_c, wnu, wnu_avei, wnu_erri)
+        I2H_ave.append(I2H_avei)
+        I2H_tau.append(I2H_taui)
+        I2H_err.append(I2H_erri)
 
         # I2H2
-        I2H2_ave.append(np.average(I2H2))
-        rho, cov0 = autocorrelation_function_fft(I2H2)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        # autocorrelation_plot(rho, tau, file2read[:-4] + "_autoI2H2.pdf")
-        I2H2_tau.append(tau)
-        I2H2_err.append(np.sqrt(2 * tau / len(I2H2) * cov0))
+        I2H2_avei, I2H2_taui, I2H2_erri = O_stat_cal(I2H2, tau_c, wnu, wnu_avei, wnu_erri)
+        I2H2_ave.append(I2H2_avei)
+        I2H2_tau.append(I2H2_taui)
+        I2H2_err.append(I2H2_erri)
 
         # I2H2dis
-        I2H2dis_ave.append(np.average(I2H2dis))
-        rho, cov0 = autocorrelation_function_fft(I2H2dis)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        # autocorrelation_plot(rho, tau, file2read[:-4] + "_autoI2H2.pdf")
-        I2H2dis_tau.append(tau)
-        I2H2dis_err.append(np.sqrt(2 * tau / len(I2H2) * cov0))
-
+        I2H2dis_avei, I2H2dis_taui, I2H2dis_erri = O_stat_cal(I2H2dis, tau_c, wnu, wnu_avei, wnu_erri)
+        I2H2dis_ave.append(I2H2dis_avei)
+        I2H2dis_tau.append(I2H2dis_taui)
+        I2H2dis_err.append(I2H2dis_erri)
         # IK
-        IK_ave.append(np.average(IK))
-        rho, cov0 = autocorrelation_function_fft(IK)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        IK_tau.append(tau)
-        IK_err.append(np.sqrt(2 * tau / len(IK) * cov0))
+        IK_avei, IK_taui, IK_erri = O_stat_cal(IK, tau_c, wnu, wnu_avei, wnu_erri)
+        IK_ave.append(IK_avei)
+        IK_tau.append(IK_taui)
+        IK_err.append(IK_erri)
 
         # p2uu
-        p2uu_ave.append(np.average(p2uu))
-        rho, cov0 = autocorrelation_function_fft(p2uu)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        p2uu_tau.append(tau)
-        p2uu_err.append(np.sqrt(2 * tau / len(p2uu) * cov0))
+        p2uu_avei, p2uu_taui, p2uu_erri = O_stat_cal(p2uu, tau_c, wnu, wnu_avei, wnu_erri)
+        p2uu_ave.append(p2uu_avei)
+        p2uu_tau.append(p2uu_taui)
+        p2uu_err.append(p2uu_erri)
 
         # uuc
-        uuc_ave.append(np.average(uuc))
-        rho, cov0 = autocorrelation_function_fft(uuc)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        uuc_tau.append(tau)
-        uuc_err.append(np.sqrt(2 * tau / len(uuc) * cov0))
+        uuc_avei, uuc_taui, uuc_erri = O_stat_cal(uuc, tau_c, wnu, wnu_avei, wnu_erri)
+        uuc_ave.append(uuc_avei)
+        uuc_tau.append(uuc_taui)
+        uuc_err.append(uuc_erri)
 
         # un2
-        un2_ave.append(np.average(un2))
-        rho, cov0 = autocorrelation_function_fft(un2)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        un2_tau.append(tau)
-        un2_err.append(np.sqrt(2 * tau / len(un2) * cov0))
+        un2_avei, un2_taui, un2_erri = O_stat_cal(un2, tau_c, wnu, wnu_avei, wnu_erri)
+        un2_ave.append(un2_avei)
+        un2_tau.append(un2_taui)
+        un2_err.append(un2_erri)
 
         # uz2
-        uz2_ave.append(np.average(uz2))
-        rho, cov0 = autocorrelation_function_fft(uz2)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        uz2_tau.append(tau)
-        uz2_err.append(np.sqrt(2 * tau / len(uz2) * cov0))
+        uz2_avei, uz2_taui, uz2_erri = O_stat_cal(uz2, tau_c, wnu, wnu_avei, wnu_erri)
+        uz2_ave.append(uz2_avei)
+        uz2_tau.append(uz2_taui)
+        uz2_err.append(uz2_erri)
 
         # lb
-        lb_ave.append(np.average(lb))
-        rho, cov0 = autocorrelation_function_fft(lb)
-        tau, tau_err = tau_int_cal_rho(rho, tau_c)
-        lb_tau.append(tau)
-        lb_err.append(np.sqrt(2 * tau / len(lb) * cov0))
+        lb_avei, lb_taui, lb_erri = O_stat_cal(lb, tau_c, wnu, wnu_avei, wnu_erri)
+        lb_ave.append(lb_avei)
+        lb_tau.append(lb_taui)
+        lb_err.append(lb_erri)
+
+        # Eu_bias
+        Eu_avei, Eu_taui, Eu_erri = O_stat_cal(Eu, tau_c)
+        Eu_ave.append(Eu_avei)
+        Eu_tau.append(Eu_taui)
+        Eu_err.append(Eu_erri)
 
     # generalize using par_nm list
     f2stail = "MC"
@@ -197,7 +221,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         for e in range(Ne):
             f.write(",Les_ave[%d],Les_tau[%d],Les_err[%d]" % (e, e, e))
 
-        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,uz2_ave,uz2_tau,uz2_err,lb_ave,lb_tau,lb_err")
+        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,uz2_ave,uz2_tau,uz2_err,lb_ave,lb_tau,lb_err,Eubias_ave,Eubias_tau,Eubias_err")
         if Ne == 2:
             f.write(",Ledif_ave,Ledif_tau,Ledif_err")
         f.write("\n")
@@ -206,7 +230,10 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
             for e in range(Ne):
                 f.write(",%f,%f,%f" % (Les_ave[e][i], Les_tau[e][i], Les_err[e][i]))
 
-            f.write(",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f" % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i], I2H2dis_ave[i], I2H2dis_tau[i], I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i], uz2_ave[i], uz2_tau[i], uz2_err[i], lb_ave[i], lb_tau[i], lb_err[i]))
+            f.write(
+                ",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f"
+                % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i], I2H2dis_ave[i], I2H2dis_tau[i], I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i], uz2_ave[i], uz2_tau[i], uz2_err[i], lb_ave[i], lb_tau[i], lb_err[i], Eu_ave[i], Eu_tau[i], Eu_err[i])
+            )
             if Ne == 2:
                 f.write(",%f,%f,%f" % (Ledif_ave[i], Ledif_tau[i], Ledif_err[i]))
             f.write("\n")

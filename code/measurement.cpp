@@ -261,14 +261,14 @@ double dtmc_lc::E_m(observable Ob)
         //E += Epar.lamd * Ob.Leuns[e];
     }
     E += -Epar.Kd * (Ob.Tp2uu + Epar.q * Ob.Tuuc);
-    E += 0.5 * Ob.Bond_num * Epar.Kd * Epar.q * Epar.q;
+    //E += 0.5 * Ob.Bond_num * Epar.Kd * Epar.q * Epar.q;
     //E += Epar.Ksb * Ob.Tuusb + Epar.Kt * Ob.Tuut; // use different moduli for twist and the other two
     E += -0.5 * Epar.Cn * Ob.Tun2;
     //E += -Epar.g * Ob.TRz;
     //E += Epar.kard * Ob.IKun2;
 
     //E += -0.5 * (Epar.Cn * Ob.Tun2 + Epar.Cnp * Ob.Tun2p);
-    // + kard * Ob.IKun2;00
+    // + kard * Ob.IKun2;
     return E;
 }
 double dtmc_lc::Eu_m(std::vector<double> Les)

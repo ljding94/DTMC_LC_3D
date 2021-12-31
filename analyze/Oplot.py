@@ -45,9 +45,9 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     Le_ave = np.sum(Les_ave, axis=0)
     Le_err = np.sqrt(np.sum(np.power(Les_err, 2), axis=0))
 
-    IdA_ave, IdA_tau, IdA_err, I2H_ave, I2H_tau, I2H_err, I2H2_ave, I2H2_tau, I2H2_err, I2H2dis_ave, I2H2dis_tau, I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err, uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, uz2_ave, uz2_tau, uz2_err, lb_ave, lb_tau, lb_err = data[7 + 3 * (Ne - 1) : 37 + 3 * (Ne - 1)]
+    IdA_ave, IdA_tau, IdA_err, I2H_ave, I2H_tau, I2H_err, I2H2_ave, I2H2_tau, I2H2_err, I2H2dis_ave, I2H2dis_tau, I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err, uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, uz2_ave, uz2_tau, uz2_err, lb_ave, lb_tau, lb_err, Eubias_ave, Eubias_tau, Eubias_err = data[7 + 3 * (Ne - 1) : 40 + 3 * (Ne - 1)]
     if Ne == 2:
-        Ledif_ave, Ledif_tau, Ledif_err = data[37 + 3 * (Ne - 1) :]
+        Ledif_ave, Ledif_tau, Ledif_err = data[40 + 3 * (Ne - 1) :]
     uuc_grad, uuc_grad_err = [], []
     un2_grad, un2_grad_err = [], []
     cpar_tsqN = []
@@ -67,7 +67,7 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     # LineWidth, FontSize, LabelSize = 1, 9, 8
     plt.figure()
     plt.rc("text", usetex=True)
-    na = 12
+    na = 13
     fig, axs = plt.subplots(na, 2, figsize=(246 / ppi * 2, 246 / ppi * 0.5 * na), sharex=True)  # , sharex=True
     # cpar_aj = cpar-np.outer([2.8, 2.0, 1.5, 0.8, 0], np.ones(len(cpar[0])))
     O_cpar_plot(axs[0, 0], E_ave, E_err, O_label, "E", r"$E/N$", cpar, colors, alphas)
@@ -103,6 +103,7 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     O_cpar_plot(axs[9, 0], un2_ave, un2_err, O_label, "un2", r"$u_n=\left<(u_i\cdot n_i)^2\right>_{i}$", cpar, colors, alphas)
     O_cpar_plot(axs[10, 0], uz2_ave, uz2_err, O_label, "uz2", r"$u_z^2=\left<(u_i\cdot \hat{z})^2\right>_{i}$", cpar, colors, alphas)
     O_cpar_plot(axs[11, 0], lb_ave, lb_err, O_label, "lb", r"$\left<l_{ij}\right>$", cpar, colors, alphas)
+    O_cpar_plot(axs[12, 0], Eubias_ave, Eubias_err, O_label, "Eubias", r"$\left<Eu\right>_{w}$", cpar, colors, alphas)
 
     if mode == "q":
         O_cpar_plot(axs[7, 1], uuc_grad, uuc_grad_err, O_label, "uuc_grad", r"$\partial u_c /\partial q$", cpar, colors, alphas)
