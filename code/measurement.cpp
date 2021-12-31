@@ -144,7 +144,9 @@ int dtmc_lc::check_duplication(int ind_i)
 
 #pragma endregion
 
-#pragma region : energy related
+#pragma region : system related
+
+#pragma endregion
 
 void dtmc_lc::mesh_bead_info_update(std::vector<int> ind_relate)
 {
@@ -241,6 +243,8 @@ void dtmc_lc::Ob_sys_update(observable Ob_new, observable Ob_old)
 
     Ob_sys.Bond_num += Ob_new.Bond_num - Ob_old.Bond_num;
 }
+
+#pragma region : energy related
 double dtmc_lc::E_m(observable Ob)
 {
     // Energy measurement for local Ob and global Ob_sys usage
@@ -267,7 +271,22 @@ double dtmc_lc::E_m(observable Ob)
     // + kard * Ob.IKun2;00
     return E;
 }
+double dtmc_lc::Eu_m(std::vector<double> Les)
+{
+    double Eu = 0;
+    double lrt;
+    if (Les.size() == 2)
+    {
+        lrt = (Les[0] - Les[1]) / (Les[0] + Les[1]);
+        lrt = std::abs(lrt);
+        Eu = 0.5 * Epar.ku * std::sqrt(N) * (lrt - 1.0 / 3) * (lrt - 1.0 / 3);
+    }
+    return Eu;
+}
 
+#pragma endregion
+
+#pragma region : detail of energy measurement
 double dtmc_lc::ds_m(int index)
 {
     if (mesh[index].edge_num == -1)
@@ -795,7 +814,7 @@ std::vector<double> dtmc_lc::uucdis_m(int bin_num)
     std::vector<double> uucdis;
     double del_uuc = 2.0 / bin_num;               // uuc take [-1,1]
     double uuc_increment = 0.5 / Ob_sys.Bond_num; // bonds are double counted
-    int bond_count=0;
+    int bond_count = 0;
     int bin;
     double uuc_buff;
     uucdis.clear();
@@ -808,7 +827,7 @@ std::vector<double> dtmc_lc::uucdis_m(int bin_num)
     {
         for (int j = 0; j < mesh[i].nei.size(); j++)
         {
-            bond_count+=1;
+            bond_count += 1;
             uuc_buff = uuc_m(i, mesh[i].nei[j]);
             //if(uuc_buff>=1 || uuc_buff<=0){
 

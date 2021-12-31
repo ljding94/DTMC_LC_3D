@@ -169,7 +169,8 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
         beta += 1.0 / beta_steps;
         for (int sweep_n = 0; sweep_n < MC_sweeps / beta_steps; sweep_n++)
         {
-            std::cout << sweep_n << "/" << MC_sweeps << "\n";
+            std::cout << sweep_n + n_beta * MC_sweeps / beta_steps << "/" << MC_sweeps << "\n";
+            std::cout<<"Eu/sqrt{N}="<<Ob_sys.Eu/std::sqrt(N)<<"\n";
             for (int i = 0; i < step_p_sweep; i++)
             {
                 bead_metropolis(delta_s);
@@ -237,6 +238,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<int> Bond_num_all;
     std::vector<double> Tuz2_all;
     std::vector<double> Tlb_all;
+    std::vector<double> Eu_all; // TODO: [ ] add Eu to output file, for further analysis!
 
     std::vector<double> D_edge_all;
     std::vector<std::vector<double>> Gij_all;
@@ -257,6 +259,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
     {
         std::cout << sweep_n << "/" << MC_sweeps << "\n";
+        std::cout<<"Eu/sqrt{N}="<<Ob_sys.Eu/std::sqrt(N)<<"\n";
         for (int i = 0; i < step_p_sweep; i++)
         {
             bead_accept += bead_metropolis(delta_s);
@@ -288,6 +291,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         Bond_num_all.push_back(Ob_sys.Bond_num);
         Tuz2_all.push_back(Ob_sys.Tuz2);
         Tlb_all.push_back(Ob_sys.Tlb);
+        Eu_all.push_back(Ob_sys.Eu);
 
         if (sweep_n % sweep_p_G == 0)
         {
@@ -333,7 +337,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             f << "Ik2s[" << e << "],";
         }*/
         //f << "IdA,I2H,I2H2,phi_sum,Tphi2,I2H2dis,IK,IKphi2,Tp2uu,Tuuc,Bond_num,Tun2\n";
-        f << "IdA,I2H,I2H2,I2H2dis,IK,Tp2uu,Tuuc,Bond_num,Tun2,Tuz2,Tlb\n";
+        f << "IdA,I2H,I2H2,I2H2dis,IK,Tp2uu,Tuuc,Bond_num,Tun2,Tuz2,Tlb,Eu\n";
         for (int i = 0; i < E_all.size(); i++)
         {
             f << E_all[i] << ",";
@@ -341,13 +345,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             {
                 f << Les_all[e][i] << ",";
             }
-            /*
-            for (int e = 0; e < Ne; e++)
-            {
-                f << Ik2s_all[e][i] << ",";
-            }*/
-            //f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << phi_sum_all[i] << "," << Tphi2_all[i] << "," << I2H2dis_all[i] << "," << IK_all[i] << "," << IKphi2_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << "," << Bond_num_all[i] << "," << Tun2_all[i] << "\n";
-            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << I2H2dis_all[i] << "," << IK_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << "," << Bond_num_all[i] << "," << Tun2_all[i] << "," << Tuz2_all[i] << "," << Tlb_all[i] << "\n";
+            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << I2H2dis_all[i] << "," << IK_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << "," << Bond_num_all[i] << "," << Tun2_all[i] << "," << Tuz2_all[i] << "," << Tlb_all[i] << "," << Eu_all[i] << "\n";
         }
     }
     f.close();

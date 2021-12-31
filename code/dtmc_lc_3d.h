@@ -11,6 +11,8 @@ struct observable
 {
     // total energy
     double E;
+    // weighted energt // for umbrella sampling
+    double Eu; // for Ne=2, it depends on |(l0-l1)/(l0+l1)|
     // geometric
     double I2H2; // integral of dA (2H)^2
     //double Iphi;              // sum of phi
@@ -50,6 +52,7 @@ struct E_parameter
     double q;  // liquid crystall twist constant
     double Cn; // liquid crystal to membrane normal moduli
     double g;  // g field for beads gravity
+    double ku;  // ku for weighted energy, harmonic oscillator-like
 };
 struct vertex
 {
@@ -112,6 +115,7 @@ public:
 
     // measure observables related to these ind and bond
     double E_m(observable Ob);
+    double Eu_m(std::vector<double> Les);
 
     // randomnumber generators
     std::mt19937 gen;

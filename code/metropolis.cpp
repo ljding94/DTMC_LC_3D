@@ -18,6 +18,9 @@ int dtmc_lc::bead_metropolis(double delta_s)
 
     // observables
     observable Ob_relate_old, Ob_relate_new;
+    std::vector<double> Les_old, Les_new; // system edge length, for umbrella sampling weight function
+    double Eu_old, Eu_new;                // umbrella sampling energy weight
+    // TODO: [ ] include Eu for the metropolis update
 
     // some useful cache variables
     int index, nei_ind;
@@ -58,7 +61,8 @@ int dtmc_lc::bead_metropolis(double delta_s)
 #pragma region : store observable of affected beads
     // get pre update info
     Ob_relate_old = Ob_m(ind_relate, bond_relate);
-
+    Les_old = Ob_sys.Les;
+    Eu_old = Eu_m(Les_old);
 #pragma endregion
 
 #pragma region : bead MC update proposal
@@ -161,16 +165,23 @@ int dtmc_lc::bead_metropolis(double delta_s)
 
     mesh_bead_info_update(ind_relate);
     Ob_relate_new = Ob_m(ind_relate, bond_relate);
+    Les_new = Ob_sys.Les;
+    for (int k = 0; k < Ob_sys.Les.size(); k++)
+    {
+        Les_new[k] += Ob_relate_new.Les[k] - Ob_relate_old.Les[k];
+    }
+    Eu_new = Eu_m(Les_new);
 
 #pragma endregion
 
 #pragma region : Metropolis
     // std::cout << "Er_new-Er_old=" << Er_new - Er_old << "\n";
     if (rand_uni(gen) <=
-        std::exp(-beta * (Ob_relate_new.E - Ob_relate_old.E)))
+        std::exp(-beta * (Ob_relate_new.E + Eu_new - Ob_relate_old.E - Eu_old)))
     {
         // [accepted]
-        Ob_sys_update(Ob_relate_new, Ob_relate_old);
+        Ob_sys_update(Ob_relate_new, Ob_relate_old); // it doesn't update Eu
+        Ob_sys.Eu += Eu_new - Eu_old;
         return 1;
     }
     else
@@ -502,6 +513,9 @@ int dtmc_lc::edge_metropolis()
 
     // observables
     observable Ob_relate_old, Ob_relate_new;
+    std::vector<double> Les_old, Les_new; // system edge length, for umbrella sampling weight function
+    double Eu_old, Eu_new;                // umbrella sampling energy weight
+    // TODO: [] include Eu for the metropolis update
     // useful variables
     std::pair<int, int> bond;
     std::vector<int> fedge_list;
@@ -554,8 +568,8 @@ int dtmc_lc::edge_metropolis()
         // check number of beads on the edge, need to be greater than 5?
         if (edge_lists[mesh[ind_i].edge_num].size() <= 4)
         {
-        // # beads for each edge need to be > 5
-        return 0;
+            // # beads for each edge need to be > 5
+            return 0;
         }
         // check j k connection
         if (list_a_nei_b(mesh[ind_j].nei, ind_k) != -1)
@@ -619,6 +633,8 @@ int dtmc_lc::edge_metropolis()
 #pragma region : [shrink] store observables of affected beads
         indi_edge_num_old = mesh[ind_i].edge_num;
         Ob_relate_old = Ob_m(ind_relate, bond_relate_old);
+        Les_old = Ob_sys.Les;
+        Eu_old = Eu_m(Les_old);
 #pragma endregion
 // neighbors are also sorted during the energy calculation
 
@@ -697,6 +713,12 @@ int dtmc_lc::edge_metropolis()
 #pragma region : [shrink] get after update observables
         mesh_bead_info_update(ind_relate);
         Ob_relate_new = Ob_m(ind_relate, bond_relate_new);
+        Les_new = Ob_sys.Les;
+        for (int k = 0; k < Ob_sys.Les.size(); k++)
+        {
+            Les_new[k] += Ob_relate_new.Les[k] - Ob_relate_old.Les[k];
+        }
+        Eu_new = Eu_m(Les_new);
         // after-update observables
 #pragma endregion
 
@@ -705,7 +727,7 @@ int dtmc_lc::edge_metropolis()
         //std::cout<<"[shrink](Ob_relate_new.E - Ob_relate_old.E)"<<(Ob_relate_new.E - Ob_relate_old.E)<<"\n";
         if (rand_uni(gen) <=
             1.0 * fedge_list.size() / (fedge_list.size() - 1) *
-                std::exp(-beta * (Ob_relate_new.E - Ob_relate_old.E)))
+                std::exp(-beta * (Ob_relate_new.E + Eu_new - Ob_relate_old.E - Eu_old)))
         {
             // [accepted]
             // remove ind_i from it's original edge_list
@@ -713,7 +735,8 @@ int dtmc_lc::edge_metropolis()
                 edge_lists[indi_edge_num_old].begin() + e_ind_i);
 
             // update system observables
-            Ob_sys_update(Ob_relate_new, Ob_relate_old);
+            Ob_sys_update(Ob_relate_new, Ob_relate_old); // it doesn't update Eu
+            Ob_sys.Eu += Eu_new - Eu_old;
 
             // update bulk_bond_list, add i-j i-k as bulk bond
             std::pair<int, int> bond1, bond2;
@@ -881,6 +904,8 @@ int dtmc_lc::edge_metropolis()
 
 #pragma region : [extend] store observable of affected beads
         Ob_relate_old = Ob_m(ind_relate, bond_relate_old);
+        Les_old = Ob_sys.Les;
+        Eu_old = Eu_m(Les_old);
         // get pre update info
 
 #pragma endregion
@@ -942,6 +967,12 @@ int dtmc_lc::edge_metropolis()
 #pragma region : [extend] get after update observables
         mesh_bead_info_update(ind_relate);
         Ob_relate_new = Ob_m(ind_relate, bond_relate_new);
+        Les_new = Ob_sys.Les;
+        for (int k = 0; k < Ob_sys.Les.size(); k++)
+        {
+            Les_new[k] += Ob_relate_new.Les[k] - Ob_relate_old.Les[k];
+        }
+        Eu_new = Eu_m(Les_new);
         // after-update observables
 
 #pragma endregion
@@ -951,7 +982,7 @@ int dtmc_lc::edge_metropolis()
         //std::cout<<"fedge_list.size()"<<fedge_list.size()<<"\n";
         if (rand_uni(gen) <=
             1.0 * fedge_list.size() / (fedge_list.size() + 1) *
-                std::exp(-beta * (Ob_relate_new.E - Ob_relate_old.E)))
+                std::exp(-beta * (Ob_relate_new.E + Eu_new - Ob_relate_old.E - Eu_old)))
         {
             // [accepted]
             if (mesh[ind_i].edge_num == -1)
@@ -961,7 +992,8 @@ int dtmc_lc::edge_metropolis()
             edge_lists[mesh[ind_i].edge_num].push_back(ind_i);
             // I2H_new = 0;
             // i j k are sorted again!
-            Ob_sys_update(Ob_relate_new, Ob_relate_old);
+            Ob_sys_update(Ob_relate_new, Ob_relate_old); // it doesn't update Eu
+            Ob_sys.Eu += Eu_new - Eu_old;
 
             // these are edge bond now
             delete_bulk_bond_list(ind_i, ind_j);

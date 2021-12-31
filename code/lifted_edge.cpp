@@ -28,28 +28,51 @@ int dtmc_lc::lifted_edge_metropolis()
     // found ind_boi on the edge
     bool ledge; // if ind_boi is on the longest edge
     int res;
-    // find if ledge
-    ledge = 1;
-    for (int i = 0; i < edge_lists.size(); i++)
+    int alg = 1;
+
+    if (alg == 0)
     {
-        if (Ob_sys.Les[mesh[ind_boi].edge_num] > Ob_sys.Les[i])
+        // algorithm 0: replica depends on difference of edge length
+        // find if ledge
+        ledge = 1;
+        for (int i = 0; i < edge_lists.size(); i++)
         {
-            ledge = 0;
+            if (Ob_sys.Les[mesh[ind_boi].edge_num] > Ob_sys.Les[i])
+            {
+                ledge = 0;
+            }
+        }
+
+        if ((ledge && lifted_rep == 1) || (!ledge && lifted_rep == 0))
+        {
+            res = edge_extend(ind_boi, num_edge_bead);
+        }
+        else
+        {
+            res = edge_shrink(ind_boi, num_edge_bead);
+        }
+        if (res == 0)
+        {
+            lifted_rep = -lifted_rep;
+        }
+    }
+    else if (alg == 1)
+    {
+        // algotithm 1: replica depends on edge extension vs shrink
+        if (lifted_rep == 1)
+        {
+            res = edge_extend(ind_boi, num_edge_bead);
+        }
+        else
+        {
+            res = edge_shrink(ind_boi, num_edge_bead);
+        }
+        if (res == 0)
+        {
+            lifted_rep = -lifted_rep;
         }
     }
 
-    if ((ledge && lifted_rep == 1) || (!ledge && lifted_rep == 0))
-    {
-        res = edge_extend(ind_boi, num_edge_bead);
-    }
-    else
-    {
-        res = edge_shrink(ind_boi, num_edge_bead);
-    }
-    if (res == 0)
-    {
-        lifted_rep = -lifted_rep;
-    }
     return res;
 }
 

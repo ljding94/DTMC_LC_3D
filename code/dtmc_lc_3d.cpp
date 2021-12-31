@@ -29,6 +29,8 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     Epar.q = Epar_.q;
     // coupling
     Epar.Cn = Epar_.Cn;
+    Epar.ku = Epar_.ku;
+
     // gravitational
     //Epar.g = Epar_.g;  // if g!=0, edge 0 z position can't be greater than 0
     Epar.g = 0; // g!=0 case will be studied in a another project
@@ -147,6 +149,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
         Ob_sys.Tuz2 += mesh[i].u[2] * mesh[i].u[2];
     }
     Ob_sys.Bond_num = 0.5 * bulk_bond_list.size();
+
     for (int n = 0; n < Ne; n++)
     {
         Ob_sys.Bond_num += edge_lists[n].size();
@@ -154,6 +157,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     //Ob_sys.E = 0.5 * Epar.Cn * (N - Np) + 0.5 * Epar.Cn * Np;
     Ob_sys.E = 0.5 * Epar.Cn * N; // offset tilt energy
     Ob_sys.E += E_m(Ob_sys);
+    Ob_sys.Eu = Eu_m(Ob_sys.Les);
 
     // set random number generators
     std::random_device rd;
@@ -785,18 +789,16 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
         return 0;
     }
 
-
     mesh[b0].nei.erase(mesh[b0].nei.begin() + b0_nei_b1);
     mesh[b1].nei.erase(mesh[b1].nei.begin() + b1_nei_b2);
     mesh[b2].nei.erase(mesh[b2].nei.begin() + b2_nei_b0);
     // b0_nei etc changed after above operation
-    b0_nei_b2 = list_a_nei_b(mesh[b0].nei,b2);
-    b1_nei_b0 = list_a_nei_b(mesh[b1].nei,b0);
-    b2_nei_b1 = list_a_nei_b(mesh[b2].nei,b1);
+    b0_nei_b2 = list_a_nei_b(mesh[b0].nei, b2);
+    b1_nei_b0 = list_a_nei_b(mesh[b1].nei, b0);
+    b2_nei_b1 = list_a_nei_b(mesh[b2].nei, b1);
     mesh[b0].nei.erase(mesh[b0].nei.begin() + b0_nei_b2);
     mesh[b1].nei.erase(mesh[b1].nei.begin() + b1_nei_b0);
     mesh[b2].nei.erase(mesh[b2].nei.begin() + b2_nei_b1);
-
 
     delete_bulk_bond_list(b0, b1);
     delete_bulk_bond_list(b1, b2);
