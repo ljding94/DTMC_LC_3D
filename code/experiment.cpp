@@ -170,8 +170,8 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
         for (int sweep_n = 0; sweep_n < MC_sweeps / beta_steps; sweep_n++)
         {
             std::cout << sweep_n + n_beta * MC_sweeps / beta_steps << "/" << MC_sweeps << "\n";
-            std::cout<<"Eu/sqrt{N}="<<Ob_sys.Eu/std::sqrt(N)<<"\n";
-            std::cout<<" Les[1]/Les[0]"<<Ob_sys.Les[1] / Ob_sys.Les[0]<<"\n";
+            std::cout << "Eu/sqrt{N}=" << Ob_sys.Eu / std::sqrt(N) << "\n";
+            std::cout << " Les[1]/Les[0]" << Ob_sys.Les[1] / Ob_sys.Les[0] << "\n";
             for (int i = 0; i < step_p_sweep; i++)
             {
                 bead_metropolis(delta_s);
@@ -190,9 +190,9 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
         }
     }
 }
-void dtmc_lc::Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1,double lam1,double delta_s, double delta_theta)
+void dtmc_lc::Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1, double lam1, double delta_s, double delta_theta)
 {
-    double kar0,lam0,Kd0;
+    double kar0, lam0, Kd0;
     kar0 = Epar.kar;
     lam0 = Epar.lam;
     Kd0 = Epar.Kd;
@@ -204,10 +204,11 @@ void dtmc_lc::Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1,doub
     {
         Ob_sys.E += Ob_sys.Les[e] * (lam1 - lam0);
     }
-    Ob_sys.E += Ob_sys.Tp2uu*(0-Kd0);
+    Ob_sys.E += Ob_sys.Tp2uu * (0 - Kd0);
 
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
     {
+        std::cout << "thermal_kar1lam1" << sweep_n << "/" << MC_sweeps << "\n";
         for (int i = 0; i < step_p_sweep; i++)
         {
             bead_metropolis(delta_s);
@@ -227,12 +228,13 @@ void dtmc_lc::Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1,doub
 
     Epar.kar = kar0;
     Epar.lam = lam0;
+    Epar.Kd = Kd0;
     Ob_sys.E += Ob_sys.I2H2dis * (kar0 - kar1);
     for (int e = 0; e < Ne; e++)
     {
         Ob_sys.E += Ob_sys.Les[e] * (lam0 - lam1);
     }
-    Ob_sys.E += Ob_sys.Tp2uu*(Kd0-0);
+    Ob_sys.E += Ob_sys.Tp2uu * (Kd0 - 0);
     // correct energy for new kar0
 }
 
@@ -275,9 +277,38 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
     {
         std::cout << sweep_n << "/" << MC_sweeps << "\n";
-        std::cout<<"Eu/sqrt{N}="<<Ob_sys.Eu/std::sqrt(N)<<"\n";
+        std::cout << "Eu/sqrt{N}=" << Ob_sys.Eu / std::sqrt(N) << "\n";
         for (int i = 0; i < step_p_sweep; i++)
         {
+
+            E_all.push_back(Ob_sys.E);
+            //std::cout << "E=" << Ob_sys.E << "\n";
+            I2H2_all.push_back(Ob_sys.I2H2);
+            I2H2dis_all.push_back(Ob_sys.I2H2dis);
+            for (int e = 0; e < Ne; e++)
+            {
+                Les_all[e].push_back(Ob_sys.Les[e]);
+            }
+            Tp2uu_all.push_back(Ob_sys.Tp2uu);
+            Tuuc_all.push_back(Ob_sys.Tuuc);
+            Tun2_all.push_back(Ob_sys.Tun2);
+            IdA_all.push_back(Ob_sys.IdA);
+            I2H_all.push_back(Ob_sys.I2H);
+            IK_all.push_back(Ob_sys.IK);
+            //IKphi2_all.push_back(Ob_sys.IKphi2);
+            Bond_num_all.push_back(Ob_sys.Bond_num);
+            Tuz2_all.push_back(Ob_sys.Tuz2);
+            Tlb_all.push_back(Ob_sys.Tlb);
+            Eu_all.push_back(Ob_sys.Eu);
+
+            if (sweep_n % sweep_p_G == 0)
+            {
+                Gij_all.push_back(Gij_m());
+                D_edge_all.push_back(D_edge_com_m());
+                //rhor_all.push_back(rho_rcom_m(delta_r, bin_num));
+                uucdis_all.push_back(uucdis_m(bin_num));
+            }
+
             bead_accept += bead_metropolis(delta_s);
             spin_accept += spin_metropolis(delta_theta);
             bond_accept += bond_metropolis();
@@ -288,33 +319,6 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
                 edge_accept += edge_metropolis();
                 //edge_accept += lifted_edge_metropolis();
             }
-        }
-        E_all.push_back(Ob_sys.E);
-        //std::cout << "E=" << Ob_sys.E << "\n";
-        I2H2_all.push_back(Ob_sys.I2H2);
-        I2H2dis_all.push_back(Ob_sys.I2H2dis);
-        for (int e = 0; e < Ne; e++)
-        {
-            Les_all[e].push_back(Ob_sys.Les[e]);
-        }
-        Tp2uu_all.push_back(Ob_sys.Tp2uu);
-        Tuuc_all.push_back(Ob_sys.Tuuc);
-        Tun2_all.push_back(Ob_sys.Tun2);
-        IdA_all.push_back(Ob_sys.IdA);
-        I2H_all.push_back(Ob_sys.I2H);
-        IK_all.push_back(Ob_sys.IK);
-        //IKphi2_all.push_back(Ob_sys.IKphi2);
-        Bond_num_all.push_back(Ob_sys.Bond_num);
-        Tuz2_all.push_back(Ob_sys.Tuz2);
-        Tlb_all.push_back(Ob_sys.Tlb);
-        Eu_all.push_back(Ob_sys.Eu);
-
-        if (sweep_n % sweep_p_G == 0)
-        {
-            Gij_all.push_back(Gij_m());
-            D_edge_all.push_back(D_edge_com_m());
-            //rhor_all.push_back(rho_rcom_m(delta_r, bin_num));
-            uucdis_all.push_back(uucdis_m(bin_num));
         }
     }
 

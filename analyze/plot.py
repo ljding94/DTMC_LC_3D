@@ -303,20 +303,23 @@ def O_MCstep_plot(filename,Ne):
     ppi = 72
     plt.figure()
     plt.rc("text")
-    na = 3
+    na =4
     fig, axs = plt.subplots(na, 1, figsize=(246 / ppi * 1, 246 / ppi * 0.5 * na), sharex=True)  # , sharex=True
     mcs = np.arange(1,len(E)+0.1,1)
     axs[0].plot(mcs,E,"-")
     axs[0].set_ylabel("E")
     for i in range(len(Les)):
         axs[1].plot(mcs,Les[i],"-")
+        print(Les[i])
     axs[1].set_ylabel("Le")
     if(Ne==2):
         axs[2].plot(mcs,Lrt,"-")
     axs[2].set_ylabel("(L[0]-L[1])/(L[0]+L[1])")
-    axs[2].set_xlabel("MC steps")
+    axs[3].plot(mcs,I2H2,"-")
+    axs[3].set_ylabel("I2H2")
+    axs[-1].set_xlabel("MC steps")
     plt.tight_layout()
-    plt.savefig(filename[:-4] + "_MCstep.pdf")
+    plt.savefig(filename[:-4] + "_MCstep.png")
     plt.close()
 
 
