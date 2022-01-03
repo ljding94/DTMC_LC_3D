@@ -171,6 +171,7 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
         {
             std::cout << sweep_n + n_beta * MC_sweeps / beta_steps << "/" << MC_sweeps << "\n";
             std::cout<<"Eu/sqrt{N}="<<Ob_sys.Eu/std::sqrt(N)<<"\n";
+            std::cout<<" Les[1]/Les[0]"<<Ob_sys.Les[1] / Ob_sys.Les[0]<<"\n";
             for (int i = 0; i < step_p_sweep; i++)
             {
                 bead_metropolis(delta_s);
@@ -189,13 +190,22 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
         }
     }
 }
-void dtmc_lc::Thermal_kar1(int MC_sweeps, int step_p_sweep, double kar1,
-                           double delta_s, double delta_theta)
+void dtmc_lc::Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1,double lam1,double delta_s, double delta_theta)
 {
-    double kar0;
+    double kar0,lam0,Kd0;
     kar0 = Epar.kar;
+    lam0 = Epar.lam;
+    Kd0 = Epar.Kd;
     Epar.kar = kar1;
+    Epar.lam = lam1;
+    Epar.Kd = 0;
     Ob_sys.E += Ob_sys.I2H2dis * (kar1 - kar0);
+    for (int e = 0; e < Ne; e++)
+    {
+        Ob_sys.E += Ob_sys.Les[e] * (lam1 - lam0);
+    }
+    Ob_sys.E += Ob_sys.Tp2uu*(0-Kd0);
+
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
     {
         for (int i = 0; i < step_p_sweep; i++)
@@ -216,7 +226,13 @@ void dtmc_lc::Thermal_kar1(int MC_sweeps, int step_p_sweep, double kar1,
     }
 
     Epar.kar = kar0;
+    Epar.lam = lam0;
     Ob_sys.E += Ob_sys.I2H2dis * (kar0 - kar1);
+    for (int e = 0; e < Ne; e++)
+    {
+        Ob_sys.E += Ob_sys.Les[e] * (lam0 - lam1);
+    }
+    Ob_sys.E += Ob_sys.Tp2uu*(Kd0-0);
     // correct energy for new kar0
 }
 

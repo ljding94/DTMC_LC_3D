@@ -30,6 +30,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     // coupling
     Epar.Cn = Epar_.Cn;
     Epar.ku = Epar_.ku;
+    Epar.n_Eu = Epar_.n_Eu;
 
     // gravitational
     //Epar.g = Epar_.g;  // if g!=0, edge 0 z position can't be greater than 0

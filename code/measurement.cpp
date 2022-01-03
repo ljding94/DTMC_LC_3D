@@ -277,9 +277,15 @@ double dtmc_lc::Eu_m(std::vector<double> Les)
     double lrt;
     if (Les.size() == 2)
     {
-        lrt = (Les[0] - Les[1]) / (Les[0] + Les[1]);
-        lrt = std::abs(lrt);
-        Eu = 0.5 * Epar.ku * std::sqrt(N) * (lrt - 1.0 / 3) * (lrt - 1.0 / 3);
+        //lrt = (Les[0] - Les[1]) / (Les[0] + Les[1]);
+        lrt = Les[1] / Les[0];
+        for (int k = 0; k < Epar.n_Eu; k++)
+        {
+            Eu += std::pow(lrt - (k + 1.0) / (Epar.n_Eu + 1),2);
+        }
+
+        //Eu = 0.5 * Epar.ku * std::sqrt(N) * (lrt - 1.0 / 3) * (lrt - 1.0 / 3);
+        Eu *= 0.5 * Epar.ku * std::sqrt(N);
     }
     return Eu;
 }

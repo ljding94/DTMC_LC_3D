@@ -39,6 +39,8 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
     Ne = par[find_cpar_ind(par_nm, "Ne")]
 
     Les_ave, Les_tau, Les_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
+    if Ne == 2:
+        Lrt_ave, Lrt_tau, Lrt_err = [], [], []
     IdA_ave, IdA_tau, IdA_err = [], [], []
     I2H_ave, I2H_tau, I2H_err = [], [], []
     I2H2_ave, I2H2_tau, I2H2_err = [], [], []
@@ -53,8 +55,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
     lb_ave, lb_tau, lb_err = [], [], []  # average length of bond
     Eu_ave, Eu_tau, Eu_err = [], [], []  # average length of bond
     wnu_ave, wnu_tau, wnu_err = [], [], []  # <wu^-1> = <1/wu>=<exp(Eu)>
-    if Ne == 2:
-        Ledif_ave, Ledif_tau, Ledif_err = [], [], []
+
     cpar_ind = find_cpar_ind(par_nm, mode)
     cpar = par[cpar_ind]
     Cn_ind = -1
@@ -77,7 +78,8 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         N = par_dealing[0]
         E = data[0] / N
         Les = data[1 : 1 + Ne]
-        IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2, Tuz2, Tlb, Eu = data[1 + Ne :]
+        IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2, Tuz2, Tlb, = data[1 + Ne : 12 + Ne]
+        Eu  = data[12+Ne]
         p2uu = Tp2uu / Bond_num
         uuc = Tuuc / Bond_num
         lb = Tlb / Bond_num
@@ -87,7 +89,8 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         # un2=Tun2/(N-Np)
         un2 = Tun2 / N
         uz2 = Tuz2 / N
-        wnu = np.exp(Eu)  # biased weight function, assumed beta=1
+        Euave = np.average(Eu)
+        wnu = np.exp(Eu-Euave)  # biased weight function, assumed beta=1, normalize to Eu_ave
         # un2p=Tun2p/Np if Np>0 else Tun2p
         # Ne2 case, need Ledif for additional info
         # was used for checking energy
@@ -133,11 +136,11 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
             Les_err[e].append(Le_erri)
 
         if Ne == 2:
-            Ledif = np.abs(Les[0] - Les[1])
-            Ledif_avei, Ledif_taui, Ledif_erri = O_stat_cal(Ledif, tau_c, wnu, wnu_avei, wnu_erri)
-            Ledif_ave.append(Ledif_avei)
-            Ledif_tau.append(Ledif_taui)
-            Ledif_err.append(Ledif_erri)
+            Lrt = (Les[0] - Les[1])/(Les[0] + Les[1])
+            Lrt_avei, Lrt_taui, Lrt_erri = O_stat_cal(Lrt, tau_c, wnu, wnu_avei, wnu_erri)
+            Lrt_ave.append(Lrt_avei)
+            Lrt_tau.append(Lrt_taui)
+            Lrt_err.append(Lrt_erri)
 
         # IdA
         IdA_avei, IdA_taui, IdA_erri = O_stat_cal(IdA, tau_c, wnu, wnu_avei, wnu_erri)
@@ -223,7 +226,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
 
         f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,uz2_ave,uz2_tau,uz2_err,lb_ave,lb_tau,lb_err,Eubias_ave,Eubias_tau,Eubias_err")
         if Ne == 2:
-            f.write(",Ledif_ave,Ledif_tau,Ledif_err")
+            f.write(",Lrt_ave,Lrt_tau,Lrt_err")
         f.write("\n")
         for i in range(len(cpar)):
             f.write("%f,%f,%f,%f" % (cpar[i], E_ave[i], E_tau[i], E_err[i]))
@@ -235,7 +238,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
                 % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i], I2H2dis_ave[i], I2H2dis_tau[i], I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i], uz2_ave[i], uz2_tau[i], uz2_err[i], lb_ave[i], lb_tau[i], lb_err[i], Eu_ave[i], Eu_tau[i], Eu_err[i])
             )
             if Ne == 2:
-                f.write(",%f,%f,%f" % (Ledif_ave[i], Ledif_tau[i], Ledif_err[i]))
+                f.write(",%f,%f,%f" % (Lrt_ave[i], Lrt_tau[i], Lrt_err[i]))
             f.write("\n")
 
 

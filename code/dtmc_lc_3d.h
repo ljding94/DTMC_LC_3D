@@ -52,7 +52,8 @@ struct E_parameter
     double q;  // liquid crystall twist constant
     double Cn; // liquid crystal to membrane normal moduli
     double g;  // g field for beads gravity
-    double ku;  // ku for weighted energy, harmonic oscillator-like
+    double ku; // ku for weighted energy, harmonic oscillator-like
+    int n_Eu;  // number of harmonic oscillator forumbrella sampling bias energy Eu;
 };
 struct vertex
 {
@@ -116,6 +117,7 @@ public:
     // measure observables related to these ind and bond
     double E_m(observable Ob);
     double Eu_m(std::vector<double> Les);
+    // Les, length of edges, n number of harmonic oscilattors
 
     // randomnumber generators
     std::mt19937 gen;
@@ -171,7 +173,7 @@ public:
 
     std::vector<double> comR_m();                              // center of mass measurement
     std::vector<double> rho_rcom_m(double del_r, int bin_num); // density distribution from center of mass
-    std::vector<double> uucdis_m(int bin_num); // distribution of twist, take from 0 to pi/4
+    std::vector<double> uucdis_m(int bin_num);                 // distribution of twist, take from 0 to pi/4
 
     // useful tools
     double distance2(int ind_1, int ind_2);
@@ -226,9 +228,8 @@ public:
     void Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
                  double delta_s, double delta_theta);
     // thermalisation of the system, starting from beta=0 (hot start)
-    void Thermal_kar1(int MC_sweeps, int step_p_sweep, double kar1,
-                      double delta_s, double delta_theta);
-    // thermalisation with on kappa=1, to form vesicle at first
+    void Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1, double lam1, double delta_s, double delta_theta);
+    // thermalisation with on kar=kar1,lam=lam1, to form vesicle at first
     void O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
                       double delta_s, double delta_theta, double delta_r, double bin_num, std::string folder,
                       std::string finfo);
