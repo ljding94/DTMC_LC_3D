@@ -204,7 +204,7 @@ void dtmc_lc::Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1, dou
     {
         Ob_sys.E += Ob_sys.Les[e] * (lam1 - lam0);
     }
-    Ob_sys.E += Ob_sys.Tp2uu * (0 - Kd0);
+    Ob_sys.E += (0 - Kd0) * (Ob_sys.Tp2uu + Epar.q * Ob_sys.Tuuc);
 
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
     {
@@ -234,7 +234,7 @@ void dtmc_lc::Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1, dou
     {
         Ob_sys.E += Ob_sys.Les[e] * (lam0 - lam1);
     }
-    Ob_sys.E += Ob_sys.Tp2uu * (Kd0 - 0);
+    Ob_sys.E += (Kd0 - 0) * (Ob_sys.Tp2uu + Epar.q * Ob_sys.Tuuc);
     // correct energy for new kar0
 }
 
@@ -278,36 +278,35 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     {
         std::cout << sweep_n << "/" << MC_sweeps << "\n";
         std::cout << "Eu/sqrt{N}=" << Ob_sys.Eu / std::sqrt(N) << "\n";
+        E_all.push_back(Ob_sys.E);
+        //std::cout << "E=" << Ob_sys.E << "\n";
+        I2H2_all.push_back(Ob_sys.I2H2);
+        I2H2dis_all.push_back(Ob_sys.I2H2dis);
+        for (int e = 0; e < Ne; e++)
+        {
+            Les_all[e].push_back(Ob_sys.Les[e]);
+        }
+        Tp2uu_all.push_back(Ob_sys.Tp2uu);
+        Tuuc_all.push_back(Ob_sys.Tuuc);
+        Tun2_all.push_back(Ob_sys.Tun2);
+        IdA_all.push_back(Ob_sys.IdA);
+        I2H_all.push_back(Ob_sys.I2H);
+        IK_all.push_back(Ob_sys.IK);
+        //IKphi2_all.push_back(Ob_sys.IKphi2);
+        Bond_num_all.push_back(Ob_sys.Bond_num);
+        Tuz2_all.push_back(Ob_sys.Tuz2);
+        Tlb_all.push_back(Ob_sys.Tlb);
+        Eu_all.push_back(Ob_sys.Eu);
+
+        if (sweep_n % sweep_p_G == 0)
+        {
+            Gij_all.push_back(Gij_m());
+            D_edge_all.push_back(D_edge_com_m());
+            //rhor_all.push_back(rho_rcom_m(delta_r, bin_num));
+            uucdis_all.push_back(uucdis_m(bin_num));
+        }
         for (int i = 0; i < step_p_sweep; i++)
         {
-
-            E_all.push_back(Ob_sys.E);
-            //std::cout << "E=" << Ob_sys.E << "\n";
-            I2H2_all.push_back(Ob_sys.I2H2);
-            I2H2dis_all.push_back(Ob_sys.I2H2dis);
-            for (int e = 0; e < Ne; e++)
-            {
-                Les_all[e].push_back(Ob_sys.Les[e]);
-            }
-            Tp2uu_all.push_back(Ob_sys.Tp2uu);
-            Tuuc_all.push_back(Ob_sys.Tuuc);
-            Tun2_all.push_back(Ob_sys.Tun2);
-            IdA_all.push_back(Ob_sys.IdA);
-            I2H_all.push_back(Ob_sys.I2H);
-            IK_all.push_back(Ob_sys.IK);
-            //IKphi2_all.push_back(Ob_sys.IKphi2);
-            Bond_num_all.push_back(Ob_sys.Bond_num);
-            Tuz2_all.push_back(Ob_sys.Tuz2);
-            Tlb_all.push_back(Ob_sys.Tlb);
-            Eu_all.push_back(Ob_sys.Eu);
-
-            if (sweep_n % sweep_p_G == 0)
-            {
-                Gij_all.push_back(Gij_m());
-                D_edge_all.push_back(D_edge_com_m());
-                //rhor_all.push_back(rho_rcom_m(delta_r, bin_num));
-                uucdis_all.push_back(uucdis_m(bin_num));
-            }
 
             bead_accept += bead_metropolis(delta_s);
             spin_accept += spin_metropolis(delta_theta);

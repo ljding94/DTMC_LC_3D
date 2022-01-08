@@ -14,7 +14,9 @@ def main():
     # config_plot3D("../data/Ne2/Nov14_2021_1/State_N100_imod1_Ne2_lf0.0_kar15_C00.0_karg0.0_lam2.0_Kd6.0_q2.0_Cn9.0.csv", mesh=1, rod=0, piwall=1, fnormal=0)
     #config_plot3D("../data/scratch_local/State_N100_imod1_Ne2_lf0.0_kar50_C00.0_karg0.0_lam5.0_Kd4.0_q2.0_Cn4.0_ku0_therm.csv",mesh=1,rod=0,piwall=0,fnormal=0)
     #O_MCstep_plot("../data/scratch_local/O_MC_N100_imod1_Ne2_lf0.0_kar50_C00.0_karg0.0_lam5.0_Kd4.0_q2.0_Cn4.0_ku0.csv",Ne=2)
-    config_plot3D("../data/scratch_local/State_N100_imod1_Ne2_lf0.0_kar50_C00.0_karg0.0_lam5.0_Kd4.0_q2.0_Cn4.0_ku0.csv",mesh=1,rod=1,piwall=0,fnormal=0)
+    config_plot3D("../data/scratch_local/State_N200_imod1_Ne2_lf0.0_kar20_C00.0_karg0.0_lam5.0_Kd3.0_q2.0_Cn3.0_ku0_init.csv",mesh=1,rod=1,piwall=0,fnormal=0)
+    config_plot3D("../data/scratch_local/State_N200_imod1_Ne2_lf0.0_kar20_C00.0_karg0.0_lam5.0_Kd3.0_q2.0_Cn3.0_ku0_therm.csv",mesh=1,rod=1,piwall=0,fnormal=0)
+    config_plot3D("../data/scratch_local/State_N200_imod1_Ne2_lf0.0_kar20_C00.0_karg0.0_lam5.0_Kd3.0_q2.0_Cn3.0_ku0.csv",mesh=1,rod=1,piwall=0,fnormal=0)
 
     return 0
 
