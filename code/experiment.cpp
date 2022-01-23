@@ -170,7 +170,7 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
         for (int sweep_n = 0; sweep_n < MC_sweeps / beta_steps; sweep_n++)
         {
             std::cout << sweep_n + n_beta * MC_sweeps / beta_steps << "/" << MC_sweeps << "\n";
-            std::cout << "Eu/sqrt{N}=" << Ob_sys.Eu / std::sqrt(N) << "\n";
+            //std::cout << "Eu/sqrt{N}=" << Ob_sys.Eu / std::sqrt(N) << "\n";
             std::cout << " Les[1]/Les[0]" << Ob_sys.Les[1] / Ob_sys.Les[0] << "\n";
             for (int i = 0; i < step_p_sweep; i++)
             {
@@ -238,6 +238,43 @@ void dtmc_lc::Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1, dou
     // correct energy for new kar0
 }
 
+void dtmc_lc::Thermal_pinch(int MC_sweeps, int step_p_sweep, double k_pinch_, double delta_s, double delta_theta)
+{
+    double lf0;
+    lf0 = lf;
+    if (lf == 0)
+    {
+        lf = 5.0;
+        edge_zlim.resize(2);
+        edge_zlim = {-0.5 * lf, 0.5 * lf};
+    }
+    k_pinch = k_pinch_;
+    for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
+    {
+        std::cout << "thermal_pinch" << sweep_n << "/" << MC_sweeps << "\n";
+        for (int i = 0; i < step_p_sweep; i++)
+        {
+            bead_metropolis(delta_s);
+            spin_metropolis(delta_theta);
+            bond_metropolis();
+            bond_metropolis();
+            //hop_metropolis();
+            if (i % int(std::sqrt(N)) == 0)
+            {
+                edge_metropolis();
+                //lifted_edge_metropolis(); // it should works faster
+            }
+        }
+        // std::cout << "thermo, beta=" << beta << "," << sweep_n << "/"<<
+        // MC_sweeps << "\n";
+    }
+
+    k_pinch = 0;
+    lf = lf0;
+    edge_zlim.clear();
+    // correct energy for new kar0
+}
+
 void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
                            double delta_s, double delta_theta, double delta_r, double bin_num, std::string folder,
                            std::string finfo)
@@ -277,7 +314,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
     {
         std::cout << sweep_n << "/" << MC_sweeps << "\n";
-        std::cout << "Eu/sqrt{N}=" << Ob_sys.Eu / std::sqrt(N) << "\n";
+        //std::cout << "Eu/sqrt{N}=" << Ob_sys.Eu / std::sqrt(N) << "\n";
         E_all.push_back(Ob_sys.E);
         //std::cout << "E=" << Ob_sys.E << "\n";
         I2H2_all.push_back(Ob_sys.I2H2);
@@ -296,7 +333,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         Bond_num_all.push_back(Ob_sys.Bond_num);
         Tuz2_all.push_back(Ob_sys.Tuz2);
         Tlb_all.push_back(Ob_sys.Tlb);
-        Eu_all.push_back(Ob_sys.Eu);
+        Eu_all.push_back(0);
 
         if (sweep_n % sweep_p_G == 0)
         {

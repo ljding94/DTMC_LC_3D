@@ -34,7 +34,7 @@ def O_stat_cal(O, tau_c, wnu=1, wnu_ave=1, wnu_err=0):
     return (O_ave, O_tau, O_err)
 
 
-def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
+def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0,CnequalsKc=0, tau_c=6):
     E_ave, E_tau, E_err = [], [], []
     Ne = par[find_cpar_ind(par_nm, "Ne")]
 
@@ -74,7 +74,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, CnequalsKc=0, tau_c=6):
         # print("f2rtail",f2rtail)
         file2read = foldername + "/O_" + f2rtail
         print("file2read", file2read)
-        data = np.loadtxt(file2read, skiprows=14, delimiter=",", unpack=True)
+        data = np.loadtxt(file2read, skiprows=14+thermN, delimiter=",", unpack=True)
         N = par_dealing[0]
         E = data[0] / N
         Les = data[1 : 1 + Ne]

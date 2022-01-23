@@ -15,12 +15,11 @@ int dtmc_lc::bead_metropolis(double delta_s)
     std::vector<int> ind_relate;
     std::vector<vertex> bead_relate;
     std::vector<std::pair<int, int>> bond_relate;
-
     // observables
     observable Ob_relate_old, Ob_relate_new;
     std::vector<double> Les_old, Les_new; // system edge length, for umbrella sampling weight function
-    double Eu_old, Eu_new;                // umbrella sampling energy weight
-    // TODO: [ ] include Eu for the metropolis update
+    double E_pinch_old = 0;
+    double E_pinch_new = 0;
 
     // some useful cache variables
     int index, nei_ind;
@@ -62,7 +61,12 @@ int dtmc_lc::bead_metropolis(double delta_s)
     // get pre update info
     Ob_relate_old = Ob_m(ind_relate, bond_relate);
     Les_old = Ob_sys.Les;
-    Eu_old = Eu_m(Les_old);
+    //Eu_old = Eu_m(Les_old);
+    if(k_pinch!=0 && mesh[index].R[2]<2.0 && -2.0<mesh[index].R[2]){
+        //std::cout<<"k_pinch="<<k_pinch<<"\n";
+        //std::cout<<"mesh["<<index<<"].R[2]="<<mesh[index].R[2]<<"\n";
+        E_pinch_old = 0.5*k_pinch*(mesh[index].R[0]*mesh[index].R[0]+mesh[index].R[1]*mesh[index].R[1]);
+    }
 #pragma endregion
 
 #pragma region : bead MC update proposal
@@ -96,6 +100,7 @@ int dtmc_lc::bead_metropolis(double delta_s)
             return 0;
         }
     }
+    /*
     else if (Epar.g != 0)
     {
         // pull edge 0 when there is gravity
@@ -107,6 +112,7 @@ int dtmc_lc::bead_metropolis(double delta_s)
             return 0;
         }
     }
+    */
 
     // hard bead potential
     for (int nei_ind = 0; nei_ind < mesh.size(); nei_ind++)
@@ -170,18 +176,21 @@ int dtmc_lc::bead_metropolis(double delta_s)
     {
         Les_new[k] += Ob_relate_new.Les[k] - Ob_relate_old.Les[k];
     }
-    Eu_new = Eu_m(Les_new);
+    //Eu_new = Eu_m(Les_new);
+    if(k_pinch!=0 && mesh[index].R[2]<2.0 && -2.0<mesh[index].R[2]){
+        E_pinch_new = 0.5*k_pinch*(mesh[index].R[0]*mesh[index].R[0]+mesh[index].R[1]*mesh[index].R[1]);
+    }
 
 #pragma endregion
 
 #pragma region : Metropolis
     // std::cout << "Er_new-Er_old=" << Er_new - Er_old << "\n";
     if (rand_uni(gen) <=
-        std::exp(-beta * (Ob_relate_new.E + Eu_new - Ob_relate_old.E - Eu_old)))
+        std::exp(-beta * (Ob_relate_new.E + E_pinch_new - Ob_relate_old.E - E_pinch_old)))
     {
         // [accepted]
         Ob_sys_update(Ob_relate_new, Ob_relate_old); // it doesn't update Eu
-        Ob_sys.Eu += Eu_new - Eu_old;
+        //Ob_sys.Eu += Eu_new - Eu_old;
         return 1;
     }
     else
@@ -514,8 +523,7 @@ int dtmc_lc::edge_metropolis()
     // observables
     observable Ob_relate_old, Ob_relate_new;
     std::vector<double> Les_old, Les_new; // system edge length, for umbrella sampling weight function
-    double Eu_old, Eu_new;                // umbrella sampling energy weight
-    // TODO: [] include Eu for the metropolis update
+    //double Eu_old, Eu_new;                // umbrella sampling energy weight
     // useful variables
     std::pair<int, int> bond;
     std::vector<int> fedge_list;
@@ -634,7 +642,7 @@ int dtmc_lc::edge_metropolis()
         indi_edge_num_old = mesh[ind_i].edge_num;
         Ob_relate_old = Ob_m(ind_relate, bond_relate_old);
         Les_old = Ob_sys.Les;
-        Eu_old = Eu_m(Les_old);
+        //Eu_old = Eu_m(Les_old);
 #pragma endregion
 // neighbors are also sorted during the energy calculation
 
@@ -718,7 +726,7 @@ int dtmc_lc::edge_metropolis()
         {
             Les_new[k] += Ob_relate_new.Les[k] - Ob_relate_old.Les[k];
         }
-        Eu_new = Eu_m(Les_new);
+        //Eu_new = Eu_m(Les_new);
         // after-update observables
 #pragma endregion
 
@@ -727,7 +735,7 @@ int dtmc_lc::edge_metropolis()
         //std::cout<<"[shrink](Ob_relate_new.E - Ob_relate_old.E)"<<(Ob_relate_new.E - Ob_relate_old.E)<<"\n";
         if (rand_uni(gen) <=
             1.0 * fedge_list.size() / (fedge_list.size() - 1) *
-                std::exp(-beta * (Ob_relate_new.E + Eu_new - Ob_relate_old.E - Eu_old)))
+                std::exp(-beta * (Ob_relate_new.E - Ob_relate_old.E)))
         {
             // [accepted]
             // remove ind_i from it's original edge_list
@@ -736,7 +744,7 @@ int dtmc_lc::edge_metropolis()
 
             // update system observables
             Ob_sys_update(Ob_relate_new, Ob_relate_old); // it doesn't update Eu
-            Ob_sys.Eu += Eu_new - Eu_old;
+            //Ob_sys.Eu += Eu_new - Eu_old;
 
             // update bulk_bond_list, add i-j i-k as bulk bond
             std::pair<int, int> bond1, bond2;
@@ -852,6 +860,7 @@ int dtmc_lc::edge_metropolis()
                 return 0;
             }
         }
+        /*
         else if (Epar.g != 0)
         {
             // graviti experiment for edge 0
@@ -861,6 +870,7 @@ int dtmc_lc::edge_metropolis()
                 return 0;
             }
         }
+        */
 
         // for Ne>1 check if i has neighbour on the other edge
         // same here, this part is unneseccery since not difference were found
@@ -905,7 +915,7 @@ int dtmc_lc::edge_metropolis()
 #pragma region : [extend] store observable of affected beads
         Ob_relate_old = Ob_m(ind_relate, bond_relate_old);
         Les_old = Ob_sys.Les;
-        Eu_old = Eu_m(Les_old);
+        //Eu_old = Eu_m(Les_old);
         // get pre update info
 
 #pragma endregion
@@ -972,7 +982,7 @@ int dtmc_lc::edge_metropolis()
         {
             Les_new[k] += Ob_relate_new.Les[k] - Ob_relate_old.Les[k];
         }
-        Eu_new = Eu_m(Les_new);
+        //Eu_new = Eu_m(Les_new);
         // after-update observables
 
 #pragma endregion
@@ -982,7 +992,7 @@ int dtmc_lc::edge_metropolis()
         //std::cout<<"fedge_list.size()"<<fedge_list.size()<<"\n";
         if (rand_uni(gen) <=
             1.0 * fedge_list.size() / (fedge_list.size() + 1) *
-                std::exp(-beta * (Ob_relate_new.E + Eu_new - Ob_relate_old.E - Eu_old)))
+                std::exp(-beta * (Ob_relate_new.E - Ob_relate_old.E)))
         {
             // [accepted]
             if (mesh[ind_i].edge_num == -1)
@@ -993,7 +1003,7 @@ int dtmc_lc::edge_metropolis()
             // I2H_new = 0;
             // i j k are sorted again!
             Ob_sys_update(Ob_relate_new, Ob_relate_old); // it doesn't update Eu
-            Ob_sys.Eu += Eu_new - Eu_old;
+            //Ob_sys.Eu += Eu_new - Eu_old;
 
             // these are edge bond now
             delete_bulk_bond_list(ind_i, ind_j);

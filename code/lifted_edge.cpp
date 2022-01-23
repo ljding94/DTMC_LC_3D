@@ -353,6 +353,7 @@ int dtmc_lc::edge_extend(int ind_boi, int num_edge_bead)
             return 0;
         }
     }
+    /*
     else if (Epar.g != 0)
     {
         // graviti experiment for edge 0
@@ -362,7 +363,7 @@ int dtmc_lc::edge_extend(int ind_boi, int num_edge_bead)
             return 0;
         }
     }
-
+    */
     // check for potential edge bridging bond
     for (int k = 0; k < mesh[ind_i].nei.size(); k++)
     { // check every neighbor of ind_i

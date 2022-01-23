@@ -12,7 +12,7 @@ struct observable
     // total energy
     double E;
     // weighted energt // for umbrella sampling
-    double Eu; // for Ne=2, it depends on |(l0-l1)/(l0+l1)|
+    //double Eu; // for Ne=2, it depends on |(l0-l1)/(l0+l1)|
     // geometric
     double I2H2; // integral of dA (2H)^2
     //double Iphi;              // sum of phi
@@ -51,9 +51,9 @@ struct E_parameter
     //double Kt;   //liquid crystalline interaction for the twist only
     double q;  // liquid crystall twist constant
     double Cn; // liquid crystal to membrane normal moduli
-    double g;  // g field for beads gravity
-    double ku; // ku for weighted energy, harmonic oscillator-like
-    int n_Eu;  // number of harmonic oscillator forumbrella sampling bias energy Eu;
+    //double g;  // g field for beads gravity
+    //double ku; // ku for weighted energy, harmonic oscillator-like
+    //int n_Eu;  // number of harmonic oscillator forumbrella sampling bias energy Eu;
 };
 struct vertex
 {
@@ -92,6 +92,8 @@ public:
     // also used to set fixed distance betwen two beads
     double l0; // in-bulk tether maximum length
 
+    double k_pinch;
+
     // system configuration
 
     std::vector<vertex> mesh; // the mesh
@@ -116,7 +118,8 @@ public:
 
     // measure observables related to these ind and bond
     double E_m(observable Ob);
-    double Eu_m(std::vector<double> Les);
+    double Eadd_m(std::vector<int> ind_relate); // additional magic energy, for manipulating the membrane during the thermalization
+    //double Eu_m(std::vector<double> Les);
     // Les, length of edges, n number of harmonic oscilattors
 
     // randomnumber generators
@@ -228,8 +231,11 @@ public:
     void Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
                  double delta_s, double delta_theta);
     // thermalisation of the system, starting from beta=0 (hot start)
-    void Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1, double lam1, double delta_s, double delta_theta);
-    // thermalisation with on kar=kar1,lam=lam1, to form vesicle at first
+    void Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1, double lam1, double delta_s, double delta_theta); // thermalisation with on kar=kar1,lam=lam1, to form vesicle at first
+    void Thermal_pinch(int MC_sweeps, int step_p_sweep, double k_pinch_, double delta_s, double delta_theta); // thermalization for imod3 Ne2 cylinder shape under pulled condition, with magic pinch potential near z=0
+
+
+
     void O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
                       double delta_s, double delta_theta, double delta_r, double bin_num, std::string folder,
                       std::string finfo);

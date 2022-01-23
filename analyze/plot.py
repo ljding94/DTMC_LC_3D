@@ -233,7 +233,7 @@ def config_plot3D(filename,mesh=0,rod=0,piwall=0,phicolor=0,fnormal=0,cvt_map=""
         sm.set_array([])
         cbar=plt.colorbar(sm, ticks=[0,0.25*np.pi,0.5*np.pi])
         cbar.ax.set_yticklabels([r"$0$",r"$\pi/4$",r"$\pi/2$"])
-        cbar.ax.set_title(r"$(u\cdot n)^2$")
+        cbar.ax.set_title(r"$\arccos|u\cdot n|$")
     if(piwall):
         deg_slct=deg>0.4*np.pi
         x_pw,y_pw,z_pw = x[deg_slct],y[deg_slct],z[deg_slct]
@@ -246,7 +246,7 @@ def config_plot3D(filename,mesh=0,rod=0,piwall=0,phicolor=0,fnormal=0,cvt_map=""
         sm.set_array([])
         cbar=plt.colorbar(sm, ticks=[0,0.25*np.pi,0.5*np.pi])
         cbar.ax.set_yticklabels([r"$0$",r"$\pi/4$",r"$\pi/2$"])
-        cbar.ax.set_title(r"$(u\cdot n)^2$")
+        cbar.ax.set_title(r"$\arccos|u\cdot n|$")
 
 
     if(fnormal):

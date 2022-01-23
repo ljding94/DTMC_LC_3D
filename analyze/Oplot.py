@@ -76,6 +76,9 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
         if mode == "lf":
             O_cpar_plot(axs[0, 1], F_ave, F_err, O_label, "F", r"$\partial{E/N}/\partial{l_f}$", cpar, colors, alphas)
             axs[0, 1].set_ylim(-0.1, 0.5)
+        Lrt = (Les_ave[0] - Les_ave[1])/(Les_ave[0] + Les_ave[1])
+        O_cpar_plot(axs[0, 1], Lrt, np.zeros(len(Lrt)), O_label, "Lrt", r"$\frac{\left<\int_0 ds\right>-\left<\int_1 ds\right>}{\left<\int_0 ds\right>+\left<\int_1 ds\right>}$", cpar, colors, alphas)
+
         Le_ave_diff = np.abs(Les_ave[1] - Les_ave[0])
         Le_err_diff = np.sqrt(np.power(Les_err[1], 2) + np.power(Les_err[0], 2))
         O_cpar_plot(axs[1, 1], Le_ave_diff, Le_err_diff, O_label, "Le_diff", r"$|\left<\int_0 ds\right>-\left<\int_1 ds\right>|$", cpar, colors, alphas)

@@ -271,6 +271,24 @@ double dtmc_lc::E_m(observable Ob)
     // + kard * Ob.IKun2;
     return E;
 }
+double dtmc_lc::Eadd_m(std::vector<int> ind_relate)
+{
+    // additional pinch force near z = 0, attract beads within certain range
+    double E = 0;
+    double z_range = 2.0;
+    int ind;
+    for (int i = 0; i < ind_relate.size(); i++)
+    {
+        ind = ind_relate[i];
+        if(mesh[ind].R[2]<z_range && -z_range<mesh[ind].R[2]){
+
+        }
+    }
+
+    return E;
+}
+
+/*
 double dtmc_lc::Eu_m(std::vector<double> Les)
 {
     double Eu = 0;
@@ -289,6 +307,7 @@ double dtmc_lc::Eu_m(std::vector<double> Les)
     }
     return Eu;
 }
+*/
 
 #pragma endregion
 

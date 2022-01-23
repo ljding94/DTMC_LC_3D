@@ -29,16 +29,14 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     Epar.q = Epar_.q;
     // coupling
     Epar.Cn = Epar_.Cn;
-    Epar.ku = Epar_.ku;
-    Epar.n_Eu = Epar_.n_Eu;
 
     // gravitational
     //Epar.g = Epar_.g;  // if g!=0, edge 0 z position can't be greater than 0
-    Epar.g = 0; // g!=0 case will be studied in a another project
     //Epar.kard = Epar_.kard;
     //Epar.lamd = Epar_.lamd;
     //Epar.ms = Epar_.ms;
     //Epar.mr = Epar_.mr;
+    k_pinch = 0.0;
 
     edge_lists.resize(Ne);
     for (int n = 0; n < Ne; n++)
@@ -158,7 +156,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     //Ob_sys.E = 0.5 * Epar.Cn * (N - Np) + 0.5 * Epar.Cn * Np;
     Ob_sys.E = 0.5 * Epar.Cn * N; // offset tilt energy
     Ob_sys.E += E_m(Ob_sys);
-    Ob_sys.Eu = Eu_m(Ob_sys.Les);
+    //Ob_sys.Eu = Eu_m(Ob_sys.Les);
 
     // set random number generators
     std::random_device rd;
@@ -718,7 +716,6 @@ void dtmc_lc::init_mobius_shape(double d0_)
 
 int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
 {
-    // TODO: update this function to add hole with more bead(6), as a larger
     // add a hole as edge[edge_num], and i0 is one of the edge beads.
     // implement larger initial hole
     //b0-b01-b1-b12-b2-b20-b0
@@ -805,7 +802,6 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
     delete_bulk_bond_list(b1, b2);
     delete_bulk_bond_list(b2, b0);
 
-    // add new edge bonds accordingly TODO: []
     // b0-b01-b1-b12-b2-b20-b0 is the new edge
     mesh[b0].edge_num = edgenum;
     mesh[b0].edge_nei = {b20, b01};
