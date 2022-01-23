@@ -293,7 +293,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<int> Bond_num_all;
     std::vector<double> Tuz2_all;
     std::vector<double> Tlb_all;
-    std::vector<double> Eu_all; // TODO: [ ] add Eu to output file, for further analysis!
+    std::vector<double> Eu_all;
 
     std::vector<double> D_edge_all;
     std::vector<std::vector<double>> Gij_all;

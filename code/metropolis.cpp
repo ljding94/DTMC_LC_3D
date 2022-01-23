@@ -62,7 +62,7 @@ int dtmc_lc::bead_metropolis(double delta_s)
     Ob_relate_old = Ob_m(ind_relate, bond_relate);
     Les_old = Ob_sys.Les;
     //Eu_old = Eu_m(Les_old);
-    if(k_pinch!=0 && mesh[index].R[2]<2.0 && -2.0<mesh[index].R[2]){
+    if(k_pinch!=0 && mesh[index].R[2]<1.0 && -1.0<mesh[index].R[2]){
         //std::cout<<"k_pinch="<<k_pinch<<"\n";
         //std::cout<<"mesh["<<index<<"].R[2]="<<mesh[index].R[2]<<"\n";
         E_pinch_old = 0.5*k_pinch*(mesh[index].R[0]*mesh[index].R[0]+mesh[index].R[1]*mesh[index].R[1]);
@@ -177,7 +177,7 @@ int dtmc_lc::bead_metropolis(double delta_s)
         Les_new[k] += Ob_relate_new.Les[k] - Ob_relate_old.Les[k];
     }
     //Eu_new = Eu_m(Les_new);
-    if(k_pinch!=0 && mesh[index].R[2]<2.0 && -2.0<mesh[index].R[2]){
+    if(k_pinch!=0 && mesh[index].R[2]<1.0 && -1.0<mesh[index].R[2]){
         E_pinch_new = 0.5*k_pinch*(mesh[index].R[0]*mesh[index].R[0]+mesh[index].R[1]*mesh[index].R[1]);
     }
 
