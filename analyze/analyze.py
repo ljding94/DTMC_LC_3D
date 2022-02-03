@@ -5,7 +5,7 @@ from autocorrelation import *
 from scipy.optimize import curve_fit
 from scipy import odr
 import scipy.fft
-
+import os
 
 def find_cpar_ind(par_nm, mode):
     cpar_ind = -1
@@ -16,9 +16,9 @@ def find_cpar_ind(par_nm, mode):
     return cpar_ind
 
 
-def O_stat_cal(O, tau_c, wnu=1, wnu_ave=1, wnu_err=0):
+def O_stat_cal_weight(O, tau_c, wnu=1, wnu_ave=1, wnu_err=0):
     # for each O, return O_ave,O_tau and O_err using O and wnu of bias
-    if wnu_ave!=1:
+    if wnu_ave != 1:
         # with bias wnu
         Obias_ave = np.average(O * wnu)
         O_ave = Obias_ave / wnu_ave
@@ -33,14 +33,44 @@ def O_stat_cal(O, tau_c, wnu=1, wnu_ave=1, wnu_err=0):
         O_err = np.sqrt(2 * O_tau / len(O) * cov0)
     return (O_ave, O_tau, O_err)
 
+def O_stat_cal(O, tau_c):
+    O_ave = np.average(O)
+    rho, cov0 = autocorrelation_function_fft(O)
+    O_tau, tau_err = tau_int_cal_rho(rho, tau_c)
+    O_err = np.sqrt(2 * O_tau / len(O) * cov0)
+    return (O_ave, O_tau, O_err)
 
-def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0,CnequalsKc=0, tau_c=6):
+def eff_Le_sym_cal(Les):
+    # calculate the assymetry of edge length
+    # for Ne=2: Asym = |(L0-L1)/sum(Ls),0|
+    # Ne=3: Asym = |L0+L1*e^{i/3}+L2*e^{i*2/3},0|
+    # Ne=4 Asym = symmetric direction in 3d, weighted by Les
+    #Les = np.array(Les)
+    Ne = len(Les)
+    if Ne == 1:
+        asym = 1
+    elif Ne == 2:
+        asym = np.abs(Les[0] - Les[1]) / (Les[0] + Les[1])
+    elif Ne == 3:
+        asymx = Les[0] + np.cos(np.pi * 2 / 3)*(Les[1] + Les[2])
+        asymx /= (Les[0] + Les[1]+Les[2])
+        asymy = np.sin(np.pi * 2 / 3)*(Les[1] - Les[2])
+        asymy /= (Les[0] + Les[1]+Les[2])
+        asym = np.sqrt(np.power(asymx, 2) + np.power(asymy, 2))
+    elif Ne == 4:
+        #TODO: implement Ne=4 case
+        asym = np.zeros(len(Les[0]))
+
+    return asym
+
+
+def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, tau_c=6):
+    cpar_valid = []
     E_ave, E_tau, E_err = [], [], []
     Ne = par[find_cpar_ind(par_nm, "Ne")]
 
     Les_ave, Les_tau, Les_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
-    if Ne == 2:
-        Lrt_ave, Lrt_tau, Lrt_err = [], [], []
+    Lasym_ave, Lasym_tau, Lasym_err = [], [], []
     IdA_ave, IdA_tau, IdA_err = [], [], []
     I2H_ave, I2H_tau, I2H_err = [], [], []
     I2H2_ave, I2H2_tau, I2H2_err = [], [], []
@@ -62,11 +92,12 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0,CnequalsKc=0, tau
     if CnequalsKc and mode == "Kd":
         Cn_ind = find_cpar_ind(par_nm, "Cn")
 
+    Ncpar_valid = len(cpar)
     for i in range(len(cpar)):
         par_dealing = par[:]
         par_dealing[cpar_ind] = par[cpar_ind][i]
         if CnequalsKc and mode == "Kd":
-            par_dealing[Cn_ind] = par[cpar_ind][i]
+            par_dealing[Cn_ind] = par[cpar_ind][i]  # adjust the ratio accordingly
         f2rtail = "MC"
         for j in range(len(par_dealing)):
             f2rtail += "_" + par_nm[j] + "%.*f" % (par_dg[j], par_dealing[j])
@@ -74,12 +105,18 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0,CnequalsKc=0, tau
         # print("f2rtail",f2rtail)
         file2read = foldername + "/O_" + f2rtail
         print("file2read", file2read)
-        data = np.loadtxt(file2read, skiprows=14+thermN, delimiter=",", unpack=True)
+        # check for file existence
+        if(not os.path.exists(file2read)):
+            print(file2read,"not exist")
+            continue
+        data = np.loadtxt(file2read, skiprows=14 + thermN, delimiter=",", unpack=True)
+        cpar_valid.append(cpar[i])
         N = par_dealing[0]
         E = data[0] / N
         Les = data[1 : 1 + Ne]
-        IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2, Tuz2, Tlb, = data[1 + Ne : 12 + Ne]
-        Eu  = data[12+Ne]
+        IdA,I2H,I2H2,I2H2dis,IK,Tp2uu,Tuuc,Bond_num,Tun2,Tuz2,Tlb = data[1 + Ne : 12 + Ne]
+        Eu = data[12 + Ne]
+        Lasym = eff_Le_sym_cal(Les)
         p2uu = Tp2uu / Bond_num
         uuc = Tuuc / Bond_num
         lb = Tlb / Bond_num
@@ -90,7 +127,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0,CnequalsKc=0, tau
         un2 = Tun2 / N
         uz2 = Tuz2 / N
         Euave = np.average(Eu)
-        wnu = np.exp(Eu-Euave)  # biased weight function, assumed beta=1, normalize to Eu_ave
+        wnu = np.exp(Eu - Euave)  # biased weight function, assumed beta=1, normalize to Eu_ave
         # un2p=Tun2p/Np if Np>0 else Tun2p
         # Ne2 case, need Ledif for additional info
         # was used for checking energy
@@ -110,93 +147,91 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0,CnequalsKc=0, tau
         Et=Et+0.5*par[find_cpar_ind(par_nm,"Cn")]*(Tun2-N)
         print("E-0.5kar*I2H2-lam*L+Kd*Tp2uu+Kd*q*Tuuc+0.5Cn*(Tun2-N)",Et)
         """
-        # TODO: [ ] write following analysis in to one function!
-        # TODO: [ ] include bias energy
-        # TODO: analysis depends on bias Eu
-        # wnu first!
+
         # wnu = 1 when Enu=0
 
-        wnu_avei, wnu_taui, wnu_erri = O_stat_cal(wnu, tau_c)
-        wnu_ave.append(wnu_avei)
-        wnu_tau.append(wnu_taui)
-        wnu_err.append(wnu_erri)
-        print("wnu_avei, wnu_taui, wnu_erri",wnu_avei, wnu_taui, wnu_erri)
+        #wnu_avei, wnu_taui, wnu_erri = O_stat_cal(wnu, tau_c)
+        #wnu_ave.append(wnu_avei)
+        #wnu_tau.append(wnu_taui)
+        #wnu_err.append(wnu_erri)
+        #print("wnu_avei, wnu_taui, wnu_erri", wnu_avei, wnu_taui, wnu_erri)
 
         # E
-        E_avei, E_taui, E_erri = O_stat_cal(E, tau_c, wnu, wnu_avei, wnu_erri)
+        #E_avei, E_taui, E_erri = O_stat_cal_weight(E, tau_c, wnu, wnu_avei, wnu_erri)
+        E_avei, E_taui, E_erri = O_stat_cal(E, tau_c)
         E_ave.append(E_avei)
         E_tau.append(E_taui)
         E_err.append(E_erri)
 
         # Le and Ik2s
         for e in range(Ne):
-            Le_avei, Le_taui, Le_erri = O_stat_cal(Les[e], tau_c, wnu, wnu_avei, wnu_erri)
+            #Le_avei, Le_taui, Le_erri = O_stat_cal(Les[e], tau_c, wnu, wnu_avei, wnu_erri)
+            Le_avei, Le_taui, Le_erri = O_stat_cal(Les[e], tau_c)
             Les_ave[e].append(Le_avei)
             Les_tau[e].append(Le_taui)
             Les_err[e].append(Le_erri)
 
-        if Ne == 2:
-            Lrt = (Les[0] - Les[1])/(Les[0] + Les[1])
-            Lrt_avei, Lrt_taui, Lrt_erri = O_stat_cal(Lrt, tau_c, wnu, wnu_avei, wnu_erri)
-            Lrt_ave.append(Lrt_avei)
-            Lrt_tau.append(Lrt_taui)
-            Lrt_err.append(Lrt_erri)
+        #Lasym_avei, Lasym_taui, Lasym_erri = O_stat_cal(Lasym, tau_c, wnu, wnu_avei, wnu_erri)
+        Lasym_avei, Lasym_taui, Lasym_erri = O_stat_cal(Lasym, tau_c)
+        Lasym_ave.append(Lasym_avei)
+        Lasym_tau.append(Lasym_taui)
+        Lasym_err.append(Lasym_erri)
 
         # IdA
-        IdA_avei, IdA_taui, IdA_erri = O_stat_cal(IdA, tau_c, wnu, wnu_avei, wnu_erri)
+        IdA_avei, IdA_taui, IdA_erri = O_stat_cal(IdA, tau_c)
         IdA_ave.append(IdA_avei)
         IdA_tau.append(IdA_taui)
         IdA_err.append(IdA_erri)
 
         # I2H
-        I2H_avei, I2H_taui, I2H_erri = O_stat_cal(I2H, tau_c, wnu, wnu_avei, wnu_erri)
+        I2H_avei, I2H_taui, I2H_erri = O_stat_cal(I2H, tau_c)
         I2H_ave.append(I2H_avei)
         I2H_tau.append(I2H_taui)
         I2H_err.append(I2H_erri)
 
         # I2H2
-        I2H2_avei, I2H2_taui, I2H2_erri = O_stat_cal(I2H2, tau_c, wnu, wnu_avei, wnu_erri)
+        I2H2_avei, I2H2_taui, I2H2_erri = O_stat_cal(I2H2, tau_c)
         I2H2_ave.append(I2H2_avei)
         I2H2_tau.append(I2H2_taui)
         I2H2_err.append(I2H2_erri)
 
         # I2H2dis
-        I2H2dis_avei, I2H2dis_taui, I2H2dis_erri = O_stat_cal(I2H2dis, tau_c, wnu, wnu_avei, wnu_erri)
+        I2H2dis_avei, I2H2dis_taui, I2H2dis_erri = O_stat_cal(I2H2dis, tau_c)
         I2H2dis_ave.append(I2H2dis_avei)
         I2H2dis_tau.append(I2H2dis_taui)
         I2H2dis_err.append(I2H2dis_erri)
         # IK
-        IK_avei, IK_taui, IK_erri = O_stat_cal(IK, tau_c, wnu, wnu_avei, wnu_erri)
+        IK_avei, IK_taui, IK_erri = O_stat_cal(IK, tau_c)
         IK_ave.append(IK_avei)
         IK_tau.append(IK_taui)
         IK_err.append(IK_erri)
 
         # p2uu
-        p2uu_avei, p2uu_taui, p2uu_erri = O_stat_cal(p2uu, tau_c, wnu, wnu_avei, wnu_erri)
+        p2uu_avei, p2uu_taui, p2uu_erri = O_stat_cal(p2uu, tau_c)
         p2uu_ave.append(p2uu_avei)
         p2uu_tau.append(p2uu_taui)
         p2uu_err.append(p2uu_erri)
 
         # uuc
-        uuc_avei, uuc_taui, uuc_erri = O_stat_cal(uuc, tau_c, wnu, wnu_avei, wnu_erri)
+        uuc_avei, uuc_taui, uuc_erri = O_stat_cal(uuc, tau_c)
         uuc_ave.append(uuc_avei)
         uuc_tau.append(uuc_taui)
         uuc_err.append(uuc_erri)
 
         # un2
-        un2_avei, un2_taui, un2_erri = O_stat_cal(un2, tau_c, wnu, wnu_avei, wnu_erri)
+        un2_avei, un2_taui, un2_erri = O_stat_cal(un2, tau_c)
         un2_ave.append(un2_avei)
         un2_tau.append(un2_taui)
         un2_err.append(un2_erri)
 
         # uz2
-        uz2_avei, uz2_taui, uz2_erri = O_stat_cal(uz2, tau_c, wnu, wnu_avei, wnu_erri)
+        uz2_avei, uz2_taui, uz2_erri = O_stat_cal(uz2, tau_c)
         uz2_ave.append(uz2_avei)
         uz2_tau.append(uz2_taui)
         uz2_err.append(uz2_erri)
 
         # lb
-        lb_avei, lb_taui, lb_erri = O_stat_cal(lb, tau_c, wnu, wnu_avei, wnu_erri)
+        lb_avei, lb_taui, lb_erri = O_stat_cal(lb, tau_c)
         lb_ave.append(lb_avei)
         lb_tau.append(lb_taui)
         lb_err.append(lb_erri)
@@ -225,20 +260,17 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0,CnequalsKc=0, tau
             f.write(",Les_ave[%d],Les_tau[%d],Les_err[%d]" % (e, e, e))
 
         f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,uz2_ave,uz2_tau,uz2_err,lb_ave,lb_tau,lb_err,Eubias_ave,Eubias_tau,Eubias_err")
-        if Ne == 2:
-            f.write(",Lrt_ave,Lrt_tau,Lrt_err")
+        f.write(",Lasym_ave,Lasym_tau,Lasym_err")
         f.write("\n")
-        for i in range(len(cpar)):
-            f.write("%f,%f,%f,%f" % (cpar[i], E_ave[i], E_tau[i], E_err[i]))
+        for i in range(len(cpar_valid)):
+            f.write("%f,%f,%f,%f" % (cpar_valid[i], E_ave[i], E_tau[i], E_err[i]))
             for e in range(Ne):
                 f.write(",%f,%f,%f" % (Les_ave[e][i], Les_tau[e][i], Les_err[e][i]))
-
             f.write(
                 ",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f"
                 % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i], I2H2dis_ave[i], I2H2dis_tau[i], I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i], uz2_ave[i], uz2_tau[i], uz2_err[i], lb_ave[i], lb_tau[i], lb_err[i], Eu_ave[i], Eu_tau[i], Eu_err[i])
             )
-            if Ne == 2:
-                f.write(",%f,%f,%f" % (Lrt_ave[i], Lrt_tau[i], Lrt_err[i]))
+            f.write(",%f,%f,%f" % (Lasym_ave[i], Lasym_tau[i], Lasym_err[i]))
             f.write("\n")
 
 

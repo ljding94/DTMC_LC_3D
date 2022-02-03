@@ -208,7 +208,7 @@ void dtmc_lc::Thermal_kar1lam1(int MC_sweeps, int step_p_sweep, double kar1, dou
 
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
     {
-        std::cout << "thermal_kar1lam1" << sweep_n << "/" << MC_sweeps << "\n";
+        std::cout << "thermal_kar1lam1:" << sweep_n << "/" << MC_sweeps << "\n";
         for (int i = 0; i < step_p_sweep; i++)
         {
             bead_metropolis(delta_s);
@@ -251,7 +251,7 @@ void dtmc_lc::Thermal_pinch(int MC_sweeps, int step_p_sweep, double k_pinch_, do
     k_pinch = k_pinch_;
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
     {
-        std::cout << "thermal_pinch" << sweep_n << "/" << MC_sweeps << "\n";
+        std::cout << "thermal_pinch:" << sweep_n << "/" << MC_sweeps << "\n";
         for (int i = 0; i < step_p_sweep; i++)
         {
             bead_metropolis(delta_s);

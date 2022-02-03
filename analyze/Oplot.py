@@ -11,7 +11,7 @@ import scipy.fft
 
 def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     colors, alphas = None, None
-    data, O_label = [], []
+    Alldata, O_label = [], []
     xLabel = mode
     cpar_ind = find_cpar_ind(par_nm, mode)
     for i in range(len(pars)):
@@ -29,25 +29,37 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
         f2rtail += "_ana.csv"
         head = "/O_"
         filename = foldername + head + f2rtail
-        data.append(np.loadtxt(filename, skiprows=1, delimiter=",", unpack=True))
-        O_label.append(label)
-    data = np.transpose(np.array(data), axes=(1, 0, 2))
-    print("len(data)", len(data))
-    cpar, E_ave, E_tau, E_err = data[:4]
+        if(os.path.exists(filename)):
+            print(filename,"exists")
+            data = np.loadtxt(filename, skiprows=1, delimiter=",", unpack=True)
+            if(len(Alldata)==0):
+                Alldata = [[] for i in range(len(data))]
+            for i in range(len(data)):
+                Alldata[i].append(data[i])
+            O_label.append(label)
+
+    #data = np.transpose(np.array(data), axes=(1, 0, 2))
+    Alldata = np.array(Alldata)
+    cpar, E_ave, E_tau, E_err = Alldata[:4]
+    for i in range(len(cpar)):
+        print("np.shape(cpar[%d])"%i,np.shape(cpar[i]))
+        print("np.shape(E_ave[%d])"%i,np.shape(E_ave[i]))
     print("E_ave", E_ave)
     Les_ave, Les_tau, Les_err = [], [], []
     Ik2s_ave, Ik2s_tau, Ik2s_err = [], [], []
     Ne = pars[0][2]
     for e in range(Ne):
-        Les_ave.append(data[4 + 3 * e])
-        Les_tau.append(data[5 + 3 * e])
-        Les_err.append(data[6 + 3 * e])
+        Les_ave.append(Alldata[4 + 3 * e])
+        Les_tau.append(Alldata[5 + 3 * e])
+        Les_err.append(Alldata[6 + 3 * e])
+    Les_ave = np.array(Les_ave)
     Le_ave = np.sum(Les_ave, axis=0)
-    Le_err = np.sqrt(np.sum(np.power(Les_err, 2), axis=0))
+    Les_err = np.array(Les_err)
+    #Le_err = np.sqrt(np.sum(np.power(Les_err, 2)))
+    Le_err = np.zeros(np.shape(Le_ave))
 
-    IdA_ave, IdA_tau, IdA_err, I2H_ave, I2H_tau, I2H_err, I2H2_ave, I2H2_tau, I2H2_err, I2H2dis_ave, I2H2dis_tau, I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err, uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, uz2_ave, uz2_tau, uz2_err, lb_ave, lb_tau, lb_err, Eubias_ave, Eubias_tau, Eubias_err = data[7 + 3 * (Ne - 1) : 40 + 3 * (Ne - 1)]
-    if Ne == 2:
-        Ledif_ave, Ledif_tau, Ledif_err = data[40 + 3 * (Ne - 1) :]
+    IdA_ave, IdA_tau, IdA_err, I2H_ave, I2H_tau, I2H_err, I2H2_ave, I2H2_tau, I2H2_err, I2H2dis_ave, I2H2dis_tau, I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err, uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, uz2_ave, uz2_tau, uz2_err, lb_ave, lb_tau, lb_err, Eubias_ave, Eubias_tau, Eubias_err = Alldata[7 + 3 * (Ne - 1) : 40 + 3 * (Ne - 1)]
+    Lasym_ave, Lasym_tau, Lasym_err = Alldata[40 + 3 * (Ne - 1) :]
     uuc_grad, uuc_grad_err = [], []
     un2_grad, un2_grad_err = [], []
     cpar_tsqN = []
@@ -60,6 +72,7 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
             un2_grad.append(np.gradient(un2_ave[i], cpar[i]))
             un2_grad_err.append(np.zeros(len(cpar[i])))
         if mode == "lf":
+            print("lf: cpar[i]",cpar[i])
             fa, fe = Chi2_gradient(cpar[i], E_ave[i], E_err[i], k=2)  # use near 2k+1 points
             F_ave.append(fa)
             F_err.append(fe)
@@ -72,25 +85,25 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     # cpar_aj = cpar-np.outer([2.8, 2.0, 1.5, 0.8, 0], np.ones(len(cpar[0])))
     O_cpar_plot(axs[0, 0], E_ave, E_err, O_label, "E", r"$E/N$", cpar, colors, alphas)
     O_cpar_plot(axs[1, 0], Le_ave, Le_err, O_label, "Le", r"$\int ds$", cpar, colors, alphas)
+
+    O_cpar_plot(axs[0, 1], Lasym_ave, Lasym_err, O_label, "Lasym", r"$see comment$", cpar, colors, alphas)
     if Ne == 2:
         if mode == "lf":
             O_cpar_plot(axs[0, 1], F_ave, F_err, O_label, "F", r"$\partial{E/N}/\partial{l_f}$", cpar, colors, alphas)
             axs[0, 1].set_ylim(-0.1, 0.5)
-        Lrt = (Les_ave[0] - Les_ave[1])/(Les_ave[0] + Les_ave[1])
-        O_cpar_plot(axs[0, 1], Lrt, np.zeros(len(Lrt)), O_label, "Lrt", r"$\frac{\left<\int_0 ds\right>-\left<\int_1 ds\right>}{\left<\int_0 ds\right>+\left<\int_1 ds\right>}$", cpar, colors, alphas)
 
         Le_ave_diff = np.abs(Les_ave[1] - Les_ave[0])
-        Le_err_diff = np.sqrt(np.power(Les_err[1], 2) + np.power(Les_err[0], 2))
-        O_cpar_plot(axs[1, 1], Le_ave_diff, Le_err_diff, O_label, "Le_diff", r"$|\left<\int_0 ds\right>-\left<\int_1 ds\right>|$", cpar, colors, alphas)
-        O_cpar_plot(axs[2, 1], Ledif_ave, Ledif_ave, O_label, "Le_diff'", r"$\left<|\int_0 ds-\int_1 ds|\right>$", cpar, colors, alphas)
-        O_cpar_plot(axs[3, 1], Le_ave_diff / Le_ave, Le_err_diff * 0, O_label, "Le_diff/Le_ave", r"$|\left<\int_0 ds\right>-\left<\int_1 ds\right>|/sum$", cpar, colors, alphas)
-        O_cpar_plot(axs[4, 1], Ledif_ave / Le_ave, Ledif_ave * 0, O_label, "Le_diff/Le_ave'", r"$\left<|\int_0 ds-\int_1 ds|\right>/sum$", cpar, colors, alphas)
+        #Le_err_diff = np.sqrt(np.power(Les_err[1], 2) + np.power(Les_err[0], 2))
+        #O_cpar_plot(axs[1, 1], Le_ave_diff, Le_err_diff, O_label, "Le_diff", r"$|\left<\int_0 ds\right>-\left<\int_1 ds\right>|$", cpar, colors, alphas)
+
+        #O_cpar_plot(axs[3, 1], Le_ave_diff / Le_ave, Le_err_diff * 0, O_label, "Le_diff/Le_ave", r"$|\left<\int_0 ds\right>-\left<\int_1 ds\right>|/sum$", cpar, colors, alphas)
+        #O_cpar_plot(axs[4, 1], Le_ave_diff / Le_ave, Le_ave_diff * 0, O_label, "Le_diff/Le_ave'", r"$\left<|\int_0 ds-\int_1 ds|\right>/sum$", cpar, colors, alphas)
         axs[4, 1].set_xlabel(xLabel)
-        Lelong_ave = (Le_ave + Ledif_ave) / 2
-        Leshort_ave = (Le_ave - Ledif_ave) / 2
-        O_cpar_plot(axs[5, 1], Lelong_ave, Lelong_ave * 0, O_label, "max(L1,L2)", r"$max(L1,L2)$", cpar, colors, alphas)
+        #Lelong_ave = (Le_ave + Le_ave_diff) / 2
+        #Leshort_ave = (Le_ave - Le_ave_diff) / 2
+        #O_cpar_plot(axs[5, 1], Lelong_ave, Lelong_ave * 0, O_label, "max(L1,L2)", r"$max(L1,L2)$", cpar, colors, alphas)
         axs[5, 1].set_xlabel(xLabel)
-        O_cpar_plot(axs[6, 1], Leshort_ave, Leshort_ave * 0, O_label, "min(L1,L2)", r"$min(L1,L2)$", cpar, colors, alphas)
+        #O_cpar_plot(axs[6, 1], Leshort_ave, Leshort_ave * 0, O_label, "min(L1,L2)", r"$min(L1,L2)$", cpar, colors, alphas)
         axs[6, 1].set_xlabel(xLabel)
 
     O_cpar_plot(axs[2, 0], IdA_ave, IdA_err, O_label, "IdA", r"$\int dA$", cpar, colors, alphas)

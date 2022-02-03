@@ -60,10 +60,12 @@ int main(int argc, char const *argv[])
         folder = "../data/scratch_local";
 
         membrane.State_write(folder + "/State_" + finfo + "_init.csv");
-        membrane.Thermal_pinch(200, int(N / (delta_s * delta_s)) + 1, 2.0, delta_s, delta_theta);
-        //membrane.Thermal_kar1lam1(200, int(N / (delta_s * delta_s)) + 1, 10, 20, delta_s, delta_theta);
+        //membrane.Thermal_pinch(200, int(N / (delta_s * delta_s)) + 1, 2.0, delta_s, delta_theta);
+        if(lf==0){
+            membrane.Thermal_kar1lam1(200, int(N / (delta_s * delta_s)) + 1, 10, 20, delta_s, delta_theta);
+            membrane.State_write(folder + "/State_" + finfo + "_therm.csv");
+        }
         //membrane.Thermal(100, int(N / (delta_s * delta_s)) + 1, 1, delta_s, delta_theta);
-        membrane.State_write(folder + "/State_" + finfo + "_therm.csv");
         membrane.O_MC_measure(200, 20, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 
@@ -74,12 +76,16 @@ int main(int argc, char const *argv[])
         // ccv running
         folder = "/users/lding3/scratch/dtmc_lc_3d";
         // used 2000, 4000 for manuscript
-        membrane.Thermal_pinch(1000, int(N / (delta_s * delta_s)) + 1, 2.0, delta_s, delta_theta);
-        membrane.State_write(folder + "/State_" + finfo + "_therm.csv");
+        //membrane.Thermal_pinch(1000, int(N / (delta_s * delta_s)) + 1, 2.0, delta_s, delta_theta);
+        //membrane.State_write(folder + "/State_" + finfo + "_therm.csv");
+        if(lf==0){
+            membrane.Thermal_kar1lam1(2000, int(N / (delta_s * delta_s)) + 1, 10, 20, delta_s, delta_theta);
+            membrane.State_write(folder + "/State_" + finfo + "_therm.csv");
+        }
         //membrane.Thermal_kar1lam1(2000, int(N / (delta_s * delta_s)) + 1, 10, 20, delta_s, delta_theta);
         //membrane.Thermal(2000, int(N / (delta_s * delta_s)), 1, delta_s,delta_theta);
         // see how it evolves for now
-        membrane.O_MC_measure(4000, 10, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo);
+        membrane.O_MC_measure(8000, 10, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 
         return 0;
