@@ -171,7 +171,7 @@ void dtmc_lc::Thermal(int MC_sweeps, int step_p_sweep, int beta_steps,
         {
             std::cout << sweep_n + n_beta * MC_sweeps / beta_steps << "/" << MC_sweeps << "\n";
             //std::cout << "Eu/sqrt{N}=" << Ob_sys.Eu / std::sqrt(N) << "\n";
-            std::cout << " Les[1]/Les[0]" << Ob_sys.Les[1] / Ob_sys.Les[0] << "\n";
+            //std::cout << " Les[1]/Les[0]" << Ob_sys.Les[1] / Ob_sys.Les[0] << "\n";
             for (int i = 0; i < step_p_sweep; i++)
             {
                 bead_metropolis(delta_s);

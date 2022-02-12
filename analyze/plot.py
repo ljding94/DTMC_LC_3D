@@ -4,7 +4,7 @@ from mpl_toolkits import mplot3d
 from matplotlib.patches import Circle
 from matplotlib import cm
 from matplotlib.colors import Normalize
-
+from analyze import *
 
 def find_nu(ux,uy,uz):
     Q=np.array([[1.5*np.average(ux*ux)-0.5,np.average(ux*uy),1.5*np.average(ux*uz)],[0,1.5*np.average(uy*uy)-0.5,np.average(uy*uz)],[0,0,1.5*np.average(uz*uz)-0.5]])
@@ -169,7 +169,7 @@ def config_plot3D(filename,mesh=0,rod=0,piwall=0,phicolor=0,fnormal=0,cvt_map=""
     #ns = np.transpose(data[17:])
 
     #x,y,z,sx,sy,sz,dA,d2H,ds,dAK,un2,is_cnp,enum, en0, en1 = data[:15]
-    d=2
+    d=1
     #sx,sy,sz=d*sx,d*sy,d*sz
     x,y,z=x-np.average(x),y-np.average(y),z-np.average(z)
     x_min, x_max = np.min(x),np.max(x)
@@ -286,12 +286,11 @@ def autocorrelation_plot(rho,tau_int,savefile):
     plt.close()
 
 
-def O_MCstep_plot(filename,Ne):
+def O_MCstep_plot(filename,thermN,Ne):
     data = np.loadtxt(filename, skiprows=14, delimiter=",", unpack=True)
     E = data[0]
     Les = data[1 : 1 + Ne]
-    if Ne == 2:
-        Lrt = (Les[0] - Les[1])/(Les[0] + Les[1])
+    Lasym = eff_Le_sym_cal(Les)
     IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2, Tuz2, Tlb, = data[1 + Ne : 12 + Ne]
     #Eu  = data[12+Ne]
     p2uu = Tp2uu / Bond_num
@@ -303,20 +302,21 @@ def O_MCstep_plot(filename,Ne):
     ppi = 72
     plt.figure()
     plt.rc("text")
-    na =4
+    na =5
     fig, axs = plt.subplots(na, 1, figsize=(246 / ppi * 1, 246 / ppi * 0.5 * na), sharex=True)  # , sharex=True
     mcs = np.arange(1,len(E)+0.1,1)
     axs[0].plot(mcs,E,"-")
     axs[0].set_ylabel("E")
+    axs[1].plot(mcs[thermN:],E[thermN:],"-")
+    axs[1].set_ylabel("E")
     for i in range(len(Les)):
-        axs[1].plot(mcs,Les[i],"-")
+        axs[2].plot(mcs,Les[i],"-")
         print(Les[i])
-    axs[1].set_ylabel("Le")
-    if(Ne==2):
-        axs[2].plot(mcs,Lrt,"-")
-    axs[2].set_ylabel("(L[0]-L[1])/(L[0]+L[1])")
-    axs[3].plot(mcs,I2H2,"-")
-    axs[3].set_ylabel("I2H2")
+    axs[2].set_ylabel("Le")
+    axs[3].plot(mcs,Lasym,"-")
+    axs[3].set_ylabel("Lasym")
+    axs[4].plot(mcs,I2H2,"-")
+    axs[4].set_ylabel("I2H2")
     axs[-1].set_xlabel("MC steps")
     plt.tight_layout()
     plt.savefig(filename[:-4] + "_MCstep.png")

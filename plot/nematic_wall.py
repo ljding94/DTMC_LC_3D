@@ -123,7 +123,7 @@ def tilt_Kd_plot(LineWidth, FontSize, LabelSize):
     axlfs.legend(title=legendtitle,loc="upper right",ncol=2,columnspacing=0.5,handlelength=0.5,handletextpad=0.1,frameon=False,fontsize=FontSize)
 
     plt.tight_layout(pad=0.1)
-    plt.savefig("nematic_wall.pdf",format="pdf")
+    plt.savefig("figures/nematic_wall.pdf",format="pdf")
 
 
 

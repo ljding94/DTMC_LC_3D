@@ -87,6 +87,7 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     O_cpar_plot(axs[1, 0], Le_ave, Le_err, O_label, "Le", r"$\int ds$", cpar, colors, alphas)
 
     O_cpar_plot(axs[0, 1], Lasym_ave, Lasym_err, O_label, "Lasym", r"$see comment$", cpar, colors, alphas)
+    axs[0,1].set_ylim(-0.1,1.1)
     if Ne == 2:
         if mode == "lf":
             O_cpar_plot(axs[0, 1], F_ave, F_err, O_label, "F", r"$\partial{E/N}/\partial{l_f}$", cpar, colors, alphas)
@@ -119,7 +120,7 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     O_cpar_plot(axs[9, 0], un2_ave, un2_err, O_label, "un2", r"$u_n=\left<(u_i\cdot n_i)^2\right>_{i}$", cpar, colors, alphas)
     O_cpar_plot(axs[10, 0], uz2_ave, uz2_err, O_label, "uz2", r"$u_z^2=\left<(u_i\cdot \hat{z})^2\right>_{i}$", cpar, colors, alphas)
     O_cpar_plot(axs[11, 0], lb_ave, lb_err, O_label, "lb", r"$\left<l_{ij}\right>$", cpar, colors, alphas)
-    O_cpar_plot(axs[12, 0], Eubias_ave, Eubias_err, O_label, "Eubias", r"$\left<Eu\right>_{w}$", cpar, colors, alphas)
+    #O_cpar_plot(axs[12, 0], Eubias_ave, Eubias_err, O_label, "Eubias", r"$\left<Eu\right>_{w}$", cpar, colors, alphas)
 
     if mode == "q":
         O_cpar_plot(axs[7, 1], uuc_grad, uuc_grad_err, O_label, "uuc_grad", r"$\partial u_c /\partial q$", cpar, colors, alphas)

@@ -7,6 +7,7 @@ from scipy import odr
 import scipy.fft
 import os
 
+
 def find_cpar_ind(par_nm, mode):
     cpar_ind = -1
     for i in range(len(par_nm)):
@@ -33,6 +34,7 @@ def O_stat_cal_weight(O, tau_c, wnu=1, wnu_ave=1, wnu_err=0):
         O_err = np.sqrt(2 * O_tau / len(O) * cov0)
     return (O_ave, O_tau, O_err)
 
+
 def O_stat_cal(O, tau_c):
     O_ave = np.average(O)
     rho, cov0 = autocorrelation_function_fft(O)
@@ -40,26 +42,39 @@ def O_stat_cal(O, tau_c):
     O_err = np.sqrt(2 * O_tau / len(O) * cov0)
     return (O_ave, O_tau, O_err)
 
+
 def eff_Le_sym_cal(Les):
     # calculate the assymetry of edge length
     # for Ne=2: Asym = |(L0-L1)/sum(Ls),0|
     # Ne=3: Asym = |L0+L1*e^{i/3}+L2*e^{i*2/3},0|
     # Ne=4 Asym = symmetric direction in 3d, weighted by Les
-    #Les = np.array(Les)
+    # Les = np.array(Les)
     Ne = len(Les)
     if Ne == 1:
         asym = 1
     elif Ne == 2:
         asym = np.abs(Les[0] - Les[1]) / (Les[0] + Les[1])
     elif Ne == 3:
-        asymx = Les[0] + np.cos(np.pi * 2 / 3)*(Les[1] + Les[2])
-        asymx /= (Les[0] + Les[1]+Les[2])
-        asymy = np.sin(np.pi * 2 / 3)*(Les[1] - Les[2])
-        asymy /= (Les[0] + Les[1]+Les[2])
+        asymx = Les[0] + np.cos(np.pi * 2 / 3) * (Les[1] + Les[2])
+        asymx /= Les[0] + Les[1] + Les[2]
+        asymy = np.sin(np.pi * 2 / 3) * (Les[1] - Les[2])
+        asymy /= Les[0] + Les[1] + Les[2]
         asym = np.sqrt(np.power(asymx, 2) + np.power(asymy, 2))
     elif Ne == 4:
-        #TODO: implement Ne=4 case
-        asym = np.zeros(len(Les[0]))
+        vs = []
+        vs.append([np.sqrt(8.0 / 9), 0, -1.0 / 3])
+        vs.append([-np.sqrt(2.0 / 9), np.sqrt(2.0 / 3), -1.0 / 3])
+        vs.append([-np.sqrt(2.0 / 9), -np.sqrt(2.0 / 3), -1.0 / 3])
+        vs.append([0, 0, 1.0])
+        vs = np.array(vs)
+        vasym = [0,0,0]
+        Lesum =  Les[0] + Les[1] + Les[2] + Les[3]
+
+        for k in range(3):
+            for e in range(Ne):
+                vasym[k] += Les[e]*vs[e][k]
+            vasym[k] /= Lesum
+        asym = np.sqrt(vasym[0]*vasym[0]+vasym[1]*vasym[1]+vasym[2]*vasym[2])
 
     return asym
 
@@ -106,15 +121,15 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
         file2read = foldername + "/O_" + f2rtail
         print("file2read", file2read)
         # check for file existence
-        if(not os.path.exists(file2read)):
-            print(file2read,"not exist")
+        if not os.path.exists(file2read):
+            print(file2read, "not exist")
             continue
         data = np.loadtxt(file2read, skiprows=14 + thermN, delimiter=",", unpack=True)
         cpar_valid.append(cpar[i])
         N = par_dealing[0]
         E = data[0] / N
         Les = data[1 : 1 + Ne]
-        IdA,I2H,I2H2,I2H2dis,IK,Tp2uu,Tuuc,Bond_num,Tun2,Tuz2,Tlb = data[1 + Ne : 12 + Ne]
+        IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2, Tuz2, Tlb = data[1 + Ne : 12 + Ne]
         Eu = data[12 + Ne]
         Lasym = eff_Le_sym_cal(Les)
         p2uu = Tp2uu / Bond_num
@@ -150,14 +165,14 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
 
         # wnu = 1 when Enu=0
 
-        #wnu_avei, wnu_taui, wnu_erri = O_stat_cal(wnu, tau_c)
-        #wnu_ave.append(wnu_avei)
-        #wnu_tau.append(wnu_taui)
-        #wnu_err.append(wnu_erri)
-        #print("wnu_avei, wnu_taui, wnu_erri", wnu_avei, wnu_taui, wnu_erri)
+        # wnu_avei, wnu_taui, wnu_erri = O_stat_cal(wnu, tau_c)
+        # wnu_ave.append(wnu_avei)
+        # wnu_tau.append(wnu_taui)
+        # wnu_err.append(wnu_erri)
+        # print("wnu_avei, wnu_taui, wnu_erri", wnu_avei, wnu_taui, wnu_erri)
 
         # E
-        #E_avei, E_taui, E_erri = O_stat_cal_weight(E, tau_c, wnu, wnu_avei, wnu_erri)
+        # E_avei, E_taui, E_erri = O_stat_cal_weight(E, tau_c, wnu, wnu_avei, wnu_erri)
         E_avei, E_taui, E_erri = O_stat_cal(E, tau_c)
         E_ave.append(E_avei)
         E_tau.append(E_taui)
@@ -165,13 +180,13 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
 
         # Le and Ik2s
         for e in range(Ne):
-            #Le_avei, Le_taui, Le_erri = O_stat_cal(Les[e], tau_c, wnu, wnu_avei, wnu_erri)
+            # Le_avei, Le_taui, Le_erri = O_stat_cal(Les[e], tau_c, wnu, wnu_avei, wnu_erri)
             Le_avei, Le_taui, Le_erri = O_stat_cal(Les[e], tau_c)
             Les_ave[e].append(Le_avei)
             Les_tau[e].append(Le_taui)
             Les_err[e].append(Le_erri)
 
-        #Lasym_avei, Lasym_taui, Lasym_erri = O_stat_cal(Lasym, tau_c, wnu, wnu_avei, wnu_erri)
+        # Lasym_avei, Lasym_taui, Lasym_erri = O_stat_cal(Lasym, tau_c, wnu, wnu_avei, wnu_erri)
         Lasym_avei, Lasym_taui, Lasym_erri = O_stat_cal(Lasym, tau_c)
         Lasym_ave.append(Lasym_avei)
         Lasym_tau.append(Lasym_taui)
