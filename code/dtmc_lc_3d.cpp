@@ -17,25 +17,25 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     // set energy related
     // geometric
     Epar.kar = Epar_.kar;
-    //Epar.J = Epar_.J;
+    // Epar.J = Epar_.J;
     Epar.C0 = Epar_.C0;
     Epar.karg = Epar_.karg;
     Epar.lam = Epar_.lam;
-    //Epar.B = Epar_.B;
-    // orientational
+    // Epar.B = Epar_.B;
+    //  orientational
     Epar.Kd = Epar_.Kd;
-    //Epar.Ksb = Epar_.Ksb;
-    //Epar.Kt = Epar_.Kt;
+    // Epar.Ksb = Epar_.Ksb;
+    // Epar.Kt = Epar_.Kt;
     Epar.q = Epar_.q;
     // coupling
     Epar.Cn = Epar_.Cn;
 
     // gravitational
-    //Epar.g = Epar_.g;  // if g!=0, edge 0 z position can't be greater than 0
-    //Epar.kard = Epar_.kard;
-    //Epar.lamd = Epar_.lamd;
-    //Epar.ms = Epar_.ms;
-    //Epar.mr = Epar_.mr;
+    // Epar.g = Epar_.g;  // if g!=0, edge 0 z position can't be greater than 0
+    // Epar.kard = Epar_.kard;
+    // Epar.lamd = Epar_.lamd;
+    // Epar.ms = Epar_.ms;
+    // Epar.mr = Epar_.mr;
     k_pinch = 0.0;
 
     edge_lists.resize(Ne);
@@ -74,7 +74,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     hole_pos = N / 2; // add hole at a position
     while (num_edge_exist < Ne)
     {
-        //std::cout << "num_edge_exist," << num_edge_exist << std::endl;
+        // std::cout << "num_edge_exist," << num_edge_exist << std::endl;
 
         if (add_hole_as_edge(hole_pos, num_edge_exist) == 1)
         {
@@ -84,25 +84,32 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
             std::cout << "at hole_pos." << hole_pos << std::endl;
         }
         hole_pos += 12;
-        //std::cout << "hole_pos=" << hole_pos << std::endl;
+        // std::cout << "hole_pos=" << hole_pos << std::endl;
     }
     // above shape setting take care of beads position
     // bulk_bond_list (excluding edge bond) and edge_list
 
     // set inital observable value
     Ob_init(Ob_sys);
-
+    double phi_u, costheta_u, sintheta_u;
     for (int i = 0; i < mesh.size(); i++)
     {
         // set phi field
-        //mesh[i].phi = 1;
+        // mesh[i].phi = 1;
         // vertex info measurement
         mesh[i].n = n_m(i);
-        // initialize director parallel to normal
-        mesh[i].u = mesh[i].n;
+        // [cold start] initialize director parallel to normal
+        // mesh[i].u = mesh[i].n;
+        // [hot start] initialize directors randomly
+        phi_u = 2*PI*rand_uni(gen);
+        costheta_u = 2*rand_uni(gen)-1;
+        sintheta_u = std::sqrt(1-costheta_u*costheta_u);
+        mesh[i].u[0] = sintheta_u*std::cos(phi_u);
+        mesh[i].u[1] = sintheta_u*std::sin(phi_u);
+        mesh[i].u[2] = costheta_u;
         mesh[i].dAn2H = dAn2H_m(i);
         mesh[i].ds = ds_m(i);
-        //mesh[i].dsk2 = dsk2_m(i);
+        // mesh[i].dsk2 = dsk2_m(i);
         mesh[i].un2 = un2_m(i);
         mesh[i].dAK = dAK_m(i);
     }
@@ -118,15 +125,15 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     for (int i = 0; i < mesh.size(); i++)
     {
         Ob_sys.I2H2 += mesh[i].dAn2H[0] * mesh[i].dAn2H[1] * mesh[i].dAn2H[1];
-        //Ob_sys.Iphi += mesh[i].phi;
+        // Ob_sys.Iphi += mesh[i].phi;
         Ob_sys.I2H2dis += mesh[i].dAn2H[0] * std::pow(mesh[i].dAn2H[1] - Epar.C0, 2);
         Ob_sys.IK += mesh[i].dAK;
-        //Ob_sys.IKphi2 += mesh[i].dAK * mesh[i].phi * mesh[i].phi;
+        // Ob_sys.IKphi2 += mesh[i].dAK * mesh[i].phi * mesh[i].phi;
         if (mesh[i].edge_num != -1)
         {
             Ob_sys.Les[mesh[i].edge_num] += mesh[i].ds;
-            //Ob_sys.Ik2s[mesh[i].edge_num] += mesh[i].dsk2;
-            //Ob_sys.Leuns[mesh[i].edge_num] += mesh[i].ds * std::sqrt(mesh[i].un2);
+            // Ob_sys.Ik2s[mesh[i].edge_num] += mesh[i].dsk2;
+            // Ob_sys.Leuns[mesh[i].edge_num] += mesh[i].ds * std::sqrt(mesh[i].un2);
         }
         // crystalline energy related
         for (int j = 0; j < mesh[i].nei.size(); j++)
@@ -134,15 +141,15 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
             // factor of 1/2 is for double counting
             Ob_sys.Tp2uu += 0.5 * p2uu_m(i, mesh[i].nei[j]);
             Ob_sys.Tuuc += 0.5 * uuc_m(i, mesh[i].nei[j]);
-            //Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
-            // Ising-like phi field interaction
-            //Ob_sys.Tphi2 += 0.5 * mesh[i].phi * mesh[mesh[i].nei[j]].phi;
+            // Ob_sys_w.Tuuc += 0.5 * (mesh[i].es + mesh[mesh[i].nei[j]].es) * 0.5 * uuc_m(i, mesh[i].nei[j]); // was used for mixture study
+            //  Ising-like phi field interaction
+            // Ob_sys.Tphi2 += 0.5 * mesh[i].phi * mesh[mesh[i].nei[j]].phi;
             Ob_sys.Tlb += 0.5 * distance(i, mesh[i].nei[j]);
         }
         // coupling related
         Ob_sys.Tun2 += mesh[i].un2;
-        //Ob_sys.IKun2 += mesh[i].dAK * mesh[i].un2;
-        // miscellany
+        // Ob_sys.IKun2 += mesh[i].dAK * mesh[i].un2;
+        //  miscellany
         Ob_sys.IdA += mesh[i].dAn2H[0];
         Ob_sys.I2H += mesh[i].dAn2H[1] * mesh[i].dAn2H[0];
         Ob_sys.Tuz2 += mesh[i].u[2] * mesh[i].u[2];
@@ -153,10 +160,10 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
     {
         Ob_sys.Bond_num += edge_lists[n].size();
     }
-    //Ob_sys.E = 0.5 * Epar.Cn * (N - Np) + 0.5 * Epar.Cn * Np;
+    // Ob_sys.E = 0.5 * Epar.Cn * (N - Np) + 0.5 * Epar.Cn * Np;
     Ob_sys.E = 0.5 * Epar.Cn * N; // offset tilt energy
     Ob_sys.E += E_m(Ob_sys);
-    //Ob_sys.Eu = Eu_m(Ob_sys.Les);
+    // Ob_sys.Eu = Eu_m(Ob_sys.Les);
 
     // set random number generators
     std::random_device rd;
@@ -366,13 +373,13 @@ void dtmc_lc::init_disk_shape(double d0_)
         init_mesh[i].R[2] = -0.5;
         // put neighbors as if every on is in-bulk
         init_mesh[i].edge_num = -1;
-        //ignore bead on init_mesh edge
+        // ignore bead on init_mesh edge
         for (int j = 0; j < 6; j++)
         {
             nei_pos = i + nei_dist[j];
             if (0 <= nei_pos && nei_pos < init_mesh.size())
             {
-                //std::cout << "nei_pos=" << nei_pos << "\n";
+                // std::cout << "nei_pos=" << nei_pos << "\n";
                 init_mesh[i].nei.push_back(nei_pos);
             }
         }
@@ -385,7 +392,7 @@ void dtmc_lc::init_disk_shape(double d0_)
             init2after_index[i] = mesh.size() - 1;
         }
     }
-    //corresting mesh nei index
+    // corresting mesh nei index
     N = mesh.size(); // assign the system size parameter
     std::vector<int> new_nei_cache;
     std::vector<int> ind_nei_cache;
@@ -451,7 +458,7 @@ void dtmc_lc::init_disk_shape(double d0_)
         eind_next = mesh[eind].edge_nei[1];
         eind_cache = mesh[eind_next].edge_nei[0];
         if (eind_cache != eind)
-        { //fix edge_nei direction of eind_next
+        { // fix edge_nei direction of eind_next
             mesh[eind_next].edge_nei[0] = eind;
             mesh[eind_next].edge_nei[1] = eind_cache;
         }
@@ -465,7 +472,7 @@ void dtmc_lc::init_cylinder_shape(double d0_)
     // only work for Ne>=2
     int x_n, y_n; // position of the vertex in the two vector coordinate
     // cylinder initial shape
-    //use cylinder initialization
+    // use cylinder initialization
     int L, Lr, Lflag; // L, length of the cylinder per number of beads
     double d0;
     d0 = d0_;
@@ -482,9 +489,9 @@ void dtmc_lc::init_cylinder_shape(double d0_)
         {
             if (N % L == 0)
             {
-                //d1 = (lf + 1) / (L - 1); //0.5 cushion for each side of the edge at the initial
-                //std::cout << "d1=" << d1 << "\n";
-                //if (d1 > 1.1 && d1 < (l0 - 0.1))
+                // d1 = (lf + 1) / (L - 1); //0.5 cushion for each side of the edge at the initial
+                // std::cout << "d1=" << d1 << "\n";
+                // if (d1 > 1.1 && d1 < (l0 - 0.1))
                 if (d0 * (L - 1) * 0.5 * std::sqrt(3) > (lf + 1))
                 {
                     std::cout << "L=" << L << "\n";
@@ -599,10 +606,10 @@ void dtmc_lc::init_mobius_shape(double d0_)
     // initialization of mobius strip
     double w, t; // continues parameter along the width and rotational direction
 
-    //use cylinder initialization
+    // use cylinder initialization
     int W = 5; // width of mobius strip
                // for now, odd only
-               //3 is very optimal consider the distance change need to be within (1,l0) when d0=1.5
+               // 3 is very optimal consider the distance change need to be within (1,l0) when d0=1.5
                // for W=5 N>=300 at least when d0=1.4
     N -= N % W;
     int Lr = N / W;    // perimeter of strip's circular bottom
@@ -705,7 +712,7 @@ void dtmc_lc::init_mobius_shape(double d0_)
                 }
                 else
                 {
-                    //true middle
+                    // true middle
                     push_neis_back(i, {1, Lw, Lw - 1, -1, -Lw - 1, -Lw});
                     push_bneis_list(i, {1, Lw, Lw - 1, -1, -Lw - 1, -Lw});
                 }
@@ -718,8 +725,8 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
 {
     // add a hole as edge[edge_num], and i0 is one of the edge beads.
     // implement larger initial hole
-    //b0-b01-b1-b12-b2-b20-b0
-    //b0-b1-b2-b0 is the center triangle.
+    // b0-b01-b1-b12-b2-b20-b0
+    // b0-b1-b2-b0 is the center triangle.
 
     int b1, b2; // another two beads to include for the new triangle edge
     int b01, b12, b20;
@@ -730,7 +737,7 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
     // check if b0 is near the edge, if yes, it can't be on the new edge
     if (if_near_edge(b0))
     {
-        //std::cout << b0 << "b0 is near an edge\n";
+        // std::cout << b0 << "b0 is near an edge\n";
         return 0;
     }
 
@@ -752,7 +759,7 @@ int dtmc_lc::add_hole_as_edge(int b0, int edgenum)
         }
         // found the b1 b2 candidate
         // continue looking for b01, b12 and b20
-        //find big triangle hole vertices // borrow idea from bond flip update
+        // find big triangle hole vertices // borrow idea from bond flip update
 
         b0_nei_b1 = list_a_nei_b(mesh[b0].nei, b1);
         b0_nei_b2 = list_a_nei_b(mesh[b0].nei, b2);
@@ -861,11 +868,11 @@ void dtmc_lc::Ob_init(observable &Ob)
     Ob.I2H2dis = 0;
     Ob.IK = 0;
     Ob.Les.resize(Ne);
-    //Ob.Ik2s.resize(Ne);
+    // Ob.Ik2s.resize(Ne);
     for (int e = 0; e < Ne; e++)
     {
         Ob.Les[e] = 0;
-        //Ob.Ik2s[e] = 0;
+        // Ob.Ik2s[e] = 0;
     }
     Ob.Tp2uu = 0;
     Ob.Tuuc = 0;
@@ -875,7 +882,7 @@ void dtmc_lc::Ob_init(observable &Ob)
     Ob.Bond_num = 0;
     Ob.Tlb = 0;
     Ob.Tuz2 = 0;
-    //Ob.TRz = 0;
+    // Ob.TRz = 0;
 }
 
 int dtmc_lc::if_near_edge(int b)
@@ -928,9 +935,9 @@ void dtmc_lc::delete_bulk_bond_list(int ind_i, int ind_j)
     {
         if (bulk_bond_list[i] == bond0 || bulk_bond_list[i] == bond1)
         {
-            //std::cout<<"delete:"<<bulk_bond_list[i].first<<"-"<<bulk_bond_list[i].second<<"\n";
+            // std::cout<<"delete:"<<bulk_bond_list[i].first<<"-"<<bulk_bond_list[i].second<<"\n";
             bulk_bond_list.erase(bulk_bond_list.begin() + i);
-            //std::cout<<"bulk_bond_list.size()="<<bulk_bond_list.size()<<"\n";
+            // std::cout<<"bulk_bond_list.size()="<<bulk_bond_list.size()<<"\n";
             i--;
         }
     }

@@ -136,10 +136,12 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
         uuc = Tuuc / Bond_num
         lb = Tlb / Bond_num
         N = par[find_cpar_ind(par_nm, "N")]
+        print("N=",N)
         # rCnp = par[find_cpar_ind(par_nm,"rCnp")]
         # Np = int(N*rCnp)
         # un2=Tun2/(N-Np)
         un2 = Tun2 / N
+        print(file2read,"Tun2[-1]=%.1f,Tun2=%.1f,un2=%.1f"%(Tun2[-1],np.average(Tun2),np.average(un2)))
         uz2 = Tuz2 / N
         Euave = np.average(Eu)
         wnu = np.exp(Eu - Euave)  # biased weight function, assumed beta=1, normalize to Eu_ave

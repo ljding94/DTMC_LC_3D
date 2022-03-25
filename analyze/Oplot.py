@@ -67,6 +67,7 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     F_ave, F_err = [], []  # just for calculating the pulling force
     for i in range(len(pars)):
         if mode == "q":
+            print(np.shape(uuc_ave),np.shape(cpar),np.shape(pars))
             uuc_grad.append(np.gradient(uuc_ave[i], cpar[i]))
             uuc_grad_err.append(np.zeros(len(cpar[i])))
             un2_grad.append(np.gradient(un2_ave[i], cpar[i]))
@@ -86,12 +87,12 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     O_cpar_plot(axs[0, 0], E_ave, E_err, O_label, "E", r"$E/N$", cpar, colors, alphas)
     O_cpar_plot(axs[1, 0], Le_ave, Le_err, O_label, "Le", r"$\int ds$", cpar, colors, alphas)
 
-    O_cpar_plot(axs[0, 1], Lasym_ave, Lasym_err, O_label, "Lasym", r"$see comment$", cpar, colors, alphas)
+    O_cpar_plot(axs[0, 1], Lasym_ave, Lasym_err, O_label, "Lasym", r"assym of L", cpar, colors, alphas)
     axs[0,1].set_ylim(-0.1,1.1)
     if Ne == 2:
         if mode == "lf":
-            O_cpar_plot(axs[0, 1], F_ave, F_err, O_label, "F", r"$\partial{E/N}/\partial{l_f}$", cpar, colors, alphas)
-            axs[0, 1].set_ylim(-0.1, 0.5)
+            O_cpar_plot(axs[1, 1], F_ave, F_err, O_label, "F", r"$\partial{E/N}/\partial{l_f}$", cpar, colors, alphas)
+            axs[1, 1].set_ylim(-0.1, 0.5)
 
         Le_ave_diff = np.abs(Les_ave[1] - Les_ave[0])
         #Le_err_diff = np.sqrt(np.power(Les_err[1], 2) + np.power(Les_err[0], 2))

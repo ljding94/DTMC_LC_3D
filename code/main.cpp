@@ -65,7 +65,7 @@ int main(int argc, char const *argv[])
             membrane.Thermal_kar1lam1(100, int(N / (delta_s * delta_s)) + 1, 10, 20, delta_s, delta_theta);
             membrane.State_write(folder + "/State_" + finfo + "_therm.csv");
         }
-        membrane.Thermal(100, int(N / (delta_s * delta_s)) + 1, 10, delta_s, delta_theta);
+        membrane.Thermal(100, int(N / (delta_s * delta_s)) + 1, 1, delta_s, delta_theta);
         membrane.O_MC_measure(100, 50, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 
@@ -83,9 +83,10 @@ int main(int argc, char const *argv[])
             membrane.State_write(folder + "/State_" + finfo + "_therm.csv");
         }
         //membrane.Thermal_kar1lam1(2000, int(N / (delta_s * delta_s)) + 1, 10, 20, delta_s, delta_theta);
-        membrane.Thermal(5000, int(N / (delta_s * delta_s)), 50, delta_s,delta_theta);
+        // 5000, 15000 for structure change
+        // membrane.Thermal(2000, int(N / (delta_s * delta_s)), 1, delta_s,delta_theta);
         // see how it evolves for now
-        membrane.O_MC_measure(15000, 1000, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo);
+        membrane.O_MC_measure(5000, 1000, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 
         return 0;

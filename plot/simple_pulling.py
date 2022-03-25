@@ -1,13 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from config_plot import *
-
+from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,AutoMinorLocator)
 
 ## FIGURE: external force related
 
 def force_normalized_kar_pull_data_get():
     # get data  C0=0 for Kd=Cn=q=0 puilling case
-    foldername = "../data/Ne2/Oct18_2021"
+    #foldername = "../data/Ne2/Oct_2021/Oct18_2021"
+    foldername = "../data/Ne2/Mar12_2022"
     kar0=40
     kars=[20,40,60,80]
     N=300
@@ -30,7 +31,8 @@ def force_normalized_kar_pull_data_get():
     return [lfs, f_kar_norm_aves, f_kar_norm_errs, labels, colors, markers, legendtitle]
 
 def force_pull_config_data_get():
-    foldername = "../data/Ne2/Oct18_2021"
+    #foldername = "../data/Ne2/Oct_2021/Oct18_2021"
+    foldername = "../data/Ne2/Mar12_2022"
     kar0=40
     lfs = [10.0,20.0,30.0]
     fnames= []
@@ -41,9 +43,10 @@ def force_pull_config_data_get():
 
 
 def force_pull_C0_pull_data_get():
-    foldername = "../data/Ne2/Oct18_2021"
+    foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     C0s = [0.0,0.1,0.2,0.3]
     kar0=40
+    N=300
     datas, labels, colors, markers = [], [], [], []
     colors = ["red", "green", "blue", "royalblue"]
     markers = ["v", "s", "p", "h", "o"]
@@ -52,7 +55,7 @@ def force_pull_C0_pull_data_get():
         datas.append(np.loadtxt(fname, skiprows=1, delimiter=",", unpack=True))
 
     datas = np.transpose(np.array(datas), axes=(1, 0, 2))
-    lfs, E_aves, E_errs = datas[0], datas[1], datas[3]
+    lfs, E_aves, E_errs = datas[0],N*datas[1], N*datas[3]
     f_kar_norm_aves, f_kar_norm_errs = [], []
     for i in range(len(E_aves)):
         fa, fe = Chi2_gradient(lfs[i], E_aves[i], E_errs[i], k=2)
@@ -63,7 +66,7 @@ def force_pull_C0_pull_data_get():
     return [lfs, f_kar_norm_aves, f_kar_norm_errs, labels, colors, markers, legendtitle]
 
 def force_pull_c0_config_data_get():
-    foldername = "../data/Ne2/Oct18_2021"
+    foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     kar0=40
     lf=20.0
     C0s = [0.0,0.1,0.2]
@@ -75,42 +78,57 @@ def force_pull_c0_config_data_get():
 def force_pull_plot(LineWidth, FontSize, LabelSize):
     # kappa and C0, lambda only, no LC interaction
     ppi = 72
-    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 0.8))
+    fig = plt.figure(figsize=(246 / ppi, 246 / ppi * 0.5))
     plt.rc("text", usetex=True)
     plt.rc("text.latex", preamble=r"\usepackage{physics}")
-    axfkar = plt.subplot2grid((2, 2), (0, 0), colspan=1)
-    axfkar_cfg = plt.subplot2grid((2, 2), (0, 1), colspan=1)
-    axfC0 = plt.subplot2grid((2, 2), (1, 0), colspan=1, sharex=axfkar)
-    axfC0_cfg = plt.subplot2grid((2, 2), (1, 1), colspan=1)
-    msize = 3
+    axfkar = plt.subplot2grid((1, 2), (0, 0), colspan=1)
+    axfkar_cfg = plt.subplot2grid((1, 2), (0, 1), colspan=1)
+    #axfC0 = plt.subplot2grid((2, 2), (1, 0), colspan=1, sharex=axfkar)
+    #axfC0_cfg = plt.subplot2grid((2, 2), (1, 1), colspan=1)
+    msize = 4
     n=2 # plot data inteval
 
     ## f normalized versus lf for different kar at C0=0
     lfs, f_kar_norm_aves, f_kar_norm_errs, labels, colors, markers, legendtitle = force_normalized_kar_pull_data_get()
+    print("len(lfs)",len(lfs),len(f_kar_norm_aves))
     for i in range(len(lfs)):
         axfkar.errorbar(lfs[i][::n], f_kar_norm_aves[i][::n], f_kar_norm_errs[i][::n], ls="None", color=colors[i], mfc= "None", marker = markers[i], ms=msize, label=labels[i])
-
-    axfkar.tick_params(which="both",direction="in", top="on", right="on",labelbottom=False, labelleft=True,labelsize=LabelSize)
+    axfkar.tick_params(which="both",direction="in", top="on", right="on",labelbottom=True, labelleft=True,labelsize=LabelSize)
     axfkar.set_ylabel(r"$F \kappa_0/\kappa$", fontsize=FontSize)
-    axfkar.set_ylim(0.0,0.35)
-    axfkar.legend(title=legendtitle,ncol=2,columnspacing=0.5,handlelength=0.5,handletextpad=0.1,frameon=False,fontsize=FontSize)
+    axfkar.set_ylim(-10,90)
+    axfkar.xaxis.set_major_locator(MultipleLocator(5))
+    axfkar.xaxis.set_minor_locator(MultipleLocator(2.5))
+    axfkar.yaxis.set_major_locator(MultipleLocator(20))
+    axfkar.yaxis.set_minor_locator(MultipleLocator(10))
+    axfkar.legend(title=legendtitle,loc="upper left",ncol=2,columnspacing=0.5,handlelength=0.5,handletextpad=0.1,frameon=False,fontsize=FontSize)
+    axfkar.set_xlabel(r"$l_f$",fontsize=FontSize)
+    x1, y1 = 0.85, 0.15
+    #axfkar.text(axfkar.get_xlim()[1]*x1+axfkar.get_xlim()[0]* (1-x1),  axfkar.get_ylim()[1]*y1+axfkar.get_ylim()[0]* (1-y1), r"(b)", fontsize=FontSize,transform=axfkar.transAxes)
+    axfkar.text(x1,y1, r"(a)", fontsize=FontSize,transform=axfkar.transAxes)
 
     ## fkar_cfg, configuration for different lf with kar0
     #lfplt = [15.0, 25.0, 35.0]
     lfs,fnames = force_pull_config_data_get()
     for i in range(len(lfs)):
-        ax_config_plot_xyz(axfkar_cfg, fnames[i], "gray", LineWidth, pov="zx",xshift=0.5*lfs[i]-5,yshift=-13*i, mesh=1, bead=0)
-        axfkar_cfg.text(lfs[i]-2,-13*i,r"$l_f=%.0f$"%lfs[i],fontsize=FontSize)
+        ax_config_plot_xyz(axfkar_cfg, fnames[i], "gray", LineWidth, pov="zx",xshift=0.5*lfs[i],yshift=13*i, mesh=1, bead=0)
+        axfkar_cfg.text(lfs[i]+5,13*i,r"$%.0f$"%lfs[i],fontsize=FontSize)
+    axfkar_cfg.text(lfs[-1],13*(len(lfs)-1)+5,r"$l_f=$",fontsize=FontSize)
+
     axfkar_cfg.tick_params(which="both",direction="in", bottom="off",top="off", right="off",left="off",labelbottom=False,labelleft=False, labelsize=LabelSize)
+    x1, y1 = 1.85, 0.15
+    axfkar_cfg.text(x1,y1, r"(b)", fontsize=FontSize,transform=axfkar.transAxes)
+    #axfkar_cfg.text(axfkar_cfg.get_xlim()[1]*x1+axfkar_cfg.get_xlim()[0]* (1-x1),  axfkar_cfg.get_ylim()[1]*y1+axfkar_cfg.get_ylim()[0]* (1-y1), r"(a)", fontsize=FontSize,transform=axfkar_cfg.transAxes)
+
 
     ## axfC0
+    '''
     lfs, f_C0_aves, f_C0_errs, labels, colors, markers, legendtitle = force_pull_C0_pull_data_get()
     for i in range(len(lfs)):
         axfC0.errorbar(lfs[i][::n], f_C0_aves[i][::n], f_C0_errs[i][::n], ls="None", color=colors[i], mfc= "None", marker = markers[i], ms=msize, label=labels[i])
 
     axfC0.tick_params(which="both",direction="in", top="off", right="on",labelbottom=True, labelleft=True, labelsize=LabelSize)
     axfC0.set_ylabel(r"$F$", fontsize=FontSize)
-    axfC0.set_ylim(0.0,0.35)
+    axfC0.set_ylim(-10,100)
     axfC0.legend(title=legendtitle,ncol=2,columnspacing=0.5,handlelength=0.5,handletextpad=0.1,frameon=False,fontsize=FontSize)
     axfC0.set_xlabel(r"$l_f$",fontsize=FontSize)
 
@@ -120,10 +138,10 @@ def force_pull_plot(LineWidth, FontSize, LabelSize):
         ax_config_plot_xyz(axfC0_cfg, fnames[i], "gray", LineWidth, pov="zx",xshift=0.5*lf-5,yshift=-13*i, mesh=1, bead=0)
         axfC0_cfg.text(lf-2,-13*i,r"$C_0=%.1f$"%C0s[i],fontsize=FontSize)
     axfC0_cfg.tick_params(which="both",direction="in", bottom="off",top="off", right="off",left="off",labelbottom=False,labelleft=False, labelsize=LabelSize)
-
+    '''
 
     plt.tight_layout(pad=0.1)
-    plt.savefig("force_pull.pdf",format="pdf")
+    plt.savefig("figures/force_pull.pdf",format="pdf")
 
 
 
