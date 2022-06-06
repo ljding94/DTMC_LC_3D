@@ -1,4 +1,4 @@
-Compile=g++ -g -std=c++17
+Compile=g++ -g -std=c++17 -O3
 dtmc_lc_3d: main.o dtmc_lc_3d.o metropolis.o lifted_edge.o measurement.o experiment.o
 	${Compile} -o dtmc_lc_3d main.o dtmc_lc_3d.o metropolis.o lifted_edge.o measurement.o experiment.o
 main.o: main.cpp dtmc_lc_3d.h

@@ -6,7 +6,7 @@ from matplotlib import cm
 from matplotlib.colors import Normalize
 
 
-def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xshift=0, yshift=0, zslice=None, mesh=1, bead=0, rod=0, pwlim=0, d=1):
+def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xshift=0, yshift=0, zslice=None, mesh=1, twistcolor=0 ,bead=0, rod=0, pwlim=0, d=1, scale=1):
     print(pov+" plotting",filename)
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
     x,y,z,ux,uy,uz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:17]
@@ -23,6 +23,8 @@ def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xsh
         take= (z>zslice[0]) & (z<zslice[1])
     # recenter based on the sliced part
     x,y,z=x-np.average(x[take]),y-np.average(y[take]),z-np.average(z[take])
+
+    x,y,z = scale*x,scale*y,scale*z
 
     if(rotxyz):
         rs=[x,y,z]
@@ -59,7 +61,7 @@ def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xsh
         for j in range(len(x)):
             if(take[j]):
                 xc, yc, rc = x[j], y[j], r[j]
-                ax.add_artist(Circle(xy=(xc, yc), linewidth=0,radius=rc,edgecolor="None",facecolor=Color, alpha=alpha_xy[j]))
+                ax.add_artist(Circle(xy=(xc, yc), linewidth=0,radius=rc,edgecolor="None",facecolor=Color, alpha=0.8*alpha_xy[j]))
 
     if(mesh):
         bonds = []
@@ -71,20 +73,18 @@ def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xsh
                     else:
                         bonds.append((int(ns[i, j]),i))
         bonds = set(bonds)
+        if(twistcolor):
+            normt=Normalize(vmin=0,vmax=0.25*np.pi)
+            cmapt = cm.get_cmap("ocean")
         for bond in bonds:
-            pass
             a,b = bond
             if(take[a] or take[b]):
-                ax.plot([x[a],x[b]], [y[a],y[b]], color=Color,lw=LineWidth/4,alpha=alpha_xy[a])
+                if(twistcolor):
+                    twist = twist_cal([x[a],y[a],z[a]],[x[b],y[b],z[b]],[ux[a],uy[a],uz[a]],[ux[b],uy[b],uz[b]])
+                    ax.plot([x[a],x[b]], [y[a],y[b]], color=cmapt(normt(twist)),lw=LineWidth/4,alpha=alpha_xy[a])
+                else:
+                    ax.plot([x[a],x[b]], [y[a],y[b]], color=Color,lw=LineWidth/4,alpha=alpha_xy[a])
 
-    # edge bond
-    ecolors = ["blue","green","crimson","indigo","cyan"]
-    ecolors=  ["k","k","k"]
-    for i in range(len(ens)):
-        for j in range(len(en0)):
-            if ens[i, j] != -1:
-                if(take[j] or take[int(ens[i, j])]):
-                    ax.plot([x[j], x[int(ens[i, j])]], [y[j], y[int(ens[i, j])]], "-",lw=LineWidth*1, color=ecolors[int(enum[j])], alpha=alpha_xy[j])
 
     # director
     norm=Normalize(vmin=0,vmax=0.5*np.pi)
@@ -97,11 +97,26 @@ def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xsh
 
     if(pwlim!=0):
         deg_slct=deg>pwlim
+        #deg_slct=np.sqrt(un2)<pwlim
         x_pw,y_pw,z_pw = x[deg_slct],y[deg_slct],z[deg_slct]
         ux_pw,uy_pw,uz_pw = ux[deg_slct],uy[deg_slct],uz[deg_slct]
         deg_pw = deg[deg_slct]
+        alpha_xy_pw=alpha_xy[deg_slct]
+        r = 0.5 * np.ones(len(x_pw))
         for i in range(len(ux_pw)):
-            ax.plot([x_pw[i]-0.5*d*sx_pw[i],x_pw[i]+0.5*d*sx_pw[i]],[y_pw[i]-0.5*d*sy_pw[i],y_pw[i]+0.5*d*sy_pw[i]],"-",linewidth=LineWidth,color=cmap(norm(deg_pw[i])),solid_capstyle="round")
+            if(take[i]):
+                xc, yc, rc = x_pw[i], y_pw[i], r[i]
+                ax.add_artist(Circle(xy=(xc, yc), linewidth=0,radius=rc,edgecolor="None",facecolor=Color, alpha=0.8*alpha_xy[i]))
+                ax.plot([x_pw[i]-0.5*d*ux_pw[i],x_pw[i]+0.5*d*ux_pw[i]],[y_pw[i]-0.5*d*uy_pw[i],y_pw[i]+0.5*d*uy_pw[i]],"-",linewidth=LineWidth,color=cmap(norm(deg_pw[i])),solid_capstyle="round")
+
+    # edge bond, plot edge lastly, so it's always shown
+    ecolors = ["blue","green","crimson","indigo","cyan"]
+    ecolors=  ["k","k","k"]
+    for i in range(len(ens)):
+        for j in range(len(en0)):
+            if ens[i, j] != -1:
+                if(take[j] or take[int(ens[i, j])]):
+                    ax.plot([x[j], x[int(ens[i, j])]], [y[j], y[int(ens[i, j])]], "-",lw=LineWidth*1, color=ecolors[int(enum[j])], alpha=alpha_xy[j])
 
     ax.set_aspect("equal")
     ax.set_yticks([])
@@ -109,7 +124,82 @@ def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xsh
     ax.set_frame_on(False)
 
 
+def twist_cal(r1,r2,u1,u2):
+    r12 = np.array(r2)-np.array(r1)
+    r12/=np.sqrt(np.dot(r12,r12))
+    ans = np.dot(np.cross(u1,u2),r12)*np.dot(u1,u2)
+    return ans
 
+def catenoid_demo(LineWidth, FontSize, LabelSize):
+    print("👌")
+    ppi = 72
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 0.4))
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+    ax = plt.subplot2grid((1, 1), (0, 0))
+    msize=4
+    fname = "../data/Ne2/Feb_2022/Feb28_2022/State_N300_imod3_Ne2_lf0.0_kar30_C00.0_karg0.0_lam6.0_Kd4.0_q1.4_Cn4.0.csv"
+    rot = (1.6,0.0,0)
+    # configuration plot
+    ax_config_plot_xyz(ax, fname, "gray", LineWidth,rotxyz=(1.0,0.0,0), xshift=0, mesh=1, bead=0,rod=0, d=0.8)
+    x0=4
+    ax.text(0-x0, -10, r"(a)", fontsize=FontSize)
+    ax_config_plot_xyz(ax, fname, "gray", LineWidth, rotxyz=(1.4,0.0,0),xshift=17, mesh=1, bead=1,rod=1, d=0.8)
+    ax.text(17-x0, -10, r"(b)", fontsize=FontSize)
+    ax_config_plot_xyz(ax, fname, "gray", LineWidth, rotxyz=(1.8,0.0,0),xshift=34, mesh=0, bead=0, rod=0, d=0.8,pwlim=np.pi/3)
+    ax.text(34-x0, -10, r"(c)", fontsize=FontSize)
+
+
+    #cbar=plt.colorbar(cm.ScalarMappable(norm=Normalize(vmin=0,vmax=0.5*np.pi), cmap=cm.get_cmap("jet_r")),ax=ax,ticks=[0,0.25*np.pi,0.5*np.pi])
+    #cbar.ax.set_yticklabels([r"$0$",r"$\pi/4$",r"$\pi/2$"],fontsize=FontSize)
+    cbar=plt.colorbar(cm.ScalarMappable(norm=Normalize(vmin=0,vmax=0.5*np.pi), cmap=cm.get_cmap("jet_r")),ax=ax,ticks=[0,np.pi/6,np.pi/3,np.pi/2])
+    cbar.ax.set_yticklabels([r"$0$",r"$\pi/6$",r"$\pi/3$",r"$\pi/2$"],fontsize=FontSize)
+    cbar.ax.tick_params(direction="in",labelsize=LabelSize)
+    cbar.ax.set_title(r"$\arccos{|\vu{u}\cdot\vu{n}|}$",fontsize=FontSize)
+
+    ax.tick_params(which="both",direction="in", bottom="off",top="off", right="off",left="off",labelbottom=False,labelleft=False, labelsize=LabelSize)
+    #x1, y1 = 0.9, 1.06
+    #axcfg.text(x1,y1, r"(a)", fontsize=FontSize,transform=axuz.transAxes)
+
+    plt.tight_layout(pad=0.1)
+    plt.savefig("figures/config_demo.pdf",format="pdf")
+
+
+def init_config_demo(LineWidth, FontSize, LabelSize):
+    print("plotting figures for initial shapes")
+    ppi = 72
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 0.4))
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+    ax = plt.subplot2grid((1, 1), (0, 0))
+    msize=4
+    rot = (1.6,0.0,0)
+    # configuration plot
+    ax_config_plot_xyz(ax, "init_config/flat.csv", "gray", LineWidth,rotxyz=(0,0.0,0), xshift=0, mesh=1, bead=0,rod=0,scale=0.5)
+    x0=4
+    ax.text(0-x0, -10, r"(a)", fontsize=FontSize)
+    ax_config_plot_xyz(ax, "init_config/cylinder.csv", "gray", LineWidth, pov="zx", rotxyz=(0.2,0.4,0),xshift=17, mesh=1, bead=0,rod=0)
+    ax.text(17-x0, -10, r"(b)", fontsize=FontSize)
+    ax_config_plot_xyz(ax, "init_config/vesicle.csv", "gray", LineWidth, rotxyz=(0.0,0.6,0),xshift=34, mesh=1, bead=0, rod=0)
+    ax.text(34-x0, -10, r"(c)", fontsize=FontSize)
+
+    ax.tick_params(which="both",direction="in", bottom="off",top="off", right="off",left="off",labelbottom=False,labelleft=False, labelsize=LabelSize)
+    #x1, y1 = 0.9, 1.06
+    #axcfg.text(x1,y1, r"(a)", fontsize=FontSize,transform=axuz.transAxes)
+
+    plt.tight_layout(pad=0.1)
+    plt.savefig("figures/init_config_demo.pdf",format="pdf")
+
+
+
+
+def twist_config_demo():
+    pass
+    # configuration comparison, director color map, and twist color on bond
+
+
+
+# not paper related
 
 def catenoid_trinoid_demo_data_get():
     foldername = "../data/Ne2/Oct23_2021"

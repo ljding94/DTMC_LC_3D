@@ -277,7 +277,7 @@ void dtmc_lc::Thermal_pinch(int MC_sweeps, int step_p_sweep, double k_pinch_, do
 
 void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
                            double delta_s, double delta_theta, double delta_r, double bin_num, std::string folder,
-                           std::string finfo)
+                           std::string finfo, int seq)
 {
     std::vector<double> E_all;
     std::vector<double> I2H2_all;
@@ -306,6 +306,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     double edge_accept = 0;
     double hop_accept = 0;
 
+    int seq_n = 0;
     std::cout << "l0=" << l0 << "\n";
     //std::cout << "Epar.lam=" << Epar.B << "\n";
     //std::cout << "Epar.B=" << Epar.B << "\n";
@@ -313,6 +314,12 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::clock_t c_start = std::clock();
     for (int sweep_n = 0; sweep_n < MC_sweeps; sweep_n++)
     {
+
+        if(seq && (sweep_n*seq % MC_sweeps == 0)){
+            seq_n = int(sweep_n*seq/MC_sweeps);
+            std::cout<<"seqqqq "<< seq_n<<"\n";
+            State_write(folder + "/State_" + finfo + "_seq"+std::to_string(seq_n)+".csv");
+        }
         std::cout << sweep_n << "/" << MC_sweeps << "\n";
         //std::cout << "Eu/sqrt{N}=" << Ob_sys.Eu / std::sqrt(N) << "\n";
         E_all.push_back(Ob_sys.E);

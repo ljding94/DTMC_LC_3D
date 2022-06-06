@@ -5,14 +5,16 @@ from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,AutoMinorLoca
 
 
 def tilt_Kds_Cn_data_get():
-    foldername = "../data/Ne2/Oct_2021/Oct18_2021"
-    lf = 20.0
-    Cns = [1.0,3.0,5.0,7.0]
+    #foldername = "../data/Ne2/Oct_2021/Oct18_2021"
+    #foldername = "../data/Ne2/Apr_2022/Apr9_2022"
+    foldername = "../data/Ne2/May12_2022"
+    lf = 25
+    Cns = [2,4,6,8]
     datas, labels, colors, markers = [], [], [], []
     colors = ["red", "green", "blue", "royalblue"]
     markers = ["v", "s", "p", "h", "o"]
     for i in range(len(Cns)):
-        fname = foldername + "/O_MC_N300_imod3_Ne2_lf%.1f_kar40_C00.0_karg0.0_lam5.0_Kds_q0.0_Cn%.1f_ana.csv" % (lf,Cns[i])
+        fname = foldername + "/O_MC_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kds_q0.0_Cn%.1f_ana.csv" % (lf,Cns[i])
         datas.append(np.loadtxt(fname, skiprows=1, delimiter=",", unpack=True))
 
     datas = np.transpose(np.array(datas), axes=(1, 0, 2))
@@ -29,21 +31,23 @@ def tilt_Kds_Cn_data_get():
 
 
 def tilt_Kds_config_data_get():
-    foldername = "../data/Ne2/Oct_2021/Oct18_2021"
-    lf=20.0
-    Cn = 5.0
-    Kds = [4.2,1.8]
+    #foldername = "../data/Ne2/Oct_2021/Oct18_2021"
+    #foldername = "../data/Ne2/Apr_2022/Apr9_2022"
+    foldername = "../data/Ne2/May12_2022"
+    lf=25.0
+    Cn = 6.0
+    Kds = [4.0,2.0]
     Kdp = []
     fnames,povs,rotxyzs, xyshift, zslice = [],[],[],[],[]
     for i in range(len(Kds)):
         for j in range(3):
-            fnames.append( foldername + "/State_N300_imod3_Ne2_lf%.1f_kar40_C00.0_karg0.0_lam5.0_Kd%.1f_q0.0_Cn%.1f.csv" % (lf,Kds[i],Cn))
+            fnames.append( foldername + "/State_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kd%.1f_q0.0_Cn%.1f.csv" % (lf,Kds[i],Cn))
             Kdp.append(Kds[i])
             povs.append("xy")
-            rotxyzs.append(None)
+            rotxyzs.append([0,0,0])
             xyshift.append((10*j,10*i))
         # 2 crossection each
-        zslice+=[(7,12),(-2.5,2.5),None]
+        zslice+=[(7,13),(-2.5,2.5),None]
         xyshift[3*i+2]=(25,10*i)
         povs[3*i+2]="zx"
         rotxyzs[3*i+2]=[-np.pi*3/8,np.pi*3/8,0]
@@ -56,15 +60,16 @@ def tilt_Kds_config_data_get():
     return [Kdp,fnames,povs,rotxyzs, xyshift, zslice]
 
 def tilt_Kds_lf_data_get():
-    foldername = "../data/Ne2/Oct_2021/Oct18_2021"
-    Cn=5.0
-    lfs = [10.0,20.0,30.0]
-    lf0 = 20.0
+    #foldername = "../data/Ne2/Oct_2021/Oct18_2021"
+    #foldername = "../data/Ne2/Apr_2022/Apr9_2022"
+    foldername = "../data/Ne2/May12_2022"
+    Cn=4.0
+    lfs = [15,25,35]
     datas, labels, colors, markers = [], [], [], []
     colors = ["red", "green", "blue", "royalblue"]
     markers = ["v", "s", "p", "h", "o"]
     for i in range(len(lfs)):
-        fname = foldername + "/O_MC_N300_imod3_Ne2_lf%.1f_kar40_C00.0_karg0.0_lam5.0_Kds_q0.0_Cn%.1f_ana.csv" % (lfs[i],Cn)
+        fname = foldername + "/O_MC_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kds_q0.0_Cn%.1f_ana.csv" % (lfs[i],Cn)
         datas.append(np.loadtxt(fname, skiprows=1, delimiter=",", unpack=True))
 
     datas = np.transpose(np.array(datas), axes=(1, 0, 2))
@@ -83,12 +88,12 @@ def tilt_Kds_lf_data_get():
 def tilt_Kd_plot(LineWidth, FontSize, LabelSize):
     print("👌交给我吧")
     ppi = 72
-    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 1.5))
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 1))
     plt.rc("text", usetex=True)
     plt.rc("text.latex", preamble=r"\usepackage{physics}")
-    axcfg = plt.subplot2grid((3, 1), (0, 0))
-    axCns = plt.subplot2grid((3, 1), (1, 0),rowspan=1)
-    axlfs = plt.subplot2grid((3, 1), (2, 0),rowspan=1,sharex=axCns)
+    axcfg = plt.subplot2grid((2, 2), (0, 0),colspan=2)
+    axCns = plt.subplot2grid((2, 2), (1, 0),rowspan=1)
+    axlfs = plt.subplot2grid((2, 2), (1, 1),rowspan=1,sharey=axCns,sharex=axCns)
 
     msize = 4
 
@@ -96,41 +101,45 @@ def tilt_Kd_plot(LineWidth, FontSize, LabelSize):
     Kds, fnames, povs, rotxyzs, xyshifts, zslices = tilt_Kds_config_data_get()
     print(xyshifts)
     for i in range(len(Kds)):
-        ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, pov=povs[i], rotxyz=rotxyzs[i],xshift=xyshifts[i][0],yshift=xyshifts[i][1], zslice=zslices[i], mesh=1, bead=0,rod=1,d=1)
+        ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, pov=povs[i], rotxyz=rotxyzs[i],xshift=xyshifts[i][0],yshift=xyshifts[i][1], zslice=zslices[i], mesh=1, bead=1,rod=1,d=1)
         if(i%3==0):
             #axcfg.text(xyshifts[i][0]-10,xyshifts[i][1]-5.5,r"$\epsilon_{LL}=%.1f$"%Kds[i],fontsize=FontSize)
-            axcfg.text(xyshifts[i][0]-10,xyshifts[i][1]-5.5,r"$\epsilon_{LL}=%.1f$"%Kds[i],fontsize=FontSize)
-    axcfg.text(-10,11,r"$C=5$",fontsize=FontSize)
+            print("Kds[i]",Kds[i])
+            axcfg.text(xyshifts[i][0]-10,xyshifts[i][1]-5.5,r"$\epsilon_{LL}=%.0f$"%Kds[i],fontsize=FontSize)
+    axcfg.text(-10,11,r"$C=6$",fontsize=FontSize)
     axcfg.tick_params(which="both",direction="in", bottom="off",top="off", right="off",left="off",labelbottom=False,labelleft=False, labelsize=LabelSize)
-    x1, y1 = 0.90, 1.2
-    axcfg.text(x1,y1, r"(a)", fontsize=FontSize,transform=axCns.transAxes)
+    x1, y1 = 0.85, 1.2
+    axcfg.text(x1,y1, r"(a)", fontsize=FontSize,transform=axlfs.transAxes)
 
+
+    ni = 0 # initial point
+    n = 2 # date inteval
     ## tilt drops as Kd increases
     Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle = tilt_Kds_Cn_data_get()
     for i in range(len(Kds)):
-        axCns.errorbar(Kds[i],un2_aves[i],un2_errs[i], ls=":", color=colors[i],mfc="None",marker=markers[i],ms=msize,label=labels[i])
+        axCns.errorbar(Kds[i][ni::n],un2_aves[i][ni::n],un2_errs[i][ni::n], ls=":", color=colors[i],mfc="None",marker=markers[i],ms=msize,label=labels[i])
     axCns.tick_params(which="both",direction="in", top="on", right="on",labelbottom=True, labelleft=True,labelsize=LabelSize)
     axCns.set_ylabel(r"$(\vu{u}\cdot\vu{n})^2$", fontsize=FontSize)
-    axCns.set_ylim(0.35,1.0)
+    axCns.set_ylim(0.4,1.0)
     axCns.xaxis.set_major_locator(MultipleLocator(1))
     axCns.xaxis.set_minor_locator(MultipleLocator(0.5))
     axCns.yaxis.set_major_locator(MultipleLocator(0.1))
     axCns.yaxis.set_minor_locator(MultipleLocator(0.05))
     axCns.set_xlabel(r"$\epsilon_{LL}$",fontsize=FontSize)
     axCns.legend(title=legendtitle,ncol=2,columnspacing=0.5,handlelength=0.5,handletextpad=0.1,frameon=False,fontsize=FontSize)
-    x1, y1 = 0.9, 0.1
+    x1, y1 = 0.85, 0.1
     axCns.text(x1,y1, r"(b)", fontsize=FontSize,transform=axCns.transAxes)
 
     ## critical Kd depends on the edge seperation distance
     Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle = tilt_Kds_lf_data_get()
     for i in range(len(Kds)):
-        axlfs.errorbar(Kds[i],un2_aves[i],un2_errs[i], ls=":", color=colors[i],mfc="None",marker=markers[i],ms=msize,label=labels[i])
-    axlfs.tick_params(which="both",direction="in", top="on", right="on",labelbottom=False, labelleft=True,labelsize=LabelSize)
-    axlfs.set_ylabel(r"$(\vu{u}\cdot\vu{n})^2$", fontsize=FontSize)
-    axlfs.set_ylim(0.35,1.0)
-    #axlfs.set_xlabel(r"$\epsilon_{LL}$",fontsize=FontSize)
-    axlfs.legend(title=legendtitle,loc="upper right",ncol=2,columnspacing=0.5,handlelength=0.5,handletextpad=0.1,frameon=False,fontsize=FontSize)
-    x1, y1 = 0.9, 0.1
+        axlfs.errorbar(Kds[i][ni::n],un2_aves[i][ni::n],un2_errs[i][ni::n], ls=":", color=colors[i],mfc="None",marker=markers[i],ms=msize,label=labels[i])
+    axlfs.tick_params(which="both",direction="in", top="on", right="on",labelbottom=True, labelleft=False,labelsize=LabelSize)
+    #axlfs.set_ylabel(r"$(\vu{u}\cdot\vu{n})^2$", fontsize=FontSize)
+    #axlfs.set_ylim(0.35,1.0)
+    axlfs.set_xlabel(r"$\epsilon_{LL}$",fontsize=FontSize)
+    axlfs.legend(title=legendtitle,loc="upper right",ncol=1,columnspacing=0.5,handlelength=0.5,handletextpad=0.1,frameon=False,fontsize=FontSize)
+    x1, y1 = 0.85, 0.1
     axlfs.text(x1,y1, r"(c)", fontsize=FontSize,transform=axlfs.transAxes)
 
     plt.tight_layout(pad=0.1)

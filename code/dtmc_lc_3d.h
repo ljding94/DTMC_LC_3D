@@ -238,7 +238,7 @@ public:
 
     void O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
                       double delta_s, double delta_theta, double delta_r, double bin_num, std::string folder,
-                      std::string finfo);
+                      std::string finfo, int seq);
     // measure the obserables
     // energy versus lambda curve testing
 

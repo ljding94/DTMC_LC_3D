@@ -65,9 +65,11 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     cpar_tsqN = []
     # some special cases
     F_ave, F_err = [], []  # just for calculating the pulling force
+    F4_ave, F4_err = [], []  # just for calculating the pulling force starting 4th data
     for i in range(len(pars)):
         if mode == "q":
             print(np.shape(uuc_ave),np.shape(cpar),np.shape(pars))
+            print(np.shape(uuc_ave[i]),np.shape(cpar[i]))
             uuc_grad.append(np.gradient(uuc_ave[i], cpar[i]))
             uuc_grad_err.append(np.zeros(len(cpar[i])))
             un2_grad.append(np.gradient(un2_ave[i], cpar[i]))
@@ -77,6 +79,9 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
             fa, fe = Chi2_gradient(cpar[i], E_ave[i], E_err[i], k=2)  # use near 2k+1 points
             F_ave.append(fa)
             F_err.append(fe)
+            fa4, fe4 = Chi2_gradient(cpar[i][4:], E_ave[i][4:], E_err[i][4:], k=2)  # use near 2k+1 points
+            F4_ave.append(fa4)
+            F4_err.append(fe4)
     ppi = 72
     # LineWidth, FontSize, LabelSize = 1, 9, 8
     plt.figure()
@@ -92,6 +97,8 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     if Ne == 2:
         if mode == "lf":
             O_cpar_plot(axs[1, 1], F_ave, F_err, O_label, "F", r"$\partial{E/N}/\partial{l_f}$", cpar, colors, alphas)
+            axs[1, 1].set_ylim(-0.1, 0.5)
+            #O_cpar_plot(axs[2, 1], F4_ave[:,4:], F4_err[:,4:], O_label, "F", r"$\partial{E/N}/\partial{l_f}$", cpar[:,4:], colors, alphas)
             axs[1, 1].set_ylim(-0.1, 0.5)
 
         Le_ave_diff = np.abs(Les_ave[1] - Les_ave[0])
