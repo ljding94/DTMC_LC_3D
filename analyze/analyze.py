@@ -42,6 +42,14 @@ def O_stat_cal(O, tau_c):
     O_err = np.sqrt(2 * O_tau / len(O) * cov0)
     return (O_ave, O_tau, O_err)
 
+def O_stat_cal_sq(O, tau_c):
+    O_ave = np.average(O)
+    rho, cov0 = autocorrelation_function_fft(O)
+    O_tau, tau_err = tau_int_cal_rho(rho, tau_c)
+    O_err_sq = 2 * O_tau / len(O) * cov0
+    return (O_ave, O_tau, O_err_sq)
+
+
 
 def eff_Le_sym_cal(Les):
     # calculate the assymetry of edge length
@@ -67,14 +75,14 @@ def eff_Le_sym_cal(Les):
         vs.append([-np.sqrt(2.0 / 9), -np.sqrt(2.0 / 3), -1.0 / 3])
         vs.append([0, 0, 1.0])
         vs = np.array(vs)
-        vasym = [0,0,0]
-        Lesum =  Les[0] + Les[1] + Les[2] + Les[3]
+        vasym = [0, 0, 0]
+        Lesum = Les[0] + Les[1] + Les[2] + Les[3]
 
         for k in range(3):
             for e in range(Ne):
-                vasym[k] += Les[e]*vs[e][k]
+                vasym[k] += Les[e] * vs[e][k]
             vasym[k] /= Lesum
-        asym = np.sqrt(vasym[0]*vasym[0]+vasym[1]*vasym[1]+vasym[2]*vasym[2])
+        asym = np.sqrt(vasym[0] * vasym[0] + vasym[1] * vasym[1] + vasym[2] * vasym[2])
 
     return asym
 
@@ -136,12 +144,12 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
         uuc = Tuuc / Bond_num
         lb = Tlb / Bond_num
         N = par[find_cpar_ind(par_nm, "N")]
-        print("N=",N)
+        print("N=", N)
         # rCnp = par[find_cpar_ind(par_nm,"rCnp")]
         # Np = int(N*rCnp)
         # un2=Tun2/(N-Np)
         un2 = Tun2 / N
-        print(file2read,"Tun2[-1]=%.1f,Tun2=%.1f,un2=%.1f"%(Tun2[-1],np.average(Tun2),np.average(un2)))
+        print(file2read, "Tun2[-1]=%.1f,Tun2=%.1f,un2=%.1f" % (Tun2[-1], np.average(Tun2), np.average(un2)))
         uz2 = Tuz2 / N
         Euave = np.average(Eu)
         wnu = np.exp(Eu - Euave)  # biased weight function, assumed beta=1, normalize to Eu_ave
@@ -286,6 +294,281 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
             f.write(
                 ",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f"
                 % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i], I2H2dis_ave[i], I2H2dis_tau[i], I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i], uz2_ave[i], uz2_tau[i], uz2_err[i], lb_ave[i], lb_tau[i], lb_err[i], Eu_ave[i], Eu_tau[i], Eu_err[i])
+            )
+            f.write(",%f,%f,%f" % (Lasym_ave[i], Lasym_tau[i], Lasym_err[i]))
+            f.write("\n")
+
+
+def O_stat_ana_multi(foldername, par, par_nm, par_dg, mode, nmulti=1, thermN=0, CnequalsKc=0, tau_c=6):
+    #TODO: optimize these code for different observables using dictionary, dataframe
+    cpar_valid = []
+    E_ave, E_tau, E_err = [], [], []
+    Ne = par[find_cpar_ind(par_nm, "Ne")]
+    Les_ave, Les_tau, Les_err = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
+    Lasym_ave, Lasym_tau, Lasym_err = [], [], []
+    IdA_ave, IdA_tau, IdA_err = [], [], []
+    I2H_ave, I2H_tau, I2H_err = [], [], []
+    I2H2_ave, I2H2_tau, I2H2_err = [], [], []
+    I2H2dis_ave, I2H2dis_tau, I2H2dis_err = [], [], []
+    IK_ave, IK_tau, IK_err = [], [], []
+    p2uu_ave, p2uu_tau, p2uu_err = [], [], []
+    uuc_ave, uuc_tau, uuc_err = [], [], []
+    # may need to add uuc2 to study the spontaneous symmetry breaking
+    un2_ave, un2_tau, un2_err = [], [], []
+    un2p_ave, un2p_tau, un2p_err = [], [], []
+    uz2_ave, uz2_tau, uz2_err = [], [], []
+    lb_ave, lb_tau, lb_err = [], [], []  # average length of bond
+    Eu_ave, Eu_tau, Eu_err = [], [], []  # average length of bond
+    wnu_ave, wnu_tau, wnu_err = [], [], []  # <wu^-1> = <1/wu>=<exp(Eu)>
+
+    cpar_ind = find_cpar_ind(par_nm, mode)
+    cpar = par[cpar_ind]
+    Cn_ind = -1
+    if CnequalsKc and mode == "Kd":
+        Cn_ind = find_cpar_ind(par_nm, "Cn")
+
+    Ncpar_valid = len(cpar)
+    for i in range(len(cpar)):
+        par_dealing = par[:]
+        par_dealing[cpar_ind] = par[cpar_ind][i]
+        if CnequalsKc and mode == "Kd":
+            par_dealing[Cn_ind] = par[cpar_ind][i]  # adjust the ratio accordingly
+        f2rtail = "MC"
+        for j in range(len(par_dealing)):
+            f2rtail += "_" + par_nm[j] + "%.*f" % (par_dg[j], par_dealing[j])
+        ## add multi run data
+        E_ave_multi, E_tau_multi, E_err_multi = [], [], []
+        Les_ave_multi, Les_tau_multi, Les_err_multi = [[] for i in range(Ne)], [[] for i in range(Ne)], [[] for i in range(Ne)]
+        Lasym_ave_multi, Lasym_tau_multi, Lasym_err_multi = [], [], []
+        IdA_ave_multi, IdA_tau_multi, IdA_err_multi = [], [], []
+        I2H_ave_multi, I2H_tau_multi, I2H_err_multi = [], [], []
+        I2H2_ave_multi, I2H2_tau_multi, I2H2_err_multi = [], [], []
+        I2H2dis_ave_multi, I2H2dis_tau_multi, I2H2dis_err_multi = [], [], []
+        IK_ave_multi, IK_tau_multi, IK_err_multi = [], [], []
+        p2uu_ave_multi, p2uu_tau_multi, p2uu_err_multi = [], [], []
+        uuc_ave_multi, uuc_tau_multi, uuc_err_multi = [], [], []
+        # may need to add uuc2 to study the spontaneous symmetry breaking
+        un2_ave_multi, un2_tau_multi, un2_err_multi = [], [], []
+        un2p_ave_multi, un2p_tau_multi, un2p_err_multi = [], [], []
+        uz2_ave_multi, uz2_tau_multi, uz2_err_multi = [], [], []
+        lb_ave_multi, lb_tau_multi, lb_err_multi = [], [], []  # average length of bond
+        for k in range(nmulti):
+            f2rtail_multi = f2rtail + "_id" + "%d" % k + ".csv"
+            file2read = foldername + "/O_" + f2rtail_multi
+            print("file2read", file2read)
+            # check for file existence
+            if not os.path.exists(file2read):
+                print(file2read, "not exist")
+                continue
+            data = np.loadtxt(file2read, skiprows=14 + thermN, delimiter=",", unpack=True)
+            if(k==0):
+                cpar_valid.append(cpar[i])
+            N = par_dealing[0]
+            E = data[0] / N
+            Les = data[1 : 1 + Ne]
+            IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2, Tuz2, Tlb = data[1 + Ne : 12 + Ne]
+            Eu = data[12 + Ne]
+            Lasym = eff_Le_sym_cal(Les)
+            p2uu = Tp2uu / Bond_num
+            uuc = Tuuc / Bond_num
+            lb = Tlb / Bond_num
+            N = par[find_cpar_ind(par_nm, "N")]
+            un2 = Tun2 / N
+            uz2 = Tuz2 / N
+
+            E_avei, E_taui, E_erri_sq = O_stat_cal_sq(E, tau_c)
+            E_ave_multi.append(E_avei)
+            E_tau_multi.append(E_taui)
+            E_err_multi.append(E_erri_sq)
+
+            # Le and Ik2s
+            for e in range(Ne):
+                Le_avei, Le_taui, Le_erri_sq = O_stat_cal_sq(Les[e], tau_c)
+                Les_ave_multi[e].append(Le_avei)
+                Les_tau_multi[e].append(Le_taui)
+                Les_err_multi[e].append(Le_erri_sq)
+
+            Lasym_avei, Lasym_taui, Lasym_erri_sq = O_stat_cal_sq(Lasym, tau_c)
+            Lasym_ave_multi.append(Lasym_avei)
+            Lasym_tau_multi.append(Lasym_taui)
+            Lasym_err_multi.append(Lasym_erri_sq)
+
+            # IdA
+            IdA_avei, IdA_taui, IdA_erri_sq = O_stat_cal_sq(IdA, tau_c)
+            IdA_ave_multi.append(IdA_avei)
+            IdA_tau_multi.append(IdA_taui)
+            IdA_err_multi.append(IdA_erri_sq)
+
+            # I2H
+            I2H_avei, I2H_taui, I2H_erri_sq = O_stat_cal_sq(I2H, tau_c)
+            I2H_ave_multi.append(I2H_avei)
+            I2H_tau_multi.append(I2H_taui)
+            I2H_err_multi.append(I2H_erri_sq)
+
+            # I2H2
+            I2H2_avei, I2H2_taui, I2H2_erri_sq = O_stat_cal_sq(I2H2, tau_c)
+            I2H2_ave_multi.append(I2H2_avei)
+            I2H2_tau_multi.append(I2H2_taui)
+            I2H2_err_multi.append(I2H2_erri_sq)
+
+            # I2H2dis
+            I2H2dis_avei, I2H2dis_taui, I2H2dis_erri_sq = O_stat_cal_sq(I2H2dis, tau_c)
+            I2H2dis_ave_multi.append(I2H2dis_avei)
+            I2H2dis_tau_multi.append(I2H2dis_taui)
+            I2H2dis_err_multi.append(I2H2dis_erri_sq)
+            # IK
+            IK_avei, IK_taui, IK_erri_sq = O_stat_cal_sq(IK, tau_c)
+            IK_ave_multi.append(IK_avei)
+            IK_tau_multi.append(IK_taui)
+            IK_err_multi.append(IK_erri_sq)
+
+            # p2uu
+            p2uu_avei, p2uu_taui, p2uu_erri_sq = O_stat_cal_sq(p2uu, tau_c)
+            p2uu_ave_multi.append(p2uu_avei)
+            p2uu_tau_multi.append(p2uu_taui)
+            p2uu_err_multi.append(p2uu_erri_sq)
+
+            # uuc
+            uuc_avei, uuc_taui, uuc_erri_sq = O_stat_cal_sq(uuc, tau_c)
+            uuc_ave_multi.append(uuc_avei)
+            uuc_tau_multi.append(uuc_taui)
+            uuc_err_multi.append(uuc_erri_sq)
+
+            # un2
+            un2_avei, un2_taui, un2_erri_sq = O_stat_cal_sq(un2, tau_c)
+            un2_ave_multi.append(un2_avei)
+            un2_tau_multi.append(un2_taui)
+            un2_err_multi.append(un2_erri_sq)
+
+            # uz2
+            uz2_avei, uz2_taui, uz2_erri_sq = O_stat_cal_sq(uz2, tau_c)
+            uz2_ave_multi.append(uz2_avei)
+            uz2_tau_multi.append(uz2_taui)
+            uz2_err_multi.append(uz2_erri_sq)
+
+            # lb
+            lb_avei, lb_taui, lb_erri_sq = O_stat_cal_sq(lb, tau_c)
+            lb_ave_multi.append(lb_avei)
+            lb_tau_multi.append(lb_taui)
+            lb_err_multi.append(lb_erri_sq)
+
+        # calculate average based on independent run
+        # \mu = \sum(x/\sigma^2)/\sum(1/\sigma^2))
+        # \sigma^2 = 1/\sum(1/\sigma^2))
+        def ob_mean_err_cal(x_ave,x_tau,x_err_sq):
+            x_ave,x_tau,x_err_sq=np.array(x_ave),np.array(x_tau),np.array(x_err_sq)
+            ob_err_sq = 1/np.sum(1/x_err_sq)
+            ob_mean = np.sum(x_ave/x_err_sq)*ob_err_sq
+            return (ob_mean,x_tau.mean(),np.sqrt(ob_err_sq+np.var(x_ave)/len(x_ave)))
+
+        # E
+        mn,ta,er = ob_mean_err_cal(E_ave_multi,E_tau_multi,E_err_multi)
+        E_ave.append(mn)
+        E_tau.append(ta)
+        E_err.append(er)
+
+        # Le and Ik2s
+        for e in range(Ne):
+            mn,ta,er = ob_mean_err_cal(Les_ave_multi[e],Les_tau_multi[e],Les_err_multi[e])
+            Les_ave[e].append(mn)
+            Les_tau[e].append(ta)
+            Les_err[e].append(er)
+
+        # Lasym
+        mn,ta,er = ob_mean_err_cal(Lasym_ave_multi,Lasym_tau_multi,Lasym_err_multi)
+        Lasym_ave.append(mn)
+        Lasym_tau.append(ta)
+        Lasym_err.append(er)
+
+        # IdA
+        mn,ta,er = ob_mean_err_cal(IdA_ave_multi,IdA_tau_multi,IdA_err_multi)
+        IdA_ave.append(mn)
+        IdA_tau.append(ta)
+        IdA_err.append(er)
+
+        # I2H
+        mn,ta,er = ob_mean_err_cal(I2H_ave_multi,I2H_tau_multi,I2H_err_multi)
+        I2H_ave.append(mn)
+        I2H_tau.append(ta)
+        I2H_err.append(er)
+
+        # I2H2
+        mn,ta,er = ob_mean_err_cal(I2H2_ave_multi,I2H2_tau_multi,I2H2_err_multi)
+        I2H2_ave.append(mn)
+        I2H2_tau.append(ta)
+        I2H2_err.append(er)
+
+        # I2H2dis
+        mn,ta,er = ob_mean_err_cal(I2H2dis_ave_multi,I2H2dis_tau_multi,I2H2dis_err_multi)
+        I2H2dis_ave.append(mn)
+        I2H2dis_tau.append(ta)
+        I2H2dis_err.append(er)
+        # IK
+        mn,ta,er = ob_mean_err_cal(IK_ave_multi,IK_tau_multi,IK_err_multi)
+        IK_ave.append(mn)
+        IK_tau.append(ta)
+        IK_err.append(er)
+
+        # p2uu
+        mn,ta,er = ob_mean_err_cal(p2uu_ave_multi,p2uu_tau_multi,p2uu_err_multi)
+        p2uu_ave.append(mn)
+        p2uu_tau.append(ta)
+        p2uu_err.append(er)
+
+        # uuc
+        mn,ta,er = ob_mean_err_cal(uuc_ave_multi,uuc_tau_multi,uuc_err_multi)
+        uuc_ave.append(mn)
+        uuc_tau.append(ta)
+        uuc_err.append(er)
+
+        # un2
+        mn,ta,er = ob_mean_err_cal(un2_ave_multi,un2_tau_multi,un2_err_multi)
+        un2_ave.append(mn)
+        un2_tau.append(ta)
+        un2_err.append(er)
+
+        # uz2
+        mn,ta,er = ob_mean_err_cal(uz2_ave_multi,uz2_tau_multi,uz2_err_multi)
+        uz2_ave.append(mn)
+        uz2_tau.append(ta)
+        uz2_err.append(er)
+
+        # lb
+        mn,ta,er = ob_mean_err_cal(lb_ave_multi,lb_tau_multi,lb_err_multi)
+        lb_ave.append(mn)
+        lb_tau.append(ta)
+        lb_err.append(er)
+
+    # generalize using par_nm list
+    f2stail = "MC"
+    for j in range(len(par)):
+        if j == cpar_ind:
+            f2stail += "_" + par_nm[j] + "s"
+        else:
+            f2stail += "_" + par_nm[j] + "%.*f" % (par_dg[j], par_dealing[j])
+    f2stail += "_ana.csv"
+    # only changed "lam" and "B" mode here, others waiting for further decision
+    savefile = foldername + "/O_" + f2stail
+    print("len(E_ave)",len(E_ave))
+    print("len(cpar)",len(cpar))
+    print("len(cpar_valid)",len(cpar_valid))
+
+    with open(savefile, "w") as f:
+        f.write(mode + ",Ep_ave,Ep_tau,Ep_err")
+        # p stands for per bead
+        for e in range(Ne):
+            f.write(",Les_ave[%d],Les_tau[%d],Les_err[%d]" % (e, e, e))
+
+        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,uz2_ave,uz2_tau,uz2_err,lb_ave,lb_tau,lb_err,Eubias_ave,Eubias_tau,Eubias_err")
+        f.write(",Lasym_ave,Lasym_tau,Lasym_err")
+        f.write("\n")
+        for i in range(len(cpar_valid)):
+            f.write("%f,%f,%f,%f" % (cpar_valid[i], E_ave[i], E_tau[i], E_err[i]))
+            for e in range(Ne):
+                f.write(",%f,%f,%f" % (Les_ave[e][i], Les_tau[e][i], Les_err[e][i]))
+            f.write(
+                ",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f"
+                % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i], I2H2dis_ave[i], I2H2dis_tau[i], I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i], uz2_ave[i], uz2_tau[i], uz2_err[i], lb_ave[i], lb_tau[i], lb_err[i],0, 0,0)
             )
             f.write(",%f,%f,%f" % (Lasym_ave[i], Lasym_tau[i], Lasym_err[i]))
             f.write("\n")

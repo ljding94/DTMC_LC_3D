@@ -292,6 +292,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<double> I2H_all;
     std::vector<int> Bond_num_all;
     std::vector<double> Tuz2_all;
+    std::vector<double> Tuz_abs_all;
     std::vector<double> Tlb_all;
     std::vector<double> Eu_all;
 
@@ -339,8 +340,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         //IKphi2_all.push_back(Ob_sys.IKphi2);
         Bond_num_all.push_back(Ob_sys.Bond_num);
         Tuz2_all.push_back(Ob_sys.Tuz2);
+        Tuz_abs_all.push_back(Ob_sys.Tuz_abs);
         Tlb_all.push_back(Ob_sys.Tlb);
-        Eu_all.push_back(0);
 
         if (sweep_n % sweep_p_G == 0)
         {
@@ -400,7 +401,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             f << "Ik2s[" << e << "],";
         }*/
         //f << "IdA,I2H,I2H2,phi_sum,Tphi2,I2H2dis,IK,IKphi2,Tp2uu,Tuuc,Bond_num,Tun2\n";
-        f << "IdA,I2H,I2H2,I2H2dis,IK,Tp2uu,Tuuc,Bond_num,Tun2,Tuz2,Tlb,Eu\n";
+        f << "IdA,I2H,I2H2,I2H2dis,IK,Tp2uu,Tuuc,Bond_num,Tun2,Tuz2,Tuz_abs,Tlb\n";
         for (int i = 0; i < E_all.size(); i++)
         {
             f << E_all[i] << ",";
@@ -408,9 +409,10 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             {
                 f << Les_all[e][i] << ",";
             }
-            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << I2H2dis_all[i] << "," << IK_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << "," << Bond_num_all[i] << "," << Tun2_all[i] << "," << Tuz2_all[i] << "," << Tlb_all[i] << "," << Eu_all[i] << "\n";
+            f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << I2H2dis_all[i] << "," << IK_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << "," << Bond_num_all[i] << "," << Tun2_all[i] << "," << Tuz2_all[i] << "," << Tuz_abs_all[i] << "," << Tlb_all[i] << "\n";
         }
     }
+    /*
     f.close();
     std::ofstream fG(folder + "/Gij_" + finfo + ".csv");
     if (fG.is_open())
@@ -427,7 +429,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     fG.close();
-
+    */
+/*
     std::ofstream fuuc(folder + "/uucdis_" + finfo + ".csv");
     if (fuuc.is_open())
     {
@@ -442,7 +445,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     fuuc.close();
-
+*/
     /*
     std::ofstream frhor(folder + "/rhor_" + finfo + ".csv");
     if (frhor.is_open())

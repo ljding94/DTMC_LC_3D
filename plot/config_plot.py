@@ -4,7 +4,7 @@ from mpl_toolkits import mplot3d
 from matplotlib.patches import Circle
 from matplotlib import cm
 from matplotlib.colors import Normalize
-
+from scipy.special import expit
 
 def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xshift=0, yshift=0, zslice=None, mesh=1, twistcolor=0 ,bead=0, rod=0, pwlim=0, d=1, scale=1):
     print(pov+" plotting",filename)
@@ -45,7 +45,13 @@ def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xsh
     x_min, x_max = np.min(x),np.max(x)
     y_min, y_max = np.min(y),np.max(y)
     z_min, z_max = np.min(z),np.max(z)
-    alpha_xy = 0.8*(z-z_min+0.1)/(z_max-z_min+0.1)+0.1
+    #alpha_xy = np.maximum(1.0*(z-z_min+0.1)/(z_max-z_min+0.1)-0.2,0)
+    alpha_xy = 0.8*(z-z_min+0.01)/(z_max-z_min+0.01)+0.1
+    #alpha_rod = 0.8*(z-z_min+0.01)/(z_max-z_min+0.01)+0.1
+    al = 1.2
+    #alpha_xy = expit(1.0*(z-0.5*z_min))
+    alpha_rod = expit(al*(z-0.5*z_min))
+    #alpha_rod = np.maximum(1.0*(z-z_min+0.01)/(z_max-z_min+0.01)-0.1,0)
     x = x + xshift
     y = y + yshift
 
@@ -93,7 +99,7 @@ def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xsh
     if(rod):
         for i in range(len(x)):
             if(take[i]):
-                ax.plot([x[i]-0.5*d*ux[i],x[i]+0.5*d*ux[i]],[y[i]-0.5*d*uy[i],y[i]+0.5*d*uy[i]],"-",linewidth=LineWidth,color=cmap(norm(deg[i])),solid_capstyle="round")
+                ax.plot([x[i]-0.5*d*ux[i],x[i]+0.5*d*ux[i]],[y[i]-0.5*d*uy[i],y[i]+0.5*d*uy[i]],"-",linewidth=LineWidth,color=cmap(norm(deg[i])),solid_capstyle="round",alpha=alpha_rod[i])
 
     if(pwlim!=0):
         deg_slct=deg>pwlim
@@ -106,8 +112,8 @@ def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xsh
         for i in range(len(ux_pw)):
             if(take[i]):
                 xc, yc, rc = x_pw[i], y_pw[i], r[i]
-                ax.add_artist(Circle(xy=(xc, yc), linewidth=0,radius=rc,edgecolor="None",facecolor=Color, alpha=0.8*alpha_xy[i]))
-                ax.plot([x_pw[i]-0.5*d*ux_pw[i],x_pw[i]+0.5*d*ux_pw[i]],[y_pw[i]-0.5*d*uy_pw[i],y_pw[i]+0.5*d*uy_pw[i]],"-",linewidth=LineWidth,color=cmap(norm(deg_pw[i])),solid_capstyle="round")
+                ax.add_artist(Circle(xy=(xc, yc), linewidth=0,radius=rc,edgecolor="None",facecolor=Color, alpha=0.8*alpha_rod[i]))
+                ax.plot([x_pw[i]-0.5*d*ux_pw[i],x_pw[i]+0.5*d*ux_pw[i]],[y_pw[i]-0.5*d*uy_pw[i],y_pw[i]+0.5*d*uy_pw[i]],"-",linewidth=LineWidth,color=cmap(norm(deg_pw[i])),solid_capstyle="round",alpha=alpha_rod[i])
 
     # edge bond, plot edge lastly, so it's always shown
     ecolors = ["blue","green","crimson","indigo","cyan"]
@@ -130,7 +136,7 @@ def twist_cal(r1,r2,u1,u2):
     ans = np.dot(np.cross(u1,u2),r12)*np.dot(u1,u2)
     return ans
 
-def catenoid_demo(LineWidth, FontSize, LabelSize):
+def config_demo(LineWidth, FontSize, LabelSize):
     print("👌")
     ppi = 72
     fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 0.4))

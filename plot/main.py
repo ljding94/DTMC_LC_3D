@@ -9,12 +9,14 @@ def main():
 
     print("(施工中👷‍♀️) plotting publication-quality figures")
     LineWidth, FontSize, LabelSize = 1,9,8
-    #catenoid_demo(LineWidth, FontSize, LabelSize)
+    #config_demo(LineWidth, FontSize, LabelSize)
     #init_config_demo(LineWidth, FontSize, LabelSize)
     #force_pull_plot(LineWidth, FontSize, LabelSize)
     #tilt_Kd_plot(LineWidth, FontSize, LabelSize)
     #twist_q_plot(LineWidth, FontSize, LabelSize)
     topo_change_plot(LineWidth, FontSize, LabelSize)
+
+
 
 if __name__ == "__main__":
     main()

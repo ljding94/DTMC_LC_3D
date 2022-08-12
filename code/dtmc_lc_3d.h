@@ -34,7 +34,7 @@ struct observable
     int Bond_num; // total number of bonds0
     double Tlb;   // total bond length, to quantify pulling stage
     double Tuz2;  // sum of uz.uz, see how director field goes from in xy plane to z direction driven by the chirality
-
+    double Tuz_abs; // sum of abs(uz), for comparison with analitical
     // gravitational
     //double TRz;
 };

@@ -73,7 +73,7 @@ def topo_change_plot(LineWidth, FontSize, LabelSize):
     for i in range(len(qcs)):
         axNe2c.append(fig.add_axes([qcs[i]/q[-1], 0.6, 0.15, 0.3]))
         ax_config_plot_xyz(axNe2c[i], fnamecs[i], "gray", LineWidth, rotxyz=rots[i],mesh=1, bead=0,rod=0,d=1,pwlim=0)
-        ax_config_plot_xyz(axNe2c[i], fnamecs[i], "gray", LineWidth, rotxyz=rots[i],yshift=-20,mesh=0, bead=0,rod=0,d=0.8,pwlim=np.pi/3)
+        ax_config_plot_xyz(axNe2c[i], fnamecs[i], "gray", LineWidth, rotxyz=rots[i],yshift=-20,mesh=1, bead=0,rod=0,d=0.8,pwlim=np.pi/3)
 
     # Ne=3
     q,Lasym_ave, Lasym_err = topo_data_get(Ne=3)
@@ -99,7 +99,7 @@ def topo_change_plot(LineWidth, FontSize, LabelSize):
     for i in range(len(qcs)):
         axNe3c.append(fig.add_axes([qcs[i]/q[-1]-0.08, 0.14, 0.15, 0.3]))
         ax_config_plot_xyz(axNe3c[i], fnamecs[i], "gray", LineWidth, rotxyz=rots[i],mesh=1, bead=0,rod=0,d=0.8,pwlim=0)
-        ax_config_plot_xyz(axNe3c[i], fnamecs[i], "gray", LineWidth, rotxyz=rots[i],yshift=-20, mesh=0, bead=1,rod=0,d=0.8,pwlim=np.pi/3)
+        ax_config_plot_xyz(axNe3c[i], fnamecs[i], "gray", LineWidth, rotxyz=rots[i],yshift=-20, mesh=1, bead=1,rod=0,d=0.8,pwlim=np.pi/3)
 
     '''
 

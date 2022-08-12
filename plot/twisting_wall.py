@@ -129,3 +129,12 @@ def twist_q_plot(LineWidth, FontSize, LabelSize):
     #fig.tight_layout(pad=0.1)
     plt.tight_layout(pad=0.1)
     plt.savefig("figures/twisting_wall.pdf",format="pdf")
+
+    # extra plot just to see the trend agains 1/2arctan(kc/3)
+    '''
+    plt.figure()
+    for i in range(len(qs)):
+        axuz.errorbar(np.arctan(qs[i][:nf:n]/3)/2,np.sqrt(uz2_aves[i][:nf:n]),uz2_errs[i][:nf:n], ls="None", color=colors[i],mfc="None",marker=markers[i],ms=msize,label=labels[i])
+    plt.show()
+    plt.close()
+    '''

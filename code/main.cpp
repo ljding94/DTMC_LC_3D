@@ -87,15 +87,16 @@ int main(int argc, char const *argv[])
         // used 2000, 4000 for manuscript
         //membrane.Thermal_pinch(1000, int(N / (delta_s * delta_s)) + 1, 2.0, delta_s, delta_theta);
         //membrane.State_write(folder + "/State_" + finfo + "_therm.csv");
+
         if(lf==0){
             membrane.Thermal_kar1lam1(2000, int(N / (delta_s * delta_s)) + 1, 10, 20, delta_s, delta_theta);
             membrane.State_write(folder + "/State_" + finfo + "_therm_vesicle.csv");
+        } else{
+            membrane.Thermal(2000, int(N / (delta_s * delta_s)), 100, delta_s,delta_theta);
         }
-
         // 5000, 15000 for structure change
-        // membrane.Thermal(2000, int(N / (delta_s * delta_s)), 100, delta_s,delta_theta);
         // see how it evolves for now
-        membrane.O_MC_measure(10000, 1000, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo, seq);
+        membrane.O_MC_measure(15000, 1000, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo, seq);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 
         return 0;

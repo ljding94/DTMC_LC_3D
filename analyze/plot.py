@@ -324,8 +324,17 @@ def O_MCstep_plot(filename,thermN,Ne):
 
 
 
-
-
-
+def uz_distribution_plot(filename):
+    data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
+    #x,y,z,sx,sy,sz,enum, en0, en1 = data[5:14]
+    x,y,z,sx,sy,sz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:17]
+    #x,y,z,sx,sy,sz,phi,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:15]
+    ns = np.transpose(data[17:])
+    plt.figure()
+    plt.hist(np.arccos(sz),bins=50,density=1)
+    plt.xlabel("arccos(uz)")
+    plt.ylabel("density")
+    plt.show()
+    plt.close()
 
 

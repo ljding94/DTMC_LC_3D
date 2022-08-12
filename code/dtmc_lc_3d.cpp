@@ -153,6 +153,7 @@ dtmc_lc::dtmc_lc(double beta_, int N_, int imod_, int Ne_, double lf_, double d0
         Ob_sys.IdA += mesh[i].dAn2H[0];
         Ob_sys.I2H += mesh[i].dAn2H[1] * mesh[i].dAn2H[0];
         Ob_sys.Tuz2 += mesh[i].u[2] * mesh[i].u[2];
+        Ob_sys.Tuz_abs += std::abs(mesh[i].u[2]);
     }
     Ob_sys.Bond_num = 0.5 * bulk_bond_list.size();
 
@@ -882,6 +883,7 @@ void dtmc_lc::Ob_init(observable &Ob)
     Ob.Bond_num = 0;
     Ob.Tlb = 0;
     Ob.Tuz2 = 0;
+    Ob.Tuz_abs = 0;
     // Ob.TRz = 0;
 }
 
