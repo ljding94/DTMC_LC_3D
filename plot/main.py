@@ -1,9 +1,12 @@
-#!/opt/homebrew/bin/python3
+#!/usr/local/bin/python3
 from simple_pulling import *
 from nematic_wall import *
+from cholesteric_wall import *
 from twisting_wall import *
 from config_plot import *
 from topo_chiral import *
+from twomod_plot import *
+
 
 def main():
 
@@ -12,11 +15,13 @@ def main():
     #config_demo(LineWidth, FontSize, LabelSize)
     #init_config_demo(LineWidth, FontSize, LabelSize)
     #force_pull_plot(LineWidth, FontSize, LabelSize)
-    #tilt_Kd_plot(LineWidth, FontSize, LabelSize)
+    #nematic_Kd_plot(LineWidth, FontSize, LabelSize)
+    #cholesteric_q_plot(LineWidth, FontSize, LabelSize)
+    #walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize)
     #twist_q_plot(LineWidth, FontSize, LabelSize)
-    topo_change_plot(LineWidth, FontSize, LabelSize)
-
-
+    #topo_change_plot(LineWidth, FontSize, LabelSize)
+    wall_pitch_q_plot(LineWidth, FontSize, LabelSize)
+    #demo_config_2mod_u_plot(LineWidth, FontSize, LabelSize)
 
 if __name__ == "__main__":
     main()

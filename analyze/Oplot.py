@@ -58,7 +58,10 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     #Le_err = np.sqrt(np.sum(np.power(Les_err, 2)))
     Le_err = np.zeros(np.shape(Le_ave))
 
-    IdA_ave, IdA_tau, IdA_err, I2H_ave, I2H_tau, I2H_err, I2H2_ave, I2H2_tau, I2H2_err, I2H2dis_ave, I2H2dis_tau, I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err, uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, uz2_ave, uz2_tau, uz2_err, lb_ave, lb_tau, lb_err, Eubias_ave, Eubias_tau, Eubias_err = Alldata[7 + 3 * (Ne - 1) : 40 + 3 * (Ne - 1)]
+    #IdA_ave, IdA_tau, IdA_err, I2H_ave, I2H_tau, I2H_err, I2H2_ave, I2H2_tau, I2H2_err, I2H2dis_ave, I2H2dis_tau, I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err, uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, uz2_ave, uz2_tau, uz2_err, lb_ave, lb_tau, lb_err, Eubias_ave, Eubias_tau, Eubias_err = Alldata[7 + 3 * (Ne - 1) : 40 + 3 * (Ne - 1)]
+
+    # got rid of Eu, added uz_abs (Aug 11, 2022)
+    IdA_ave, IdA_tau, IdA_err, I2H_ave, I2H_tau, I2H_err, I2H2_ave, I2H2_tau, I2H2_err, I2H2dis_ave, I2H2dis_tau, I2H2dis_err, IK_ave, IK_tau, IK_err, p2uu_ave, p2uu_tau, p2uu_err, uuc_ave, uuc_tau, uuc_err, un2_ave, un2_tau, un2_err, uz2_ave, uz2_tau, uz2_err,  uz_ave, uz_tau, uz_err, lb_ave, lb_tau, lb_err = Alldata[7 + 3 * (Ne - 1) : 40 + 3 * (Ne - 1)]
     Lasym_ave, Lasym_tau, Lasym_err = Alldata[40 + 3 * (Ne - 1) :]
     uuc_grad, uuc_grad_err = [], []
     un2_grad, un2_grad_err = [], []
@@ -66,6 +69,7 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     # some special cases
     F_ave, F_err = [], []  # just for calculating the pulling force
     F4_ave, F4_err = [], []  # just for calculating the pulling force starting 4th data
+    qn = []
     for i in range(len(pars)):
         if mode == "q":
             print(np.shape(uuc_ave),np.shape(cpar),np.shape(pars))
@@ -74,6 +78,15 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
             uuc_grad_err.append(np.zeros(len(cpar[i])))
             un2_grad.append(np.gradient(un2_ave[i], cpar[i]))
             un2_grad_err.append(np.zeros(len(cpar[i])))
+
+            # TODO: renormalized q related
+            # normalized q
+            print("pars[-1]=",pars[i][-1])
+            qn.append(cpar[i]/pars[i][-1])
+            print("qn[-1]\n")
+            print(qn[-1])
+
+
         if mode == "lf":
             print("lf: cpar[i]",cpar[i])
             fa, fe = Chi2_gradient(cpar[i], E_ave[i], E_err[i], k=2)  # use near 2k+1 points
@@ -87,12 +100,12 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     plt.figure()
     plt.rc("text", usetex=True)
     na = 13
-    fig, axs = plt.subplots(na, 2, figsize=(246 / ppi * 2, 246 / ppi * 0.5 * na), sharex=True)  # , sharex=True
+    fig, axs = plt.subplots(na, 2, figsize=(246 / ppi * 2, 246 / ppi * 0.5 * na))#, sharex=True)  # , sharex=True
     # cpar_aj = cpar-np.outer([2.8, 2.0, 1.5, 0.8, 0], np.ones(len(cpar[0])))
     O_cpar_plot(axs[0, 0], E_ave, E_err, O_label, "E", r"$E/N$", cpar, colors, alphas)
     O_cpar_plot(axs[1, 0], Le_ave, Le_err, O_label, "Le", r"$\int ds$", cpar, colors, alphas)
 
-    O_cpar_plot(axs[0, 1], Lasym_ave, Lasym_err, O_label, "Lasym", r"assym of L", cpar, colors, alphas)
+    #O_cpar_plot(axs[0, 1], Lasym_ave, Lasym_err, O_label, "Lasym", r"assym of L", cpar, colors, alphas)
     axs[0,1].set_ylim(-0.1,1.1)
     if Ne == 2:
         if mode == "lf":
@@ -125,14 +138,17 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     O_cpar_plot(axs[7, 0], p2uu_ave, p2uu_err, O_label, "p2uu", r"$\left<1.5 (u_i\cdot u_j)^2-0.5\right>_{(i,j)}$", cpar, colors, alphas)
     O_cpar_plot(axs[8, 0], uuc_ave, uuc_err, O_label, "uuc", r"$u_c=\left<(u_i\times u_j)\cdot\hat{r}_{ij} (u_i\cdot u_j)\right>_{(i,j)}$", cpar, colors, alphas)
     # plot the differential if mode is q
-    O_cpar_plot(axs[9, 0], un2_ave, un2_err, O_label, "un2", r"$u_n=\left<(u_i\cdot n_i)^2\right>_{i}$", cpar, colors, alphas)
+    O_cpar_plot(axs[9, 0], un2_ave, un2_err, O_label, "un2", r"$u_n^2=\left<(u_i\cdot n_i)^2\right>_{i}$", cpar, colors, alphas)
     O_cpar_plot(axs[10, 0], uz2_ave, uz2_err, O_label, "uz2", r"$u_z^2=\left<(u_i\cdot \hat{z})^2\right>_{i}$", cpar, colors, alphas)
-    O_cpar_plot(axs[11, 0], lb_ave, lb_err, O_label, "lb", r"$\left<l_{ij}\right>$", cpar, colors, alphas)
+    O_cpar_plot(axs[11, 0], uz_ave, uz_err, O_label, "uz2", r"$|u_z|=\left<|u_i\cdot \hat{z}|\right>_{i}$", cpar, colors, alphas)
+    O_cpar_plot(axs[12, 0], lb_ave, lb_err, O_label, "lb", r"$\left<l_{ij}\right>$", cpar, colors, alphas)
     #O_cpar_plot(axs[12, 0], Eubias_ave, Eubias_err, O_label, "Eubias", r"$\left<Eu\right>_{w}$", cpar, colors, alphas)
 
     if mode == "q":
-        O_cpar_plot(axs[7, 1], uuc_grad, uuc_grad_err, O_label, "uuc_grad", r"$\partial u_c /\partial q$", cpar, colors, alphas)
-        O_cpar_plot(axs[8, 1], un2_grad, un2_grad_err, O_label, "un2_grad", r"$\partial u_n /\partial q$", cpar, colors, alphas)
+        #O_cpar_plot(axs[7, 1], uuc_grad, uuc_grad_err, O_label, "uuc_grad", r"$\partial u_c /\partial q$", cpar, colors, alphas)
+        #O_cpar_plot(axs[8, 1], un2_grad, un2_grad_err, O_label, "un2_grad", r"$\partial u_n /\partial q$", cpar, colors, alphas)
+        O_cpar_plot(axs[8, 1], uuc_ave, uuc_err, O_label, "uuc", r"$u_c$", qn, colors, alphas)
+        O_cpar_plot(axs[9, 1], un2_ave, un2_err, O_label, "un2", r"$u_n^2$", qn, colors, alphas)
     # O_cpar_plot(axs[10,0], IKun2_ave, IKun2_err, O_label, "IKun2", r"$\left<\int dA K (u_i\cdot n_i)\right>$",cp ar, colors, alphas)
     # O_cpar_plot(axs[9,0], Itau2_ave, Itau2_err, O_label, "Itau2", r"$\left<\int ds \tau^2\right>$",cpar, colors, alphas)
     axs[10, 0].set_xlabel(xLabel)
@@ -611,3 +627,7 @@ def plot_O_MCsteps(filename):
     axs[4].set_xlabel(r"MC steps")
     plt.tight_layout(pad=0.5)
     plt.savefig(filename[:-4] + ".pdf")
+
+
+def plot_vs_rescaled_q(foldername, pars, par_nm, par_dg, mode):
+    pass

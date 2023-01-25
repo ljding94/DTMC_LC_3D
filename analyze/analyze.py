@@ -105,9 +105,10 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
     un2_ave, un2_tau, un2_err = [], [], []
     un2p_ave, un2p_tau, un2p_err = [], [], []
     uz2_ave, uz2_tau, uz2_err = [], [], []
+    uz_ave, uz_tau, uz_err = [], [], [] # abs(uz)
     lb_ave, lb_tau, lb_err = [], [], []  # average length of bond
-    Eu_ave, Eu_tau, Eu_err = [], [], []  # average length of bond
-    wnu_ave, wnu_tau, wnu_err = [], [], []  # <wu^-1> = <1/wu>=<exp(Eu)>
+    #Eu_ave, Eu_tau, Eu_err = [], [], []  # average length of bond
+    #wnu_ave, wnu_tau, wnu_err = [], [], []  # <wu^-1> = <1/wu>=<exp(Eu)>
 
     cpar_ind = find_cpar_ind(par_nm, mode)
     cpar = par[cpar_ind]
@@ -124,7 +125,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
         f2rtail = "MC"
         for j in range(len(par_dealing)):
             f2rtail += "_" + par_nm[j] + "%.*f" % (par_dg[j], par_dealing[j])
-        f2rtail += ".csv"
+        f2rtail += "_id0.csv"
         # print("f2rtail",f2rtail)
         file2read = foldername + "/O_" + f2rtail
         print("file2read", file2read)
@@ -137,7 +138,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
         N = par_dealing[0]
         E = data[0] / N
         Les = data[1 : 1 + Ne]
-        IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2, Tuz2, Tlb = data[1 + Ne : 12 + Ne]
+        IdA, I2H, I2H2, I2H2dis, IK, Tp2uu, Tuuc, Bond_num, Tun2, Tuz2, Tuz_abs, Tlb = data[1 + Ne : 13 + Ne]
         Eu = data[12 + Ne]
         Lasym = eff_Le_sym_cal(Les)
         p2uu = Tp2uu / Bond_num
@@ -151,8 +152,10 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
         un2 = Tun2 / N
         print(file2read, "Tun2[-1]=%.1f,Tun2=%.1f,un2=%.1f" % (Tun2[-1], np.average(Tun2), np.average(un2)))
         uz2 = Tuz2 / N
-        Euave = np.average(Eu)
-        wnu = np.exp(Eu - Euave)  # biased weight function, assumed beta=1, normalize to Eu_ave
+        uz = Tuz_abs/N
+
+        #Euave = np.average(Eu)
+        #wnu = np.exp(Eu - Euave)  # biased weight function, assumed beta=1, normalize to Eu_ave
         # un2p=Tun2p/Np if Np>0 else Tun2p
         # Ne2 case, need Ledif for additional info
         # was used for checking energy
@@ -255,6 +258,12 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
         uz2_tau.append(uz2_taui)
         uz2_err.append(uz2_erri)
 
+        # uz_abs
+        uz_avei, uz_taui, uz_erri = O_stat_cal(uz2, tau_c)
+        uz_ave.append(uz2_avei)
+        uz_tau.append(uz2_taui)
+        uz_err.append(uz2_erri)
+
         # lb
         lb_avei, lb_taui, lb_erri = O_stat_cal(lb, tau_c)
         lb_ave.append(lb_avei)
@@ -262,11 +271,12 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
         lb_err.append(lb_erri)
 
         # Eu_bias
+        '''
         Eu_avei, Eu_taui, Eu_erri = O_stat_cal(Eu, tau_c)
         Eu_ave.append(Eu_avei)
         Eu_tau.append(Eu_taui)
         Eu_err.append(Eu_erri)
-
+        '''
     # generalize using par_nm list
     f2stail = "MC"
     for j in range(len(par)):
@@ -284,7 +294,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
         for e in range(Ne):
             f.write(",Les_ave[%d],Les_tau[%d],Les_err[%d]" % (e, e, e))
 
-        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,uz2_ave,uz2_tau,uz2_err,lb_ave,lb_tau,lb_err,Eubias_ave,Eubias_tau,Eubias_err")
+        f.write(",IdA_ave,IdA_tau,IdA_err,I2H_ave,I2H_tau,I2H_err,I2H2_ave,I2H2_tau,I2H2_err,I2H2dis_ave,I2H2dis_tau,I2H2dis_err,IK_ave,IK_tau,IK_err,p2uu_ave,p2uu_tau,p2uu_err,uuc_ave,uuc_tau,uuc_err,un2_ave,un2_tau,un2_err,uz2_ave,uz2_tau,uz2_err,uz_ave,uz_tau,uz_err,lb_ave,lb_tau,lb_err")
         f.write(",Lasym_ave,Lasym_tau,Lasym_err")
         f.write("\n")
         for i in range(len(cpar_valid)):
@@ -293,7 +303,7 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
                 f.write(",%f,%f,%f" % (Les_ave[e][i], Les_tau[e][i], Les_err[e][i]))
             f.write(
                 ",%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f"
-                % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i], I2H2dis_ave[i], I2H2dis_tau[i], I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i], uz2_ave[i], uz2_tau[i], uz2_err[i], lb_ave[i], lb_tau[i], lb_err[i], Eu_ave[i], Eu_tau[i], Eu_err[i])
+                % (IdA_ave[i], IdA_tau[i], IdA_err[i], I2H_ave[i], I2H_tau[i], I2H_err[i], I2H2_ave[i], I2H2_tau[i], I2H2_err[i], I2H2dis_ave[i], I2H2dis_tau[i], I2H2dis_err[i], IK_ave[i], IK_tau[i], IK_err[i], p2uu_ave[i], p2uu_tau[i], p2uu_err[i], uuc_ave[i], uuc_tau[i], uuc_err[i], un2_ave[i], un2_tau[i], un2_err[i], uz2_ave[i], uz2_tau[i], uz2_err[i], uz_ave[i], uz_tau[i], uz_err[i], lb_ave[i], lb_tau[i], lb_err[i])
             )
             f.write(",%f,%f,%f" % (Lasym_ave[i], Lasym_tau[i], Lasym_err[i]))
             f.write("\n")

@@ -1,26 +1,49 @@
-#!/opt/homebrew/bin/python3
-from plot import *
-from catelinder_cal import *
-from catelinder_plot import *
-from unduloid_cal import *
-from unduloid_plot import *
-from catenoid_cal import *
+#!#!/usr/local/bin/python3
+#from plot import *
+#from catelinder_cal import *
+#from catelinder_plot import *
+#from unduloid_cal import *
+#from unduloid_plot import *
+#from catenoid_cal import *
 
+from numeric_2mod_io import *
 def main():
     print("python code for numerical calculation of pulling experiment o/n unduloid")
-    #A_z1_e_theta1_demo()
-    #res = opt_unduloid_E(5.0, 40, 0.1, 35, 300)
+    #cylinder_2mod_plot("./pydata/optFtot_K1.0_C10.0_m2_qs.csv")
+    #cylinder_2mod_plot("./pydata/optFtot_K10.0_C1.0_m2_qs.csv")
 
-    #unduloid_A_l_plot()
-    #unduloid_F_plot()
-    #unduloid_config_plot(res.x[0], res.x[1], res.x[2])
+    K = 2 #[0.1,0.5,2.0,4.0]
+    qs = np.arange(1.0,3.5,0.1)
+    m = 2
+    R = 5
+    Rs =np.arange(2,10.1,1)
+    C = 6
+    Cs =np.arange(2,10.1,1)
 
-    #res = opt_catelinder_E(2.0, 10, 10, 20, 300)
-    #print(res)
-    #catelinder_config_plot(res.x[0],res.x[1],res.x[2])
-    #print("catelinder_A",catelinder_A(res.x[0], res.x[1], res.x[2]))
-    #catelinder_F_plot()
-    catenoid_A_L_plot()
+
+    #m,alpha,gamma,bn_phi,bn_z=0,0,1,100,100
+    #director_field_plot(m, alpha, gamma, bn_phi, bn_z)
+    #return 0
+
+    pars = []
+    for R in Rs:
+        pars.append([K,C,m,R])
+    foldername = "./pydata/Nov30_2022"
+    #cylinder_2mod_plot(foldername, pars)
+    #cylinder_2mod_plot_normlq(foldername, pars, normqlim=0.5)
+    #cylinder_c_q_hist(foldername, pars)
+    #cylinder_critical_q_C(foldername, pars)
+
+    #director_field_plot(2, 0.5, 0.8, 100, 30)
+    #director_field_plot(2, 0, 0.5, 100, 30)
+
+
+    #Ks = np.arange(0.01,0.101,0.01)
+    #qs = np.arange(0.0,8.1,0.5)
+    Ks = np.arange(0.02,0.401,0.02)
+    qs = np.arange(0.0,8.1,0.4)
+    C, R = 1,1
+    del_Ftot_Ks_qs_plot("./pydata/Jan22_2023",Ks,C,qs,R)
 
 if __name__ == "__main__":
     main()

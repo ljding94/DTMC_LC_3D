@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 # cholesteric on cylinder of radius 1 and length l
 
-
 def inte_SS(m, alpha):
     # ans = 2*m*np.pi+np.sin(m*z*np.tan(alpha))+np.sin(2*m*np.pi-m*z*np.tan(alpha))
     # ans /=2*m
@@ -32,8 +31,6 @@ def inte_BB(m, alpha):
 
 def inte_C(m, alpha):
     return np.pi
-
-
 
 
 def inte_ftot(alpha, K, q, C, m):
@@ -80,14 +77,14 @@ def find_alpha():
 def find_alpha_opt():
     print("find_alpha_opt()\n")
     K = 1
-    qs = np.arange(1.0, 1.5, 0.1)
+    qs = np.arange(0.0, 2.0, 0.1)
     C = 1
     plt.figure()
     axalpha = plt.subplot2grid((2, 2), (0, 0))
     axE = plt.subplot2grid((2, 2), (1, 0),sharex=axalpha)
     axalpha1 = plt.subplot2grid((2, 2), (0, 1))
     axE1 = plt.subplot2grid((2, 2), (1, 1),sharex=axalpha1)
-    for m in [2,3]:
+    for m in [0,1,2,3,4]:
         alphas = []
         Es = []
         for i in range(len(qs)):
@@ -96,13 +93,18 @@ def find_alpha_opt():
             alphas.append(res.x)
             print("q:",qs)
             print("alpha",alphas)
-        axalpha.plot(qs,np.cos(alphas),label="m=%.0f"%m)
+        axalpha.plot(qs,4/(2*np.pi)*np.cos(alphas),label="m=%.0f"%m)
         axE.plot(qs,Es,"--",label="m=%.0f"%m)
-        axalpha1.plot(3*np.tan(2*qs),np.cos(alphas),label="m=%.0f"%m)
-        axE1.plot(3*np.tan(2*qs),Es,"--",label="m=%.0f"%m)
+        # compare with kc ~ 3/2 tan(4pi q*del_l) where del_l is the bead-bread distance for the triangle mech model
+        del_l=0.01
+        kc = 3/2*np.tan(4*np.pi*del_l*qs)
+        axalpha1.plot(kc,4/(2*np.pi)*np.cos(alphas),label="m=%.0f"%m)
+        axE1.plot(kc,Es,"--",label="m=%.0f"%m)
+        #   $axalpha1.plot(3*np.tan(2*qs),np.cos(alphas),label="m=%.0f"%m)
+        #   axE1.plot(3*np.tan(2*qs),Es,"--",label="m=%.0f"%m)
     axE.set_xlabel("q",fontsize=12)
-    axE1.set_xlabel(r"$3\tan(2q)$",fontsize=12)
-    axalpha.set_ylabel(r"$\cos(\alpha)$",fontsize=12)
+    axE1.set_xlabel(r"$k_c$",fontsize=12)
+    axalpha.set_ylabel(r"$\frac{4}{2\pi}\cos(\alpha)$",fontsize=12)
     axE.set_ylabel(r"$E$",fontsize=12)
     plt.legend()
     plt.show()

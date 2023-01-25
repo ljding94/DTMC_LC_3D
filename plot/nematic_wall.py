@@ -85,7 +85,7 @@ def tilt_Kds_lf_data_get():
     return [Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle]
 
 
-def tilt_Kd_plot(LineWidth, FontSize, LabelSize):
+def nematic_Kd_plot(LineWidth, FontSize, LabelSize):
     print("👌交给我吧")
     ppi = 72
     fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 1))
@@ -144,3 +144,133 @@ def tilt_Kd_plot(LineWidth, FontSize, LabelSize):
 
     plt.tight_layout(pad=0.1)
     plt.savefig("figures/nematic_wall.pdf",format="pdf")
+
+
+def smectic_to_walls_config_data_get():
+    lf=25.0
+    Cn = 6.0
+    fns = ["../data/Ne2/May12_2022","../data/Ne2/May12_2022","../data/Ne2/Nov30_2022"]
+    Kds = [2.0,4.0,2.0]
+    qs = [0.0,0.0,1.5]
+    Kps = []
+    qps = []
+    fnames,povs,rotxyzs, xyshift, zslice = [],[],[],[],[]
+    for i in range(len(Kds)):
+        for j in range(3):
+            fnames.append( fns[i] + "/State_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kd%.1f_q%.1f_Cn%.1f.csv" % (lf,Kds[i],qs[i],Cn))
+            povs.append("xy")
+            rotxyzs.append([0,0,0])
+            xyshift.append((10*j,-10*i))
+            Kps.append(Kds[i])
+            qps.append(qs[i])
+        # 2 crossection each
+        zslice+=[(7,13),(-2.5,2.5),None]
+        xyshift[3*i+2]=(25,-10*i)
+        povs[3*i+2]="zx"
+        rotxyzs[3*i+2]=[-np.pi*3/8,np.pi*3/8,0]
+
+    return [Kps,qps,fnames,povs,rotxyzs, xyshift, zslice]
+
+from cholesteric_wall import *
+# merge nematic wall and cholesteric wall plot
+def walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize):
+    print("👌交给我吧")
+    ppi = 72
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 1.6))
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+    axcfg = plt.subplot2grid((7, 2), (0, 0),colspan=2,rowspan=3)
+    #smectic to nematic
+    axCn_Kd = plt.subplot2grid((7, 2), (3, 0),rowspan=2)
+    axlf_Kd = plt.subplot2grid((7, 2), (5, 0),rowspan=2,sharey=axCn_Kd)
+    #smectic to cholesteric
+    axCn_q = plt.subplot2grid((7, 2), (3, 1),rowspan=2,sharey=axCn_Kd)
+    axlf_q = plt.subplot2grid((7, 2), (5, 1),rowspan=2,sharey=axlf_Kd,sharex=axCn_q)
+
+    msize = 4
+
+    ## configuration shows the tilt wall formation
+    Kds, qs, fnames, povs, rotxyzs, xyshifts, zslices = smectic_to_walls_config_data_get()
+    print(xyshifts)
+    for i in range(len(Kds)):
+        ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, pov=povs[i], rotxyz=rotxyzs[i],xshift=xyshifts[i][0],yshift=xyshifts[i][1], zslice=zslices[i], mesh=1, bead=1,rod=1,d=1)
+        if(i%3==0):
+            #axcfg.text(xyshifts[i][0]-10,xyshifts[i][1]-5.5,r"$\epsilon_{LL}=%.1f$"%Kds[i],fontsize=FontSize)
+            print("Kds[i]",Kds[i])
+            axcfg.text(xyshifts[i][0]-10,xyshifts[i][1]-5.5,r"$(\epsilon_{LL},k_c)=(%.0f,%.1f)$"%(Kds[i],qs[i]),fontsize=FontSize)
+
+    axcfg.tick_params(which="both",direction="in", bottom="off",top="off", right="off",left="off",labelbottom=False,labelleft=False, labelsize=LabelSize)
+    x1, y1 = 0.85, 1.2
+    axcfg.text(x1,y1, r"(a)", fontsize=FontSize,transform=axCn_q.transAxes)
+
+
+    ni = 0 # initial point
+    n = 2 # date inteval
+
+    # smectic to nematic
+    ## tilt drops as Kd increases
+    Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle = tilt_Kds_Cn_data_get()
+    for i in range(len(Kds)):
+        axCn_Kd.errorbar(Kds[i][ni::n],un2_aves[i][ni::n],un2_errs[i][ni::n], ls=":", color=colors[i],mfc="None",marker=markers[i],ms=msize,label=labels[i])
+    axCn_Kd.tick_params(which="both",direction="in", top="on", right="on",labelbottom=False, labelleft=True,labelsize=LabelSize)
+    axCn_Kd.set_ylabel(r"$(\vu{u}\cdot\vu{n})^2$", fontsize=FontSize)
+    axCn_Kd.set_ylim(0.42,0.98)
+    axCn_Kd.xaxis.set_major_locator(MultipleLocator(1))
+    axCn_Kd.xaxis.set_minor_locator(MultipleLocator(0.5))
+    axCn_Kd.yaxis.set_major_locator(MultipleLocator(0.1))
+    axCn_Kd.yaxis.set_minor_locator(MultipleLocator(0.05))
+    #axCn_Kd.set_xlabel(r"$\epsilon_{LL}$",fontsize=FontSize)
+    axCn_Kd.legend(title=legendtitle,ncol=2,columnspacing=0.5,handlelength=0.5,handletextpad=0.1,frameon=False,fontsize=FontSize)
+    x1, y1 = 0.85, 0.1
+    axCn_Kd.text(x1,y1, r"(b)", fontsize=FontSize,transform=axCn_Kd.transAxes)
+
+    ## critical Kd depends on the edge seperation distance
+    Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle = tilt_Kds_lf_data_get()
+    for i in range(len(Kds)):
+        axlf_Kd.errorbar(Kds[i][ni::n],un2_aves[i][ni::n],un2_errs[i][ni::n], ls=":", color=colors[i],mfc="None",marker=markers[i],ms=msize,label=labels[i])
+    axlf_Kd.tick_params(which="both",direction="in", top="on", right="on",labelbottom=True, labelleft=True,labelsize=LabelSize)
+    axlf_Kd.set_ylabel(r"$(\vu{u}\cdot\vu{n})^2$", fontsize=FontSize)
+    #axlf_Kd.set_ylim(0.35,1.0)
+    axlf_Kd.xaxis.set_major_locator(MultipleLocator(1))
+    axlf_Kd.xaxis.set_minor_locator(MultipleLocator(0.5))
+    axlf_Kd.yaxis.set_major_locator(MultipleLocator(0.1))
+    axlf_Kd.yaxis.set_minor_locator(MultipleLocator(0.05))
+    axlf_Kd.set_xlabel(r"$\epsilon_{LL}$",fontsize=FontSize)
+    axlf_Kd.legend(title=legendtitle,loc="upper right",ncol=1,columnspacing=0.5,handlelength=0.5,handletextpad=0.1,frameon=False,fontsize=FontSize)
+    x1, y1 = 0.85, 0.1
+    axlf_Kd.text(x1,y1, r"(c)", fontsize=FontSize,transform=axlf_Kd.transAxes)
+
+    # smectic to cholesteric
+    qs, un2_aves, un2_errs, labels, colors, markers, legendtitle = tilt_qs_Cn_data_get()
+    for i in range(len(qs)):
+        axCn_q.errorbar(qs[i][ni::n], un2_aves[i][ni::n], un2_errs[i][ni::n], ls=":", color=colors[i], mfc="None", marker=markers[i], ms=msize, label=labels[i])
+    axCn_q.tick_params(which="both", direction="in", top="on", right="on", labelbottom=False, labelleft=False, labelsize=LabelSize)
+    #axCn_q.set_ylabel(r"$(\vu{u}\cdot\vu{n})^2$", fontsize=FontSize)
+    axCn_q.set_ylim(0.42, 0.98)
+    axCn_q.xaxis.set_major_locator(MultipleLocator(0.5))
+    axCn_q.xaxis.set_minor_locator(MultipleLocator(0.25))
+    #axCn_q.yaxis.set_major_locator(MultipleLocator(0.1))
+    #axCn_q.yaxis.set_minor_locator(MultipleLocator(0.05))
+    #axCn_q.set_xlabel(r"$q$", fontsize=FontSize)
+    axCn_q.legend(title=legendtitle, ncol=3, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
+    x1, y1 = 0.85, 0.1
+    axCn_q.text(x1, y1, r"(d)", fontsize=FontSize, transform=axCn_q.transAxes)
+
+    ## critical q depends on the edge seperation distance
+    qs, un2_aves, un2_errs, labels, colors, markers, legendtitle = tilt_qs_lf_data_get()
+    for i in range(len(qs)):
+        axlf_q.errorbar(qs[i][ni::n], un2_aves[i][ni::n], un2_errs[i][ni::n], ls=":", color=colors[i], mfc="None", marker=markers[i], ms=msize, label=labels[i])
+    axlf_q.tick_params(which="both", direction="in", top="on", right="on", labelbottom=True, labelleft=False, labelsize=LabelSize)
+    # axlf_q.set_ylabel(r"$(\vu{u}\cdot\vu{n})^2$", fontsize=FontSize)
+    # axlf_q.set_ylim(0.35,1.0)
+    axlf_q.xaxis.set_major_locator(MultipleLocator(0.5))
+    axlf_q.xaxis.set_minor_locator(MultipleLocator(0.25))
+    axlf_q.set_xlabel(r"$q$", fontsize=FontSize)
+    axlf_q.legend(title=legendtitle, loc="upper right", ncol=1, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
+    x1, y1 = 0.85, 0.1
+    axlf_q.text(x1, y1, r"(e)", fontsize=FontSize, transform=axlf_q.transAxes)
+
+    plt.tight_layout(pad=0.1)
+    plt.savefig("figures/smectic_to_walls.pdf",format="pdf")
+
+
