@@ -10,12 +10,12 @@ def main():
     #find_alpha_opt()
     if(len(sys.argv)>2):
         # on ccv
-        folder = "/users/lding3/scratch"
+        folder = "/users/lding3/scratch/dtmc_lc_3d"
         K= float(sys.argv[1])
         C = int(sys.argv[2])
         m = float(sys.argv[3])
-        bn_phi = float(sys.argv[4])
-        bn_z = float(sys.argv[5])
+        bn_phi = int(sys.argv[4])
+        bn_z = int(sys.argv[5])
         R = 1
         qs = np.arange(0.0,6.1,0.1)
         Ftot_qs_cal(folder, K, C, qs, m, bn_phi, bn_z, R, "Powell")
