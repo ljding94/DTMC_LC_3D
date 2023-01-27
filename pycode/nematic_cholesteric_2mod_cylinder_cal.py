@@ -20,7 +20,7 @@ def n(m, alpha, gamma, phi, z):
     return np.array([nx, ny, nz])
 
 # previous variable under tan(alpha)z , no z/R definition
-'''
+
 def u(m, alpha, gamma, phi, z):
     ux = (np.cos(phi) * np.cos((m * (phi - z * np.tan(alpha))) / 2.0) - (-1 + gamma + gamma * np.sin(alpha)) * np.sin(phi) * np.sin((m * (phi - z * np.tan(alpha))) / 2.0)) / np.sqrt(1 + (-1 + gamma) * gamma - (-1 + gamma) * gamma * (-np.sin(alpha) + np.cos(m * (phi - z * np.tan(alpha))) * (1 + np.sin(alpha))))
     uy = (np.cos((m * (phi - z * np.tan(alpha))) / 2.0) * np.sin(phi) + np.cos(phi) * (-1 + gamma + gamma * np.sin(alpha)) * np.sin((m * (phi - z * np.tan(alpha))) / 2.0)) / np.sqrt(1 + (-1 + gamma) * gamma - (-1 + gamma) * gamma * (-np.sin(alpha) + np.cos(m * (phi - z * np.tan(alpha))) * (1 + np.sin(alpha))))
@@ -58,7 +58,7 @@ def B_R1(m, alpha, gamma, phi, z):
     B = np.array([Bx, By, Bz])
     return B
 
-
+'''
 def S(m, alpha, gamma, phi, z, R):
     S = -0.5*(np.cos((m*(phi - z*np.tan(alpha)))/2.)*(-2 + m - m*gamma - 2*(-1 + gamma)*gamma + (2 + m*(-1 + R) - 2*gamma)*gamma*np.sin(alpha) + 2*(-1 + gamma)*gamma*np.cos(m*(phi - z*np.tan(alpha)))*(1 + np.sin(alpha))))/ (R*(1 + (-1 + gamma)*gamma - (-1 + gamma)*gamma*(-np.sin(alpha) + np.cos(m*(phi - z*np.tan(alpha)))*(1 + np.sin(alpha))))**1.5)
     return S
@@ -77,7 +77,7 @@ def B(m, alpha, gamma, phi, z, R):
     B = np.array([Bx, By, Bz])
     return B
 
-'''
+
 
 def beta_cal(m,alpha,R,phi,z):
     return m/2*(phi-np.tan(alpha)*z/R)
@@ -117,6 +117,7 @@ def B_cal(m, alpha, gamma, R, phi, z):
     Bz = -0.25*(m*(-1 + gamma)*gamma*np.cos(alpha)*np.sin(2*beta))/(R*(np.cos(beta)**2 + (1 + 2*(-1 + gamma)*gamma + 2*(-1 + gamma)*gamma*np.sin(alpha))*np.sin(beta)**2)**2)
 
     return np.array([Bx, By, Bz])
+'''
 
 
 # integral
@@ -126,8 +127,9 @@ def intSS_unit_length(m, alpha, gamma, bn_phi, bn_z, R):
     phi, z = phi.flatten(), z.flatten()
     dphi = 2 * np.pi / bn_phi
     dz = 1 / bn_z
+    s = S_R1(m, alpha, gamma, phi, z)
     #s = S(m, alpha, gamma, phi, z, R)
-    s = S_cal(m, alpha, gamma, R, phi, z)
+    #s = S_cal(m, alpha, gamma, R, phi, z)
     res = s * s * R * dphi * dz
     return res.sum()
 
@@ -137,8 +139,9 @@ def intTT_unit_length(m, alpha, gamma, bn_phi, bn_z, R):
     phi, z = phi.flatten(), z.flatten()
     dphi = 2 * np.pi / bn_phi
     dz = 1 / bn_z
+    t = T_R1(m, alpha, gamma, phi, z)
     #t = T(m, alpha, gamma, phi, z, R)
-    t = T_cal(m, alpha, gamma, R, phi, z)
+    #t = T_cal(m, alpha, gamma, R, phi, z)
     res = t * t * R* dphi * dz
     return res.sum()
 
@@ -148,8 +151,9 @@ def intT_unit_length(m, alpha, gamma, bn_phi, bn_z, R):
     phi, z = phi.flatten(), z.flatten()
     dphi = 2 * np.pi / bn_phi
     dz = 1 / bn_z
+    t = T_R1(m, alpha, gamma, phi, z)
     #t = T(m, alpha, gamma, phi, z, R)
-    t = T_cal(m, alpha, gamma, R, phi, z)
+    #t = T_cal(m, alpha, gamma, R, phi, z)
     res = t * R*dphi * dz
     return res.sum()
 
@@ -159,8 +163,9 @@ def intBB_unit_length(m, alpha, gamma, bn_phi, bn_z, R):
     phi, z = phi.flatten(), z.flatten()
     dphi = 2 * np.pi / bn_phi
     dz = 1 / bn_z
+    b = B_R1(m, alpha, gamma, phi, z)
     #b = B(m, alpha, gamma, phi, z, R)
-    b = B_cal(m, alpha, gamma, R, phi, z)
+    #b = B_cal(m, alpha, gamma, R, phi, z)
     bb = b[0] * b[0] + b[1] * b[1] + b[2] * b[2]
     res = bb * R*dphi * dz
     return res.sum()
@@ -171,7 +176,8 @@ def intC_unit_length(m, alpha, gamma, bn_phi, bn_z, R):
     phi, z = phi.flatten(), z.flatten()
     dphi = 2 * np.pi / bn_phi
     dz = 1 / bn_z
-    ui = u_cal(m, alpha, gamma, R, phi, z)
+    ui = u(m, alpha, gamma, phi, z)
+    #ui = u_cal(m, alpha, gamma, R, phi, z)
     ni = n(m, alpha, gamma, phi, z)
     un = ui[0] * ni[0] + ui[1] * ni[1] + ui[2] * ni[2]
     res = (1 - un * un) * R* dphi * dz
@@ -180,11 +186,12 @@ def intC_unit_length(m, alpha, gamma, bn_phi, bn_z, R):
 
 def Ftot_unit_length(K, C, q, m, alpha, gamma, bn_phi, bn_z, R):
     intSS = intSS_unit_length(m, alpha, gamma, bn_phi, bn_z, R)
-    #intTT = intTT_unit_length(m, alpha, gamma, bn_phi, bn_z, R)
+    intTT = intTT_unit_length(m, alpha, gamma, bn_phi, bn_z, R)
     intT = intT_unit_length(m, alpha, gamma, bn_phi, bn_z, R)
     intBB = intBB_unit_length(m, alpha, gamma, bn_phi, bn_z, R)
     intC = intC_unit_length(m, alpha, gamma, bn_phi, bn_z, R)
-    Ftot = 0.5 * K * (intSS + (intT - q)**2  + intBB) + 0.5 * C * intC
+    Ftot = 0.5 * K * (intSS + intTT - 2*q*intT+q**2  + intBB) + 0.5 * C * intC
+    #Ftot = 0.5 * K * (intSS + (intT - q)**2  + intBB) + 0.5 * C * intC
     return Ftot
 
 

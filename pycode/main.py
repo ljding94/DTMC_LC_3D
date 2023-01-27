@@ -37,13 +37,21 @@ def main():
     #director_field_plot(2, 0.5, 0.8, 100, 30)
     #director_field_plot(2, 0, 0.5, 100, 30)
 
+    Ks = np.arange(0.02,0.421,0.1)
+    Ks = np.arange(0.4,1.01,0.1)
+    Cs = np.arange(1,6.1,1)
+    K = 1
+    del_Ftot_Ks_qs_plot("../data/pydata/local/Jan26_2023_R1",K,Cs,1)
+    return 0
 
     #Ks = np.arange(0.01,0.101,0.01)
     #qs = np.arange(0.0,8.1,0.5)
-    Ks = np.arange(0.02,0.401,0.02)
-    qs = np.arange(0.0,8.1,0.4)
+    #Ks = np.arange(0.02,0.401,0.02)
+    Ks = np.arange(0.01,0.801,0.01)
+    #qs = np.arange(0.0,8.1,0.4)
     C, R = 1,1
-    del_Ftot_Ks_qs_plot("./pydata/Jan22_2023",Ks,C,qs,R)
+
+    del_Ftot_Ks_qs_plot("../data/pydata/Jan24_2023",Ks,C,R)
 
 if __name__ == "__main__":
     main()
