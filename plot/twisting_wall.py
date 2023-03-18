@@ -50,10 +50,10 @@ def twist_q_plot(LineWidth, FontSize, LabelSize):
     fig = plt.figure(figsize=(246 / ppi * 2, 246 / ppi * 1))
     plt.rc("text", usetex=True)
     plt.rc("text.latex", preamble=r"\usepackage{physics}")
-    axcfg = plt.subplot2grid((2, 10), (0, 3), colspan=7, rowspan=2)
+    axcfg = plt.subplot2grid((2, 10), (0, 0), colspan=7, rowspan=2)
     # axcfgt = plt.subplot2grid((2, 5), (1, 3),colspan=2)
-    axuc = plt.subplot2grid((2, 10), (0, 0), colspan=3)
-    axuz = plt.subplot2grid((2, 10), (1, 0), colspan=3, sharex=axuc)
+    axuc = plt.subplot2grid((2, 10), (0, 7), colspan=3)
+    axuz = plt.subplot2grid((2, 10), (1, 7), colspan=3, sharex=axuc)
     msize = 4
 
     """
@@ -72,6 +72,22 @@ def twist_q_plot(LineWidth, FontSize, LabelSize):
     x1, y1 = 0.8, -0.0
     axcfgt.text(x1,y1, r"(d)", fontsize=FontSize,transform=axcfgt.transAxes)
     """
+
+    # configuration plot
+    lfs, qs, fnames, povs, rotxyzs, xysfts = twist_q_config_data_get()
+    for i in range(len(qs)):
+        pass
+        print(xysfts[i])
+        ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, pov=povs[i], rotxyz=rotxyzs[i], xshift=xysfts[i][0], yshift=xysfts[i][1], mesh=1, bead=0, rod=0, d=1, pwlim=np.pi / 3)
+        axcfg.text(xysfts[i][0] - lfs[i] / 2, xysfts[i][1] - 6, r"$k_c=%.1f,l_f=%.0f$" % (qs[i], lfs[i]), fontsize=FontSize)
+
+        # ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, xshift=10,yshift=25*i-5,zslice=(8,12), mesh=1, bead=0,rod=0,pwlim=0.8, d=1)
+    #axcfg.text(xysfts[2][0] - 5, xysfts[2][1] + lfs[i] / 2 - 1, r"$k_c=%.1f$" % qs[-1], fontsize=FontSize)
+    axcfg.tick_params(which="both", direction="in", bottom="off", top="off", right="off", left="off", labelbottom=False, labelleft=False, labelsize=LabelSize)
+    x1, y1 = -0.5, 0.1
+    axcfg.text(x1, y1, r"(a)", fontsize=FontSize, transform=axuz.transAxes)
+    # axcfg.text(x1,y1, r"(c)", fontsize=FontSize,transform=axcfg.transAxes)
+
 
     # o vs q plot
 
@@ -92,7 +108,7 @@ def twist_q_plot(LineWidth, FontSize, LabelSize):
     # axuc.set_xlabel(r"$k_c$",fontsize=FontSize)
     axuc.legend(loc="upper left", title=legendtitle, ncol=2, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
     x1, y1 = 0.8, 0.1
-    axuc.text(x1, y1, r"(a)", fontsize=FontSize, transform=axuc.transAxes)
+    axuc.text(x1, y1, r"(b)", fontsize=FontSize, transform=axuc.transAxes)
 
     for i in range(len(qs)):
         axuz.errorbar(qs[i][:nf:n], uz2_aves[i][:nf:n], uz2_errs[i][:nf:n], ls="None", color=colors[i], mfc="None", marker=markers[i], ms=msize, label=labels[i])
@@ -108,22 +124,8 @@ def twist_q_plot(LineWidth, FontSize, LabelSize):
     axuz.set_xlabel(r"$k_c$", fontsize=FontSize)
     axuz.legend(loc="upper left", title=legendtitle, ncol=2, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
     x1, y1 = 0.8, 0.1
-    axuz.text(x1, y1, r"(b)", fontsize=FontSize, transform=axuz.transAxes)
+    axuz.text(x1, y1, r"(c)", fontsize=FontSize, transform=axuz.transAxes)
 
-    # configuration plot
-    lfs, qs, fnames, povs, rotxyzs, xysfts = twist_q_config_data_get()
-    for i in range(len(qs)):
-        pass
-        print(xysfts[i])
-        ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, pov=povs[i], rotxyz=rotxyzs[i], xshift=xysfts[i][0], yshift=xysfts[i][1], mesh=1, bead=0, rod=0, d=1, pwlim=np.pi / 3)
-        axcfg.text(xysfts[i][0] - lfs[i] / 2, xysfts[i][1] - 6, r"$k_c=%.1f,l_f=%.0f$" % (qs[i], lfs[i]), fontsize=FontSize)
-
-        # ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, xshift=10,yshift=25*i-5,zslice=(8,12), mesh=1, bead=0,rod=0,pwlim=0.8, d=1)
-    axcfg.text(xysfts[2][0] - 5, xysfts[2][1] + lfs[i] / 2 - 1, r"$k_c=%.1f$" % qs[-1], fontsize=FontSize)
-    axcfg.tick_params(which="both", direction="in", bottom="off", top="off", right="off", left="off", labelbottom=False, labelleft=False, labelsize=LabelSize)
-    x1, y1 = 3.1, 0.1
-    axcfg.text(x1, y1, r"(c)", fontsize=FontSize, transform=axuz.transAxes)
-    # axcfg.text(x1,y1, r"(c)", fontsize=FontSize,transform=axcfg.transAxes)
 
     # fig.tight_layout(pad=0.1)
     plt.tight_layout(pad=0.1)

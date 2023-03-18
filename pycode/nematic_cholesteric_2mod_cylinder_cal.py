@@ -19,8 +19,33 @@ def n(m, alpha, gamma, phi, z):
     nz = np.zeros(len(phi))
     return np.array([nx, ny, nz])
 
-# previous variable under tan(alpha)z , no z/R definition
 
+def u(m, alpha, gamma, phi, z):
+    ux = (np.cos(phi)*np.cos((m*(phi - z*np.tan(alpha)))/2.) + (1 - gamma + gamma*np.sin(alpha))*np.sin(phi)*np.sin((m*(phi - z*np.tan(alpha)))/2.))/np.sqrt(1 + (-1 + gamma)*gamma + (-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha)))
+    uy= (np.cos((m*(phi - z*np.tan(alpha)))/2.)*np.sin(phi) + np.cos(phi)*(-1 + gamma - gamma*np.sin(alpha))*np.sin((m*(phi - z*np.tan(alpha)))/2.))/np.sqrt(1 + (-1 + gamma)*gamma + (-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha)))
+    uz= -((gamma*np.cos(alpha)*np.sin((m*(phi - z*np.tan(alpha)))/2.))/np.sqrt(1 + (-1 + gamma)*gamma + (-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha))))
+    return np.array([ux,uy,uz])
+
+def S_R1(m, alpha, gamma, phi, z):
+    S = (np.cos((m*(phi - z*np.tan(alpha)))/2.)*(2 + m*(-1 + gamma) + 2*(-1 + gamma)*gamma + 2*(-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha))))/(2.*(1 + (-1 + gamma)*gamma + (-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha)))**1.5)
+    return S
+def T_R1(m, alpha, gamma, phi, z):
+    T = (gamma*(-1 + 2*m + gamma) - (2*m*(-1 + gamma) + gamma**2)*np.sin(alpha) + gamma*np.cos(2*alpha)*(-1 + gamma - gamma*np.sin(alpha)) + 2*gamma*np.cos(alpha)**2*np.cos(m*(phi - z*np.tan(alpha)))*(1 - gamma + gamma*np.sin(alpha)))/(4*np.cos(alpha)*(-1 + gamma - gamma**2 + (-1 + gamma)*gamma*np.cos(m*(phi - z*np.tan(alpha)))) + 4*(-1 + gamma)*gamma*np.sin(2*alpha)*np.sin((m*(phi - z*np.tan(alpha)))/2.)**2)
+    return T
+
+def B_R1(m, alpha, gamma, phi, z):
+    Bx = (np.sin((m*(phi - z*np.tan(alpha)))/2.)*(4*np.cos((m*(phi - z*np.tan(alpha)))/2.)*(1 - gamma + gamma*np.sin(alpha))*(-2 + m - m*gamma - 2*(-1 + gamma)*gamma + 2*(-1 + gamma)*gamma*(-(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha))) + np.sin(alpha)))*np.sin(phi) + np.cos(phi)*(-2*(-4 + m*(2 - 2*gamma*(3 + 2*(-2 + gamma)*gamma)) + gamma*(14 - 3*gamma*(10 + gamma*(-11 + 5*gamma))) +gamma*(gamma*(8 + 3*gamma*(-5 + 3*gamma))*np.cos(2*alpha) + (-1 + gamma)*(14 + 4*m*(-1 + gamma) + 3*gamma*(-8 + 7*gamma) - 3*gamma**2*np.cos(2*alpha))*np.sin(alpha)))* np.sin((m*(phi - z*np.tan(alpha)))/2.) + 4*(-1 + gamma)*gamma*(-1 + np.sin(alpha))*(1 - gamma + gamma*np.sin(alpha))**2*np.sin((3*m*(phi - z*np.tan(alpha)))/2.))))/(8.*(1 + (-1 + gamma)*gamma + (-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha)))**2)
+
+    By= (np.sin((m*(phi - z*np.tan(alpha)))/2.)*(np.cos(phi)*np.cos((m*(phi - z*np.tan(alpha)))/2.)*(2 + m*(-1 + gamma) + 2*(-1 + gamma)*gamma +2*(-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha)))*(1 - gamma + gamma*np.sin(alpha)) + (2 + gamma*(-6 + 5*gamma)*(1 + (-1 + gamma)*gamma) + m*(-1 + gamma)*(1 + 2*(-1 + gamma)*gamma) + gamma**2*np.cos(2*alpha)*(-3 + (5 - 3*gamma)*gamma + (-1 + gamma)*gamma*np.sin(alpha)) + (-1 + gamma)*gamma*((-6 - 2*m*(-1 + gamma) + (8 - 7*gamma)*gamma)*np.sin(alpha) + 2*np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha))*(1 - gamma + gamma*np.sin(alpha))**2))*np.sin(phi)*np.sin((m*(phi - z*np.tan(alpha)))/2.)))/(2.*(1 + (-1 + gamma)*gamma + (-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha)))**2)
+
+    Bz=(m*(-1 + gamma)*gamma*np.cos(alpha)*np.sin(m*(phi - z*np.tan(alpha))))/(4.*(1 + (-1 + gamma)*gamma + (-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha)))**2)
+
+    return np.array([Bx,By,Bz])
+
+# previous variable under tan(alpha)z , no z/R definition
+# previously has uc = cos ... +  sin
+#                nu = cos ..  - sin
+'''
 def u(m, alpha, gamma, phi, z):
     ux = (np.cos(phi) * np.cos((m * (phi - z * np.tan(alpha))) / 2.0) - (-1 + gamma + gamma * np.sin(alpha)) * np.sin(phi) * np.sin((m * (phi - z * np.tan(alpha))) / 2.0)) / np.sqrt(1 + (-1 + gamma) * gamma - (-1 + gamma) * gamma * (-np.sin(alpha) + np.cos(m * (phi - z * np.tan(alpha))) * (1 + np.sin(alpha))))
     uy = (np.cos((m * (phi - z * np.tan(alpha))) / 2.0) * np.sin(phi) + np.cos(phi) * (-1 + gamma + gamma * np.sin(alpha)) * np.sin((m * (phi - z * np.tan(alpha))) / 2.0)) / np.sqrt(1 + (-1 + gamma) * gamma - (-1 + gamma) * gamma * (-np.sin(alpha) + np.cos(m * (phi - z * np.tan(alpha))) * (1 + np.sin(alpha))))
@@ -57,6 +82,7 @@ def B_R1(m, alpha, gamma, phi, z):
 
     B = np.array([Bx, By, Bz])
     return B
+'''
 
 '''
 def S(m, alpha, gamma, phi, z, R):

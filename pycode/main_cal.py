@@ -24,6 +24,8 @@ def main():
         #Ftot_par_run(par, bn_phi, bn_z, method)
         #K, C, q, m = par
         #Ftot_par_run((1,1,0.5,2), 50, 50, "Powell")
+        F_compot_param(folder="../data/pydata/local/Mar18_2023_params_test", m=2, alphas=np.arange(0,0.81,0.05), gammas=np.arange(0.0,1.01,0.05),  bn_phi=100, bn_z=100, R=1)
+        return 0
 
 
         #print(intSS_unit_length(m, alpha, gamma, bn_phi, bn_z))

@@ -12,11 +12,34 @@ def n(m, alpha, gamma, phi, z):
     return np.array([nx, ny, nz])
 
 
-def u(m, alpha, gamma, phi, z):
+def u_misaligned(m, alpha, gamma, phi, z):
     ux = (np.cos(phi) * np.cos((m * (phi - z * np.tan(alpha))) / 2.0) - (-1 + gamma + gamma * np.sin(alpha)) * np.sin(phi) * np.sin((m * (phi - z * np.tan(alpha))) / 2.0)) / np.sqrt(1 + (-1 + gamma) * gamma - (-1 + gamma) * gamma * (-np.sin(alpha) + np.cos(m * (phi - z * np.tan(alpha))) * (1 + np.sin(alpha))))
     uy = (np.cos((m * (phi - z * np.tan(alpha))) / 2.0) * np.sin(phi) + np.cos(phi) * (-1 + gamma + gamma * np.sin(alpha)) * np.sin((m * (phi - z * np.tan(alpha))) / 2.0)) / np.sqrt(1 + (-1 + gamma) * gamma - (-1 + gamma) * gamma * (-np.sin(alpha) + np.cos(m * (phi - z * np.tan(alpha))) * (1 + np.sin(alpha))))
     uz = (gamma * np.cos(alpha) * np.sin((m * (phi - z * np.tan(alpha))) / 2.0)) / np.sqrt(1 + (-1 + gamma) * gamma - (-1 + gamma) * gamma * (-np.sin(alpha) + np.cos(m * (phi - z * np.tan(alpha))) * (1 + np.sin(alpha))))
     return np.array([ux, uy, uz])
+
+def u(m, alpha, gamma, phi, z):
+    ux = (np.cos(phi)*np.cos((m*(phi - z*np.tan(alpha)))/2.) + (1 - gamma + gamma*np.sin(alpha))*np.sin(phi)*np.sin((m*(phi - z*np.tan(alpha)))/2.))/np.sqrt(1 + (-1 + gamma)*gamma + (-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha)))
+    uy= (np.cos((m*(phi - z*np.tan(alpha)))/2.)*np.sin(phi) + np.cos(phi)*(-1 + gamma - gamma*np.sin(alpha))*np.sin((m*(phi - z*np.tan(alpha)))/2.))/np.sqrt(1 + (-1 + gamma)*gamma + (-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha)))
+    uz= -((gamma*np.cos(alpha)*np.sin((m*(phi - z*np.tan(alpha)))/2.))/np.sqrt(1 + (-1 + gamma)*gamma + (-1 + gamma)*gamma*(np.cos(m*(phi - z*np.tan(alpha)))*(-1 + np.sin(alpha)) - np.sin(alpha))))
+    return np.array([ux,uy,uz])
+
+def uz_at_wall(alpha,gamma):
+    ans =  (gamma*np.cos(alpha))/np.sqrt(1 + 2*(-1 + gamma)*gamma + 2*(-1 + gamma)*gamma*np.sin(alpha))
+    return ans
+
+def uz_align_at_wall(alpha,gamma):
+    ans = (gamma*np.cos(alpha))/np.sqrt(1 + (-1 + gamma)*gamma - (-1 + gamma)*gamma*(-1 + 2*np.sin(alpha)))
+    return ans
+
+def alpha_u_at_wall(alpha,gamma):
+    # use sin, whith has sign -issue, e.g. 3/4\pi ->-1/4\pi
+    #ans = -(-1 + gamma + gamma*np.sin(alpha))/np.sqrt(1 - 2*gamma + 2*gamma**2 + 2*(-1 + gamma)*gamma*np.sin(alpha))
+    #return np.arcsin(ans)
+    #ans = -((-1 + gamma)/np.cos(alpha))/gamma + np.tan(alpha)
+    ans = (gamma*np.cos(alpha))/np.sqrt(1 + (-1 + gamma)*gamma - (-1 + gamma)*gamma*(-1 + 2*np.sin(alpha)))
+    return np.arccos(ans)
+
 
 
 def beta_cal(m,alpha,phi,z):
@@ -45,23 +68,24 @@ def test():
 ## sample model config plot
 
 
-def ax_2mod_u_plot(ax,m,alpha,gamma,bn_phi,bn_z,d=0.1):
-    bns_phi, bns_z = 100, 50
-    phi, z = np.meshgrid(2 * np.pi * np.linspace(0.5 / bns_phi, 1 + 0.5 / bns_phi, bns_phi), np.linspace(0.5 / bns_z, 1 + 0.5 / bns_z, bns_z))
+def ax_2mod_u_3Dplot(ax,m,alpha,gamma,d=0.1):
+    bns_phi, bns_z = 101, 51
+    phi, z = np.meshgrid(2 * np.pi * np.linspace(0.0 / bns_phi, 1 + 0.0 / bns_phi, bns_phi), np.linspace(0.5 / bns_z, 1 + 0.5 / bns_z, bns_z))
     x, y = np.cos(phi), np.sin(phi)
 
     print("np.shape(x)",np.shape(x))
     print("np.shape(y)",np.shape(y))
     print("np.shape(z)",np.shape(z))
     # plot surface mesh
-    ax.plot_surface(x,y,z, linewidth=0.5,shade=0,color = "gray", edgecolor="black",alpha=0.5,rstride=250, cstride=20)
+    ax.plot_surface(x,y,z, linewidth=0,shade=0,color = "gray", edgecolor="gray",alpha=0.6) # ,rstride=1, cstride=1)
     #ax.plot_surface(x,y,z, linewidth=0.5,shade=0,color = "gray",alpha=0.5,rstride=10, cstride=10)
 
-
-    phi, z = np.meshgrid(2 * np.pi * np.linspace(0.5 / bn_phi, 1 + 0.5 / bn_phi, bn_phi), np.linspace(0.5 / bn_z, 1 + 0.5 / bn_z, bn_z))
+    bn_phi,bn_z = 19,9
+    phi, z = np.meshgrid(2 * np.pi * np.linspace(0.0 / bn_phi, 1 + 0.0 / bn_phi, bn_phi), np.linspace(0.5 / bn_z, 1 + 0.5 / bn_z, bn_z))
     x, y = np.cos(phi), np.sin(phi)
     x,y,z,phi = x.flatten(),y.flatten(),z.flatten(),phi.flatten()
     ux,uy,uz = u(m, alpha, gamma, phi, z)
+    #ux,uy,uz = u(m, alpha, gamma, phi, z)
     nx,ny,nz = n(m, alpha, gamma, phi, z)
     deg=np.arccos(np.abs(ux*nx+uy*ny+uz*nz))
 
@@ -71,6 +95,17 @@ def ax_2mod_u_plot(ax,m,alpha,gamma,bn_phi,bn_z,d=0.1):
     for i in range(len(x)):
         #ax.plot3D([x[i]-0.5*d*ux[i],x[i]+0.5*d*ux[i]],[y[i]-0.5*d*uy[i],y[i]+0.5*d*uy[i]],[z[i]-0.5*d*uz[i],z[i]+0.5*d*uz[i]],"-",linewidth=1,color=cmap(norm(abs_un[i])),label=r"$u$")
         ax.plot3D([x[i]-0.5*d*ux[i],x[i]+0.5*d*ux[i]],[y[i]-0.5*d*uy[i],y[i]+0.5*d*uy[i]],[z[i]-0.5*d*uz[i],z[i]+0.5*d*uz[i]],"-",linewidth=2,color=cmap(norm(deg[i])))
+        # for the propurse of seeing direction
+    #ax.scatter([x-0.5*d*ux],[y-0.5*d*uy],[z-0.5*d*uz],s=5,marker="o",color=cmap(norm(deg)))
+
+    #plot wall line
+    z = np.linspace(0,1,50)
+    for delphi in [-np.pi/2,np.pi/2]:
+        phi = np.tan(alpha)*z + delphi
+        x = np.cos(phi)
+        y = np.sin(phi)
+        ax.plot3D(x,y,z, linestyle="-", color="k", alpha=0.9, linewidth = 1)
+
     #ax.set_aspect("auto")
     ax.view_init(elev=50) #., azim=-40)
     ax.dist=7.2
@@ -90,20 +125,193 @@ def demo_config_2mod_u_plot(LineWidth, FontSize, LabelSize):
     # Remove vertical space between axes
     #fig.subplots_adjust(hspace=-0.5)
     # Plot each graph, and manually set the y tick values
-    alphas = [0,0.4,0.8]
-    gammas = [0,1,0.5]
-    bn_phi,bn_z = 20,10
+    alphas = [0,np.pi/8,np.pi/4]
+    alphas_label = ["0","\pi/8","\pi/4"]
+    alphas_u = []
+    uzs = []
+    thetas_u = []
+    thetas_label = [["\pi/2","\pi/4","0"],["3\pi/8","3\pi/16","0",],["\pi/4","\pi/8","0"]]
+    gammas = [0,0.5,1]
     for i in range(3):
-        axs[i,0].text2D(-0.05,0.4, r"$\alpha=%.1f$"%alphas[i], fontsize=FontSize, transform=axs[i,0].transAxes,rotation=90)
+        axs[i,0].text2D(-0.05,0.4, r"$\alpha=%s$"%alphas_label[i], fontsize=FontSize, transform=axs[i,0].transAxes,rotation=90)
         axs[0,i].text2D(0.4,1.05, r"$\gamma=%.1f$"%gammas[i], fontsize=FontSize, transform=axs[0,i].transAxes)
         for j in range(3):
-            ax_2mod_u_plot(axs[i,j],2,alphas[i],gammas[j],bn_phi,bn_z,d=0.2)
+            ax_2mod_u_3Dplot(axs[i,j],2,alphas[i],gammas[j],d=0.2)
+            #uz = uz_at_wall(alphas[i],gammas[j])
+            alpha_u = alpha_u_at_wall(alphas[i],gammas[j])
+            #if(alpha_u<0):
+            #    alpha_u = np.pi+alpha_u
+            alphas_u.append(alpha_u)
+            thetas_u.append(alpha_u-alphas[i])
+            print(alpha_u/np.pi*16)
+            axs[i,j].text2D(0.3,-0.05,r"$\theta=%s$"%thetas_label[i][j],fontsize=FontSize, transform=axs[i,j].transAxes)
+    print("alphas_u/np.pi*16",np.array(alphas_u)/np.pi*16)
+    print("(thetas_u)/np.pi*16",np.array(thetas_u)/np.pi*16)
     plt.tight_layout(pad=0.37)
     #plt.tight_layout(pad=-1)
     #plt.show()
     plt.savefig("figures/twomode_config_demo.pdf", format="pdf")
 
+def ax_2mod_2Dplot(ax,mod,view,hshift=0,vshift=0,du=0.3,dt=0.2,label="",FontSize=9):
+    # get ux,uy,uz for different mod
+    bn_phi,bn_z = 12,1
+    #phi, z = np.meshgrid(2 * np.pi * np.linspace(0.0 / bn_phi, 1 + 0.0 / bn_phi, bn_phi), np.linspace(0.5 / bn_z, 1 + 0.5 / bn_z, bn_z))
+    phi, z = np.arange(0,2*np.pi,2*np.pi/bn_phi),np.zeros(bn_phi)
+    x, y = np.cos(phi), np.sin(phi)
+    x,y,z,phi = x.flatten(),y.flatten(),z.flatten(),phi.flatten()
 
+    nx,ny,nz = n(2, 0, 0, phi, z)
+
+    if(mod=="nematic-z"):
+        ux,uy,uz = np.zeros(len(x)),np.zeros(len(x)),np.ones(len(x))
+    elif(mod=="nematic-x"):
+        ux,uy,uz = u(2, 0, 0, phi, z)
+    elif(mod=="smectic"):
+        ux,uy,uz = u(0, 0, 0, phi, z)
+    elif(mod=="cholesteric"):
+        ux,uy,uz = u(2, 0, 1, phi, z)
+    else:
+        print("\nundefined mod\n")
+
+    print("ux:",ux)
+    print("uy:",uy)
+    deg=np.arccos(np.abs(ux*nx+uy*ny+uz*nz))
+    cmap = cm.get_cmap("jet_r")
+    norm=Normalize(vmin=0,vmax=0.5*np.pi)
+    print("np.min(deg),np.max(deg)",np.min(norm(deg)),np.max(norm(deg)))
+    vlw = 2
+    ms = 5
+    if(view=="xy"):
+        x = x+ hshift
+        y = y + vshift
+        #plot circle
+        pphi = np.linspace(0,2*np.pi,200)
+        ax.plot(np.cos(pphi)+hshift,np.sin(pphi)+vshift,"-",color="gray",lw=1)
+        #plot director in T shape
+        for i in range(len(x)):
+            ax.plot([x[i],x[i]+du*ux[i]],[y[i],y[i]+du*uy[i]],"-",linewidth=vlw,color=cmap(norm(deg[i])))
+            #ax.plot([x[i]-0.5*du*ux[i],x[i]+0.5*du*ux[i]],[y[i]-0.5*du*uy[i],y[i]+0.5*du*uy[i]],"-",linewidth=vlw,color=cmap(norm(deg[i])))
+            #ax.text(x[i],y[i],i)
+            if(abs(uz[i])>1-1e-4):
+                ax.scatter([x[i]],[y[i]],color=cmap(norm(deg[i])),s=ms,zorder=10)
+            if(abs(uz[i])>1e-4 and abs(uz[i])<(1-1e-4)):
+                tx,ty,tz = np.cross([ux[i],uy[i],uz[i]],[0,0,1])
+                mag_t = np.sqrt(np.inner([tx,ty,tz],[tx,ty,tz]))
+                if(mag_t==0):
+                    tx,ty,tz = np.sin(phi[i]),-np.cos(phi[i]),0
+                else:
+                    tx,ty,tz=tx/mag_t,ty/mag_t,tz/mag_t
+                print("inner t=", np.inner([tx,ty,tz],[tx,ty,tz]))
+                print("mag_t=",mag_t)
+                ax.plot([x[i]-0.5*dt*tx,x[i]+0.5*dt*tx],[y[i]-0.5*dt*ty,y[i]+0.5*dt*ty],"-",linewidth=vlw,color=cmap(norm(deg[i])))
+            #ax.plot([x[i]-0.5*du*ux[i]-0.5*dt*tx,x[i]-0.5*du*ux[i]+0.5*dt*tx],[y[i]-0.5*du*uy[i]-0.5*dt*ty,y[i]-0.5*du*uy[i]+0.5*dt*ty],"-",linewidth=vlw,color=cmap(norm(deg[i])))
+
+    elif(view=="xz"):
+        x = x+ hshift
+        z = z + vshift
+        #plot box
+        zshift=-1.6
+        ax.plot(np.array([-1,1,1,-1,-1])+hshift,0.75*(np.array([-0.5,-0.5,0.5,0.5,-0.5]))+vshift+zshift,"-",color="gray",lw=1)
+        ax.text(1.1+hshift,-0.5+vshift+zshift,label,fontsize=FontSize)
+        #plot director in T shape
+        for i in range(-bn_phi//2+1,0):
+            #ax.text(x[i],z[i]+zshift,i)
+            ax.plot([x[i],x[i]+du*ux[i]],[z[i]+zshift,z[i]+zshift+du*uz[i]],"-",linewidth=vlw,color=cmap(norm(deg[i])))
+            #ax.plot([x[i]-0.5*du*ux[i],x[i]+0.5*du*ux[i]],[z[i]+zshift-0.5*du*uz[i],z[i]+zshift+0.5*du*uz[i]],"-",linewidth=vlw,color=cmap(norm(deg[i])))
+            if(abs(uy[i])>1-1e-4):
+                ax.scatter([x[i]],[z[i]+zshift],color=cmap(norm(deg[i])),s=ms,zorder=10)
+            if(abs(uy[i])>1e-4 and abs(uy[i])<(1-1e-4)):
+                tx,ty,tz = np.cross([ux[i],uy[i],uz[i]],[0,1,0])
+                mag_t = np.sqrt(np.inner([tx,ty,tz],[tx,ty,tz]))
+                tx,ty,tz=tx/mag_t,ty/mag_t,tz/mag_t
+                '''
+                if(mag_t==0):
+                    tx,ty,tz = np.sin(phi[i]),-np.cos(phi[i]),0
+                else:
+                    tx,ty,tz=tx/mag_t,ty/mag_t,tz/mag_t
+                '''
+                ax.plot([x[i]-0.5*dt*tx,x[i]+0.5*dt*tx],[z[i]+zshift-0.5*dt*tz,z[i]+zshift+0.5*dt*tz],"-",linewidth=vlw,color=cmap(norm(deg[i])))
+            #ax.plot([x[i]-0.5*du*ux[i]-0.5*dt*tx,x[i]-0.5*du*ux[i]+0.5*dt*tx],[z[i]+zshift-0.5*du*uz[i]-0.5*dt*tz,z[i]+zshift-0.5*du*uz[i]+0.5*dt*tz],"-",linewidth=vlw,color=cmap(norm(deg[i])))
+
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+def two_mod_diagram_plot(LineWidth, FontSize, LabelSize):
+    # diagram for explaining monte carlo results: alignment of directors
+    # plot sample config of nematic and cholesteric walls using Kleman's nail representation
+    print("plotting illustration diagrams for walls")
+
+    ppi = 72
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+    fig, ax = plt.subplots(1, 1,figsize=(246 / ppi * 1, 246 / ppi * 0.8) )
+
+    delh,delv=2.75,-3.5
+
+    ax_2mod_2Dplot(ax,"nematic-z","xy",hshift=delh,vshift=0)
+    ax_2mod_2Dplot(ax,"nematic-z","xz",hshift=delh,vshift=0,label=r"(a)")
+    ax_2mod_2Dplot(ax,"smectic","xy",hshift=0,vshift=delv)
+    ax_2mod_2Dplot(ax,"smectic","xz",hshift=0,vshift=delv,label=r"(b)")
+    ax_2mod_2Dplot(ax,"nematic-x","xy",hshift=delh,vshift=delv)
+    ax_2mod_2Dplot(ax,"nematic-x","xz",hshift=delh,vshift=delv,label=r"(c)")
+    ax_2mod_2Dplot(ax,"cholesteric","xy",hshift=2*delh,vshift=delv)
+    ax_2mod_2Dplot(ax,"cholesteric","xz",hshift=2*delh,vshift=delv,label=r"(d)")
+
+    axins = ax.inset_axes([0.75,0.55,0.02,0.4])
+
+    cbar=plt.colorbar(cm.ScalarMappable(norm=Normalize(vmin=0,vmax=0.5*np.pi), cmap=cm.get_cmap("jet_r")),cax=axins,ticks=[0,np.pi/6,np.pi/3,np.pi/2])
+    cbar.ax.set_yticklabels([r"$0$",r"$\pi/6$",r"$\pi/3$",r"$\pi/2$"],fontsize=FontSize)
+    cbar.ax.tick_params(direction="in",labelsize=LabelSize)
+    cbar.ax.set_title(r"$\arccos{|\vu{u}\cdot\vu{n}|}$",fontsize=FontSize)
+
+
+    delar = 0.75
+    delh_mt = 0.2
+    delvar = -0.2
+    lshift = - 0.3
+    hw = 0.05
+    ax.arrow(delh_mt*delh,delvar, delar,0, head_width=hw)
+    ax.arrow(delh_mt*delh,delvar, 0,delar, head_width=hw)
+    ax.text(delh_mt*delh+delar,delvar+lshift, r"$x$", fontsize=FontSize)
+    ax.text(delh_mt*delh+lshift,delvar+delar, r"$y$", fontsize=FontSize)
+
+    ax.arrow(delh_mt*delh,-1.75+delvar, delar,0, head_width=hw)
+    ax.arrow(delh_mt*delh,-1.75+delvar, 0,delar, head_width=hw)
+    ax.text(delh_mt*delh+delar,+lshift-1.75+delvar, r"$x$", fontsize=FontSize)
+    ax.text(delh_mt*delh+lshift,delar-1.75+delvar, r"$z$", fontsize=FontSize)
+
+    #cbar=plt.colorbar(cm.ScalarMappable(norm=Normalize(vmin=0,vmax=0.5*np.pi), cmap=cm.get_cmap("jet_r")),ax=ax,ticks=[0,np.pi/6,np.pi/3,np.pi/2])
+    ax.set_aspect('equal', 'box')
+    ax.set_aspect("equal")
+    ax.set_yticks([])
+    ax.set_xticks([])
+    ax.set_frame_on(False)
+
+
+    '''
+    ax_2mod_2Dplot(axs[0,0],"nematic-z","xy")
+    ax_2mod_2Dplot(axs[0,0],"nematic-z","xz")
+    ax_2mod_2Dplot(axs[0,1],"smectic","xy")
+    ax_2mod_2Dplot(axs[0,1],"smectic","xz")
+    ax_2mod_2Dplot(axs[1,0],"nematic-x","xy")
+    ax_2mod_2Dplot(axs[1,0],"nematic-x","xz")
+    ax_2mod_2Dplot(axs[1,1],"cholesteric","xy")
+    ax_2mod_2Dplot(axs[1,1],"cholesteric","xz")
+
+    axs[0, 0].set_aspect('equal', 'box')
+    axs[0, 1].set_aspect('equal', 'box')
+    axs[1, 0].set_aspect('equal', 'box')
+    axs[1, 1].set_aspect('equal', 'box')
+
+    axs[0,0].axis("off")
+    axs[0,1].axis("off")
+    axs[1,0].axis("off")
+    axs[1,1].axis("off")
+    '''
+
+
+    plt.tight_layout(pad=0)
+    #plt.tight_layout(pad=-1)
+    #plt.show()
+    plt.savefig("figures/diagram_walls.pdf", format="pdf")
 
 
 

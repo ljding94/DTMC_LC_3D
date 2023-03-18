@@ -6,7 +6,7 @@ from matplotlib import cm
 from matplotlib.colors import Normalize
 from scipy.special import expit
 
-def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xshift=0, yshift=0, zslice=None, mesh=1, twistcolor=0 ,bead=0, rod=0, pwlim=0, d=1, scale=1):
+def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xshift=0, yshift=0, zslice=None, hide_behind=None, mesh=1, twistcolor=0 ,bead=0, rod=0, pwlim=0, d=1, scale=1):
     print(pov+" plotting",filename)
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
     x,y,z,ux,uy,uz,nx,ny,nz,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:17]
@@ -45,6 +45,12 @@ def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xsh
     x_min, x_max = np.min(x),np.max(x)
     y_min, y_max = np.min(y),np.max(y)
     z_min, z_max = np.min(z),np.max(z)
+
+    if(hide_behind):
+        z_cut = z_min + (z_max-z_min)*hide_behind
+        take = take & (z>z_cut)
+
+
     #alpha_xy = np.maximum(1.0*(z-z_min+0.1)/(z_max-z_min+0.1)-0.2,0)
     alpha_xy = 0.8*(z-z_min+0.01)/(z_max-z_min+0.01)+0.1
     #alpha_rod = 0.8*(z-z_min+0.01)/(z_max-z_min+0.01)+0.1
@@ -84,7 +90,7 @@ def ax_config_plot_xyz(ax, filename, Color, LineWidth, pov="xy",rotxyz=None, xsh
             cmapt = cm.get_cmap("ocean")
         for bond in bonds:
             a,b = bond
-            if(take[a] or take[b]):
+            if(take[a] and take[b]):
                 if(twistcolor):
                     twist = twist_cal([x[a],y[a],z[a]],[x[b],y[b],z[b]],[ux[a],uy[a],uz[a]],[ux[b],uy[b],uz[b]])
                     ax.plot([x[a],x[b]], [y[a],y[b]], color=cmapt(normt(twist)),lw=LineWidth/4,alpha=alpha_xy[a])
@@ -195,6 +201,38 @@ def init_config_demo(LineWidth, FontSize, LabelSize):
 
     plt.tight_layout(pad=0.1)
     plt.savefig("figures/init_config_demo.pdf",format="pdf")
+
+def cylinder_config_demo(LineWidth, FontSize, LabelSize):
+    print("plotting figures for cylinder config demo")
+
+    lf = 25
+    foldername = "../data/Ne2/May12_2022"
+    fname = foldername + "/State_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q1.0_Cn4.0.csv"%lf
+
+    ppi = 72
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 0.5))
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+    ax = plt.subplot2grid((1, 1), (0, 0))
+    msize=4
+    dely=8
+    ax_config_plot_xyz(ax, fname, "gray", LineWidth, pov="zx", mesh=1, bead=0,rod=0, d=0.8)
+
+    ax.text(lf/2+1,-2, r"(a)",fontsize=FontSize)
+    ax_config_plot_xyz(ax, fname, "gray", LineWidth, pov="zx", yshift=-dely, mesh=1, bead=1,rod=1, d=0.8)
+    ax.text(lf/2+1,-2-dely, r"(b)",fontsize=FontSize)
+
+    delb=5
+    ax.plot([-lf/2,-lf/2],[-dely-delb,delb], color="black", ls="--", lw = LineWidth)
+    ax.plot([lf/2,lf/2],[-dely-delb,delb], color="black", ls="--", lw = LineWidth)
+    ax.text(-lf/2,-dely-delb-2, r"$z=0$",fontsize=FontSize)
+    ax.text(lf/2,-dely-delb-2, r"$z=l_f$",fontsize=FontSize)
+
+
+
+    plt.tight_layout(pad=0.1)
+    #plt.show()
+    plt.savefig("figures/elongation_config_demo.pdf",format="pdf")
 
 
 

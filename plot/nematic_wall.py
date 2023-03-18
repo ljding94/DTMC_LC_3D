@@ -154,22 +154,25 @@ def smectic_to_walls_config_data_get():
     qs = [0.0,0.0,1.5]
     Kps = []
     qps = []
-    fnames,povs,rotxyzs, xyshift, zslice = [],[],[],[],[]
+    fnames,povs,rotxyzs, xyshift, zslice, hides = [],[],[],[],[],[]
+    rotate_per_j = [[0,0,0],[-np.pi/2,0,0],[-np.pi*3/8,np.pi*3/8,0]]
     for i in range(len(Kds)):
         for j in range(3):
             fnames.append( fns[i] + "/State_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kd%.1f_q%.1f_Cn%.1f.csv" % (lf,Kds[i],qs[i],Cn))
             povs.append("xy")
-            rotxyzs.append([0,0,0])
+            rotxyzs.append(rotate_per_j[j])
             xyshift.append((10*j,-10*i))
             Kps.append(Kds[i])
             qps.append(qs[i])
         # 2 crossection each
-        zslice+=[(7,13),(-2.5,2.5),None]
+        #zslice+=[(7,13),(-2.5,2.5),None]
+        zslice+=[(10,13),(7,13),None] # usd same slice for the two crosssection shown
+        hides+=[None,0.5,None]
         xyshift[3*i+2]=(25,-10*i)
         povs[3*i+2]="zx"
-        rotxyzs[3*i+2]=[-np.pi*3/8,np.pi*3/8,0]
+        #rotxyzs[3*i+2]=[-np.pi*3/8,np.pi*3/8,0]
 
-    return [Kps,qps,fnames,povs,rotxyzs, xyshift, zslice]
+    return [Kps,qps,fnames,povs,rotxyzs, xyshift, zslice, hides]
 
 from cholesteric_wall import *
 # merge nematic wall and cholesteric wall plot
@@ -190,10 +193,11 @@ def walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize):
     msize = 4
 
     ## configuration shows the tilt wall formation
-    Kds, qs, fnames, povs, rotxyzs, xyshifts, zslices = smectic_to_walls_config_data_get()
+    Kds, qs, fnames, povs, rotxyzs, xyshifts, zslices, hides = smectic_to_walls_config_data_get()
     print(xyshifts)
+
     for i in range(len(Kds)):
-        ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, pov=povs[i], rotxyz=rotxyzs[i],xshift=xyshifts[i][0],yshift=xyshifts[i][1], zslice=zslices[i], mesh=1, bead=1,rod=1,d=1)
+        ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, pov=povs[i], rotxyz=rotxyzs[i],xshift=xyshifts[i][0],yshift=xyshifts[i][1], zslice=zslices[i], hide_behind=hides[i], mesh=1, bead=1,rod=1,d=1)
         if(i%3==0):
             #axcfg.text(xyshifts[i][0]-10,xyshifts[i][1]-5.5,r"$\epsilon_{LL}=%.1f$"%Kds[i],fontsize=FontSize)
             print("Kds[i]",Kds[i])
