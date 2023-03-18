@@ -12,7 +12,7 @@ def main():
         # on ccv
         folder = "/users/lding3/scratch/dtmc_lc_3d"
         K= float(sys.argv[1])
-        C = int(sys.argv[2])
+        C = float(sys.argv[2])
         m = float(sys.argv[3])
         bn_phi = int(sys.argv[4])
         bn_z = int(sys.argv[5])
