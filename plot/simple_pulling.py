@@ -99,34 +99,14 @@ def force_pull_plot(LineWidth, FontSize, LabelSize):
     fig = plt.figure(figsize=(246 / ppi, 246 / ppi * 1))
     plt.rc("text", usetex=True)
     plt.rc("text.latex", preamble=r"\usepackage{physics}")
-    axfkar = plt.subplot2grid((2, 2), (0, 0), colspan=1)
-    axfkar_cfg = plt.subplot2grid((2, 2), (0, 1), colspan=1)
+    axfkar_cfg = plt.subplot2grid((2, 2), (0, 0), colspan=1)
+    axfkar = plt.subplot2grid((2, 2), (0, 1), colspan=1)
     axfq = plt.subplot2grid((2, 2), (1, 0), colspan=1)
     axfKd = plt.subplot2grid((2, 2), (1, 1), colspan=1, sharey=axfq)
 
     msize = 4
     ni = 1  # initial point
     n = 2  # plot data inteval
-
-    # fkar
-    ## f normalized versus lf for different kar at C0=0
-    lfs, f_kar_norm_aves, f_kar_norm_errs, labels, colors, markers, legendtitle = force_normalized_kar_pull_data_get(gni=2)
-    print("len(lfs)", len(lfs), len(f_kar_norm_aves))
-
-    for i in range(len(lfs)):
-        axfkar.errorbar(lfs[i][ni::n], f_kar_norm_aves[i][ni::n], f_kar_norm_errs[i][ni::n], ls="None", color=colors[i], mfc="None", marker=markers[i], ms=msize, label=labels[i])
-    axfkar.tick_params(which="both", direction="in", top="on", right="on", labelbottom=True, labelleft=True, labelsize=LabelSize)
-    axfkar.set_ylabel(r"$F/\kappa$", fontsize=FontSize)
-    axfkar.set_ylim(-0.25, 2.75)
-    axfkar.xaxis.set_major_locator(MultipleLocator(5))
-    axfkar.xaxis.set_minor_locator(MultipleLocator(2.5))
-    axfkar.yaxis.set_major_locator(MultipleLocator(0.5))
-    axfkar.yaxis.set_minor_locator(MultipleLocator(0.25))
-    axfkar.legend(title=legendtitle, loc="upper left", ncol=2, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
-    axfkar.set_xlabel(r"$l_f$", fontsize=FontSize)
-    x1, y1 = 0.85, 0.15
-    # axfkar.text(axfkar.get_xlim()[1]*x1+axfkar.get_xlim()[0]* (1-x1),  axfkar.get_ylim()[1]*y1+axfkar.get_ylim()[0]* (1-y1), r"(b)", fontsize=FontSize,transform=axfkar.transAxes)
-    axfkar.text(x1, y1, r"(a)", fontsize=FontSize, transform=axfkar.transAxes)
 
     ## fkar_cfg, configuration for different lf with kar0
     # lfplt = [15.0, 25.0, 35.0]
@@ -137,9 +117,32 @@ def force_pull_plot(LineWidth, FontSize, LabelSize):
     axfkar_cfg.text(lfs[-1], 13 * (len(lfs) - 1) + 5, r"$l_f=$", fontsize=FontSize)
 
     axfkar_cfg.tick_params(which="both", direction="in", bottom="off", top="off", right="off", left="off", labelbottom=False, labelleft=False, labelsize=LabelSize)
-    x1, y1 = 1.85, 0.15
-    axfkar_cfg.text(x1, y1, r"(b)", fontsize=FontSize, transform=axfkar.transAxes)
+    x1, y1 = -0.25, 0.15
+    axfkar_cfg.text(x1, y1, r"(a)", fontsize=FontSize, transform=axfkar.transAxes)
     # axfkar_cfg.text(axfkar_cfg.get_xlim()[1]*x1+axfkar_cfg.get_xlim()[0]* (1-x1),  axfkar_cfg.get_ylim()[1]*y1+axfkar_cfg.get_ylim()[0]* (1-y1), r"(a)", fontsize=FontSize,transform=axfkar_cfg.transAxes)
+
+
+    # fkar
+    ## f normalized versus lf for different kar at C0=0
+    lfs, f_kar_norm_aves, f_kar_norm_errs, labels, colors, markers, legendtitle = force_normalized_kar_pull_data_get(gni=2)
+    print("len(lfs)", len(lfs), len(f_kar_norm_aves))
+    for i in range(len(lfs)):
+        axfkar.errorbar(lfs[i][ni::n], f_kar_norm_aves[i][ni::n], f_kar_norm_errs[i][ni::n], ls="None", color=colors[i], mfc="None", marker=markers[i], ms=msize, label=labels[i])
+    axfkar.yaxis.set_label_position("right")
+    axfkar.yaxis.tick_right()
+    axfkar.tick_params(which="both", direction="in", left="on", bottom="on",top="on", right="on", labelbottom=True, labelleft=False, labelsize=LabelSize)
+    axfkar.set_ylabel(r"$F/\kappa$", fontsize=FontSize)
+    axfkar.set_ylim(-0.25, 2.75)
+    axfkar.xaxis.set_major_locator(MultipleLocator(5))
+    axfkar.xaxis.set_minor_locator(MultipleLocator(2.5))
+    axfkar.yaxis.set_major_locator(MultipleLocator(0.5))
+    axfkar.yaxis.set_minor_locator(MultipleLocator(0.25))
+    axfkar.legend(title=legendtitle, loc="upper left", ncol=2, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
+    axfkar.set_xlabel(r"$l_f$", fontsize=FontSize)
+    x1, y1 = 0.85, 0.15
+    # axfkar.text(axfkar.get_xlim()[1]*x1+axfkar.get_xlim()[0]* (1-x1),  axfkar.get_ylim()[1]*y1+axfkar.get_ylim()[0]* (1-y1), r"(b)", fontsize=FontSize,transform=axfkar.transAxes)
+    axfkar.text(x1, y1, r"(b)", fontsize=FontSize, transform=axfkar.transAxes)
+
 
     # fq
     ni = 1  # initial point

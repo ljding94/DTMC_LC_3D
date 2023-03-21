@@ -1,4 +1,4 @@
-#!#!/usr/local/bin/python3
+#!/usr/local/bin/python3
 #from plot import *
 #from catelinder_cal import *
 #from catelinder_plot import *
@@ -11,10 +11,11 @@ def main():
     print("python code for numerical calculation of pulling experiment o/n unduloid")
     #cylinder_2mod_plot("./pydata/optFtot_K1.0_C10.0_m2_qs.csv")
     #cylinder_2mod_plot("./pydata/optFtot_K10.0_C1.0_m2_qs.csv")
-    F_compot_param_plot("../data/pydata/local/Mar18_2023_params_test/F_compot_m2_R1.0_alphas_gammas.csv",2)
-    F_compot_param_plot("../data/pydata/local/Mar18_2023_params_test/F_compot_m1_R1.0_alphas_gammas.csv",1)
-    F_compot_param_plot("../data/pydata/local/Mar18_2023_params_test/F_compot_m0_R1.0_alphas_gammas.csv",0)
-    return 0
+
+    #F_compot_param_plot("../data/pydata/local/Mar18_2023_params_test/F_compot_m2_R1.0_alphas_gammas.csv",2)
+    #F_compot_param_plot("../data/pydata/local/Mar18_2023_params_test/F_compot_m0_R1.0_alphas_gammas.csv",0)
+    #return 0
+
     K = 2 #[0.1,0.5,2.0,4.0]
     qs = np.arange(1.0,3.5,0.1)
     m = 2
@@ -40,11 +41,10 @@ def main():
     #director_field_plot(2, 0.5, 0.8, 100, 30)
     #director_field_plot(2, 0, 0.5, 100, 30)
     if(0):
-        Ks = np.arange(0.02,0.421,0.1)
-        Ks = np.arange(0.4,1.01,0.1)
-        Cs = np.arange(1,6.1,1)
+        Cs = np.arange(1,3.1,1)
         K = 1
-        del_Ftot_Ks_qs_plot("../data/pydata/local/Jan26_2023_R1",K,Cs,1)
+        #del_Ftot_Ks_qs_plot("../data/pydata/local/Jan26_2023_R1",K,Cs,1)
+        del_Ftot_Ks_qs_plot("../data/pydata/local/Mar19_2023",K,Cs,1)
         return 0
 
     #Ks = np.arange(0.01,0.101,0.01)
@@ -56,7 +56,8 @@ def main():
     C, R = 1,1
     Cs = np.arange(0.5,10.1,0.5)
 
-    del_Ftot_Ks_qs_plot("../data/pydata/Jan26_2023",K,Cs,1)
+    #del_Ftot_Ks_qs_plot("../data/pydata/Jan26_2023",K,Cs,1)
+    del_Ftot_Ks_qs_plot("../data/pydata/Mar19_2023",K,Cs,1)
 
 if __name__ == "__main__":
     main()

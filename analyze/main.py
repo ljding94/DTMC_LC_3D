@@ -31,7 +31,7 @@ def main():
         for q in qs:
         #for q in [1.9]:
             print("q=",q)
-            filename = "../data/Ne2/Dec7_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q%.1f_Cn6.0_id0.csv"%q
+            filename = "../data/Ne2/Dec7_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q%.1f_Cn2.0_id0.csv"%q
             #ans = tilt_slice_distri_plot(filename)
             #tanalpha.append(ans)
             ans_u = wall_director_alpha_calc(filename,pwlim = np.pi/3)
@@ -40,7 +40,7 @@ def main():
         #alpha_u_plot()
         #print(tanalpha)
         #tanalpha_q_plot()
-    #alpha_u_plot()
+    alpha_u_plot()
     #alpha_u_plot()
     return 0
 

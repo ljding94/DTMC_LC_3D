@@ -216,7 +216,7 @@ def Ftot_unit_length(K, C, q, m, alpha, gamma, bn_phi, bn_z, R):
     intT = intT_unit_length(m, alpha, gamma, bn_phi, bn_z, R)
     intBB = intBB_unit_length(m, alpha, gamma, bn_phi, bn_z, R)
     intC = intC_unit_length(m, alpha, gamma, bn_phi, bn_z, R)
-    Ftot = 0.5 * K * (intSS + intTT - 2*q*intT+q**2  + intBB) + 0.5 * C * intC
+    Ftot = 0.5 * K * (intSS + intTT + 2*q*intT+q**2  + intBB) + 0.5 * C * intC
     #Ftot = 0.5 * K * (intSS + (intT - q)**2  + intBB) + 0.5 * C * intC
     return Ftot
 

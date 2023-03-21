@@ -17,15 +17,15 @@ def main():
         bn_phi = int(sys.argv[4])
         bn_z = int(sys.argv[5])
         R = 1
-        qs = np.arange(0.00,3.01,0.05)
+        qs = np.arange(0.00,2.01,0.02)
         Ftot_qs_cal(folder, K, C, qs, m, bn_phi, bn_z, R, "Powell")
     else:
         print("python code for numerical calculation cholesteric (2 mod) on cylinder")
         #Ftot_par_run(par, bn_phi, bn_z, method)
         #K, C, q, m = par
         #Ftot_par_run((1,1,0.5,2), 50, 50, "Powell")
-        F_compot_param(folder="../data/pydata/local/Mar18_2023_params_test", m=2, alphas=np.arange(0,0.81,0.05), gammas=np.arange(0.0,1.01,0.05),  bn_phi=100, bn_z=100, R=1)
-        return 0
+        #F_compot_param(folder="../data/pydata/local/Mar18_2023_params_test", m=2, alphas=np.arange(0,0.81,0.05), gammas=np.arange(0.0,1.01,0.05),  bn_phi=100, bn_z=100, R=1)
+        #return 0
 
 
         #print(intSS_unit_length(m, alpha, gamma, bn_phi, bn_z))
@@ -81,8 +81,8 @@ def main():
         #Ftot_qs_cal("./pydata", 10, 1, qs, 2, 50, 50, "Powell")
         #
         #qs = np.arange(0.01,0.1,0.002)
-        Cs = np.arange(1,6.1,1)
-        qs = np.arange(0.0,3.1,0.2)
+        Cs = np.arange(1,3.1,1)
+        qs = -np.arange(0.0,1.1,0.05)
         m = 0
         R = 1
         K = 1
@@ -97,7 +97,7 @@ def main():
                     pass
                     #print("R=%f,q=%f \n"%(R,q))
                     #print("Ftot_unit_length/R= ",Ftot_unit_length(K, C, q, m, alpha, gamma, bn_phi, bn_z, R))
-                Ftot_qs_cal("../data/pydata/local/Jan26_2023_R1", K, C, qs, m, bn_phi, bn_z, R, "Powell")
+                Ftot_qs_cal("../data/pydata/local/Mar19_2023", K, C, qs, m, bn_phi, bn_z, R, "Powell")
 
 
 if __name__ == "__main__":

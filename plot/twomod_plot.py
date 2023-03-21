@@ -96,7 +96,7 @@ def ax_2mod_u_3Dplot(ax,m,alpha,gamma,d=0.1):
         #ax.plot3D([x[i]-0.5*d*ux[i],x[i]+0.5*d*ux[i]],[y[i]-0.5*d*uy[i],y[i]+0.5*d*uy[i]],[z[i]-0.5*d*uz[i],z[i]+0.5*d*uz[i]],"-",linewidth=1,color=cmap(norm(abs_un[i])),label=r"$u$")
         ax.plot3D([x[i]-0.5*d*ux[i],x[i]+0.5*d*ux[i]],[y[i]-0.5*d*uy[i],y[i]+0.5*d*uy[i]],[z[i]-0.5*d*uz[i],z[i]+0.5*d*uz[i]],"-",linewidth=2,color=cmap(norm(deg[i])))
         # for the propurse of seeing direction
-    #ax.scatter([x-0.5*d*ux],[y-0.5*d*uy],[z-0.5*d*uz],s=5,marker="o",color=cmap(norm(deg)))
+    ax.scatter([x-0.5*d*ux],[y-0.5*d*uy],[z-0.5*d*uz],s=5,marker="o",color=cmap(norm(deg)))
 
     #plot wall line
     z = np.linspace(0,1,50)
@@ -149,8 +149,8 @@ def demo_config_2mod_u_plot(LineWidth, FontSize, LabelSize):
     print("(thetas_u)/np.pi*16",np.array(thetas_u)/np.pi*16)
     plt.tight_layout(pad=0.37)
     #plt.tight_layout(pad=-1)
-    #plt.show()
-    plt.savefig("figures/twomode_config_demo.pdf", format="pdf")
+    plt.show()
+    #plt.savefig("figures/twomode_config_demo.pdf", format="pdf")
 
 def ax_2mod_2Dplot(ax,mod,view,hshift=0,vshift=0,du=0.3,dt=0.2,label="",FontSize=9):
     # get ux,uy,uz for different mod

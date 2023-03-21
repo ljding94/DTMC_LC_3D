@@ -212,16 +212,35 @@ def ax_pitch_phi_z_plot(filename, axcfg, axunphi, axphi0z,msize,LineWidth, nbin=
     #label=r"$\phi_0 = %.1f+%.3f z$" % (params[0], params[1])
 
 
+
+def wall_pitch_tan_data_get():
+    kcs = np.arange(0.0,2.01,0.1)
+    #res by cn
+    Cn2res = [(0.07171687507132235, 0.014269194742233529), (0.1531247950928125, 0.019702645691059745), (0.21597286919392358, 0.015530465542011793), (0.12134238384877459, 0.020801319512674853), (0.2893139878856185, 0.0049807115122890485), (0.30840884105694, 0.018021602282221025), (0.3439241206076535, 0.023715579422829116), (0.3549383315516277, 0.014143177344371568), (0.3765076695151387, 0.029217039592043484), (0.48119482596213653, 0.016506420556048142), (0.6269013241538041, 0.008668224771367267), (0.6155285243118631, 0.02951455537466414), (0.6071443855656959, 0.030377613877672377), (0.6828988133368302, 0.016270617400019716), (0.7268114381338039, 0.029385986928657605), (0.807921890344102, 0.02512949370453941), (0.8116053338525985, 0.027035593644727143), (0.8498225919074379, 0.023119548395428357), (0.8019832448359602, 0.023494484374115946), (0.8416905938095114, 0.01768179574411115), (0.9213251792310383, 0.04878216325679875)]
+
+    Cn4res = [(0.04526928659475114, 0.02450490350304673), (0.052519524383029245, 0.014833023186659607), (0.17082072926035433, 0.014317561384449597), (0.19119114042378088, 0.020541188626334566), (0.18136254424639991, 0.02977076209961673), (0.29167081623340163, 0.019907713717815103), (0.38529827242545833, 0.019665338859497696), (0.47357895083010587, 0.031999344042706206), (0.35935583051548764, 0.0035951730371498853), (0.418774417527803, 0.021991532090154482), (0.33655979350098914, 0.013728473271936882), (0.5795742763531372, 0.006700866889811913), (0.633888494763439, 0.036280314067395784), (0.7054085401292735, 0.015219188144950999), (0.7283219380194356, 0.038371045899881606), (0.7279032948946208, 0.020915320054828775), (0.8140908945784836, 0.021769667918782345), (0.9326531697794475, 0.020552343320187443), (0.9972649387446532, 0.03218122500117304), (0.9299581288732129, 0.030817098325748242), (0.9069568906852431, 0.018944770171753167)]
+
+    Cn6res = [(-0.04535629139876542, 0.021113893611373585), (0.0859852488954683, 0.02332645619289845), (0.10046459082681683, 0.02004970392703706), (0.132936078911145, 0.029107698275464233), (0.2173186393632259, 0.00869240606734223), (0.28203634123467103, 0.022155009014534842), (0.3643730464719448, 0.004330547417869567), (0.3626924134801637, 0.018990989593462577), (0.4647405159949755, 0.009079895858261126), (0.5022692729650203, 0.033354261771154796), (0.4694281510881381, 0.014153187156549679), (0.5566644040589314, 0.027962283011405485), (0.5451418024359513, 0.033523225772062584), (0.6813221621068155, 0.014908556442604132), (0.7433417090200445, 0.04024179292816863), (0.7711906286273695, 0.014836617946756057), (0.8194082073425, 0.029523235446106667), (0.8228541736488066, 0.0198543734727229), (0.8454411583713057, 0.017040105556118172), (0.909081676268063, 0.018714415026368024), (0.907172499406838, 0.006310711006587178)]
+
+    alpha_u_Cn2 = [1.3973005177504485, 1.4900114242662634, 1.4161562287081038, 1.3862472778494603, 1.3712475033359504, 1.2822010660616556, 1.2476022107234472, 1.2622307499337568, 1.2129765442873435, 1.1549972762064071, 1.1349823121170068, 1.133962514187405, 1.1974279096920175, 1.15748541958521, 1.117944043265488, 1.1785343323920476, 1.1453405565825097, 1.1132352415982831, 1.102632547439785, 1.082502657644467, 1.1373164644140825]
+    alpha_u_Cn4 = [1.4777834484135257, 1.4551264087420979, 1.4207589949494193, 1.3716097525234503, 1.3916646625516402, 1.3072236309459868, 1.2951939281106437, 1.2112390699261928, 1.2023504703701497, 1.130248181346157, 1.0715173721614377, 1.171582291965305, 1.1596850527927227, 1.0970915891251725, 1.1536775294698973, 1.116310670673257, 1.1236886156423231, 1.1357779370983998, 1.0867051511512427, 1.1117527004756618, 1.214311917422728]
+    alpha_u_Cn6 = [1.4723108811252246, 1.5041477642870125, 1.4917032885592725, 1.452903089289555, 1.4079053024350594, 1.2838809156284545, 1.2616937264686248, 1.286026793720392, 1.201167754223943, 1.1713746818378825, 1.179985018426367, 1.1796708016489579, 1.05374140829622, 1.1316281497275797, 1.1489902037650463, 1.0977612630096436, 1.1029307965274928, 1.0954793387023247, 1.1320166475595055, 1.1146776358131572, 1.120967449783173]
+
+    return [kcs, Cn2res,Cn4res,Cn6res,alpha_u_Cn2,alpha_u_Cn4,alpha_u_Cn6]
+
+
+
 def wall_pitch_q_plot(LineWidth, FontSize, LabelSize):
     print("👌")
     ppi = 72
     fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 1.5))
     plt.rc("text", usetex=True)
     plt.rc("text.latex", preamble=r"\usepackage{physics}")
-    axcfg = plt.subplot2grid((5, 2), (0, 0), rowspan=3)
-    axunphi = plt.subplot2grid((5, 2), (0, 1), rowspan=3)
-    axphi0z = plt.subplot2grid((5, 2), (3, 0), rowspan=2)
-    axtankc = plt.subplot2grid((5, 2), (3, 1), rowspan=2)
+    axcfg = plt.subplot2grid((6, 2), (0, 0), rowspan=3)
+    axunphi = plt.subplot2grid((6, 2), (3, 0), rowspan=3)
+    axphi0z = plt.subplot2grid((6, 2), (0, 1), rowspan=2)
+    axtankc = plt.subplot2grid((6, 2), (2, 1), rowspan=2)
+    axthekc = plt.subplot2grid((6, 2), (4, 1), rowspan=2, sharex = axtankc)
     msize = 4
 
     # single tube plot
@@ -229,18 +248,18 @@ def wall_pitch_q_plot(LineWidth, FontSize, LabelSize):
     fname = "../data/Ne2/Dec7_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q1.5_Cn4.0_id0.csv"
 
     ax_pitch_phi_z_plot(fname, axcfg, axunphi, axphi0z, msize, LineWidth, nbin=5, z_relative_range=(1 / 4, 3 / 4))
-
+    axcfg.margins(y=0)
     # config plot
-    x1, y1 = -0.3, 0.075
+    x1, y1 = 0.75, 1.075
     axcfg.text(x1, y1, r"(a)", fontsize=FontSize, transform=axunphi.transAxes)
 
     # print(filename, params[1])
     # axs[2].scatter(phi,x)
     axunphi.set_xlabel(r"$\phi = \arctan(y/x)$",fontsize=FontSize)
     axunphi.set_ylabel(r"$(\vu{u}\cdot \vu{n})^2$",fontsize=FontSize)
-    axunphi.yaxis.set_label_position("right")
-    axunphi.yaxis.tick_right()
-    axunphi.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="off", labelbottom=True, labelleft=False, labelsize=LabelSize)
+    axunphi.yaxis.set_label_position("left")
+    #axunphi.yaxis.tick_right()
+    axunphi.tick_params(which="both", direction="in", bottom="on", top="off", right="off", left="oon", labelbottom=True, labelleft=True, labelsize=LabelSize)
     axunphi.xaxis.set_major_locator(MultipleLocator(2))
     axunphi.xaxis.set_minor_locator(MultipleLocator(1))
     #axunphi.set_xlim(-2.7, 2.7)
@@ -254,7 +273,9 @@ def wall_pitch_q_plot(LineWidth, FontSize, LabelSize):
 
     axphi0z.set_xlabel(r"$\left<z\right>/\left<R\right>$",fontsize=FontSize)
     axphi0z.set_ylabel(r"$\phi_0$",fontsize=FontSize)
-    axphi0z.tick_params(which="both", direction="in", bottom="on", top="off", right="off", left="on", labelbottom=True, labelleft=True, labelsize=LabelSize)
+    axphi0z.yaxis.set_label_position("left")
+    #axphi0z.yaxis.tick_right()
+    axphi0z.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="off", labelbottom=True, labelleft=True, labelsize=LabelSize)
 
     axphi0z.xaxis.set_major_locator(MultipleLocator(1))
     axphi0z.xaxis.set_minor_locator(MultipleLocator(0.5))
@@ -268,16 +289,8 @@ def wall_pitch_q_plot(LineWidth, FontSize, LabelSize):
     x1, y1 = 0.75, 0.075
     axphi0z.text(x1, y1, r"(c)", fontsize=FontSize, transform=axphi0z.transAxes)
 
-
-    kcs = np.arange(0.0,2.01,0.1)
-    #res by cn
-    Cn2res = [(0.07171687507132235, 0.014269194742233529), (0.1531247950928125, 0.019702645691059745), (0.21597286919392358, 0.015530465542011793), (0.12134238384877459, 0.020801319512674853), (0.2893139878856185, 0.0049807115122890485), (0.30840884105694, 0.018021602282221025), (0.3439241206076535, 0.023715579422829116), (0.3549383315516277, 0.014143177344371568), (0.3765076695151387, 0.029217039592043484), (0.48119482596213653, 0.016506420556048142), (0.6269013241538041, 0.008668224771367267), (0.6155285243118631, 0.02951455537466414), (0.6071443855656959, 0.030377613877672377), (0.6828988133368302, 0.016270617400019716), (0.7268114381338039, 0.029385986928657605), (0.807921890344102, 0.02512949370453941), (0.8116053338525985, 0.027035593644727143), (0.8498225919074379, 0.023119548395428357), (0.8019832448359602, 0.023494484374115946), (0.8416905938095114, 0.01768179574411115), (0.9213251792310383, 0.04878216325679875)]
-
-    Cn4res = [(0.04526928659475114, 0.02450490350304673), (0.052519524383029245, 0.014833023186659607), (0.17082072926035433, 0.014317561384449597), (0.19119114042378088, 0.020541188626334566), (0.18136254424639991, 0.02977076209961673), (0.29167081623340163, 0.019907713717815103), (0.38529827242545833, 0.019665338859497696), (0.47357895083010587, 0.031999344042706206), (0.35935583051548764, 0.0035951730371498853), (0.418774417527803, 0.021991532090154482), (0.33655979350098914, 0.013728473271936882), (0.5795742763531372, 0.006700866889811913), (0.633888494763439, 0.036280314067395784), (0.7054085401292735, 0.015219188144950999), (0.7283219380194356, 0.038371045899881606), (0.7279032948946208, 0.020915320054828775), (0.8140908945784836, 0.021769667918782345), (0.9326531697794475, 0.020552343320187443), (0.9972649387446532, 0.03218122500117304), (0.9299581288732129, 0.030817098325748242), (0.9069568906852431, 0.018944770171753167)]
-
-    Cn6res = [(-0.04535629139876542, 0.021113893611373585), (0.0859852488954683, 0.02332645619289845), (0.10046459082681683, 0.02004970392703706), (0.132936078911145, 0.029107698275464233), (0.2173186393632259, 0.00869240606734223), (0.28203634123467103, 0.022155009014534842), (0.3643730464719448, 0.004330547417869567), (0.3626924134801637, 0.018990989593462577), (0.4647405159949755, 0.009079895858261126), (0.5022692729650203, 0.033354261771154796), (0.4694281510881381, 0.014153187156549679), (0.5566644040589314, 0.027962283011405485), (0.5451418024359513, 0.033523225772062584), (0.6813221621068155, 0.014908556442604132), (0.7433417090200445, 0.04024179292816863), (0.7711906286273695, 0.014836617946756057), (0.8194082073425, 0.029523235446106667), (0.8228541736488066, 0.0198543734727229), (0.8454411583713057, 0.017040105556118172), (0.909081676268063, 0.018714415026368024), (0.907172499406838, 0.006310711006587178)]
-
     # no longer needed, since R already considered in fitting slope
+    kcs, Cn2res,Cn4res,Cn6res,alpha_u_Cn2,alpha_u_Cn4,alpha_u_Cn6 = wall_pitch_tan_data_get()
     R = 1
     Cn2res = R*np.array(Cn2res)
     Cn2ta, Cn2taerr = Cn2res[:,0], Cn2res[:,1]
@@ -298,10 +311,10 @@ def wall_pitch_q_plot(LineWidth, FontSize, LabelSize):
     axtankc.errorbar(kcs,Cn4ta,yerr = Cn4taerr, color = "r", marker = "o", linestyle="None" ,ms=msize,mfc="None", label="C=4")
     axtankc.errorbar(kcs,Cn6ta,yerr = Cn6taerr, color = "k", marker = "o", linestyle="None" ,ms=msize,mfc="None", label="C=6")
     axtankc.set_xlabel(r"$k_c$",fontsize=FontSize)
-    axtankc.set_ylabel(r"$\tan(\alpha)$",fontsize=FontSize)
-    axtankc.yaxis.set_label_position("right")
-    axtankc.yaxis.tick_right()
-    axtankc.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="off", labelbottom=True, labelleft=False, labelsize=LabelSize)
+    axtankc.set_ylabel(r"$\tan\alpha$",fontsize=FontSize)
+    axtankc.yaxis.set_label_position("left")
+    #axtankc.yaxis.tick_right()
+    axtankc.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="on", labelbottom=True, labelleft=True, labelsize=LabelSize)
 
     axtankc.xaxis.set_major_locator(MultipleLocator(0.5))
     axtankc.xaxis.set_minor_locator(MultipleLocator(0.25))
@@ -313,6 +326,23 @@ def wall_pitch_q_plot(LineWidth, FontSize, LabelSize):
 
     x1, y1 = 0.75, 0.075
     axtankc.text(x1, y1, r"(d)", fontsize=FontSize, transform=axtankc.transAxes)
+
+    axthekc.plot(kcs,alpha_u_Cn2 - np.arctan(Cn2ta), color = "b", marker = "s", linestyle="None", ms=msize, mfc = "None", label = "C=2")
+    axthekc.plot(kcs,alpha_u_Cn4 - np.arctan(Cn4ta), color = "r", marker = "s", linestyle="None", ms=msize, mfc = "None", label = "C=4")
+    axthekc.plot(kcs,alpha_u_Cn4 - np.arctan(Cn4ta), color = "k", marker = "s", linestyle="None", ms=msize, mfc = "None", label = "C=6")
+    axthekc.set_xlabel(r"$k_c$",fontsize=FontSize)
+    axthekc.set_ylabel(r"$\theta = \alpha_u - \alpha$",fontsize=FontSize)
+    axthekc.yaxis.set_label_position("left")
+    #axthekc.yaxis.tick_right()
+    axthekc.tick_params(which="both", direction="in", bottom="on", top="off", right="off", left="on", labelbottom=True, labelleft=True, labelsize=LabelSize)
+
+    axthekc.xaxis.set_major_locator(MultipleLocator(0.5))
+    axthekc.xaxis.set_minor_locator(MultipleLocator(0.25))
+    axthekc.yaxis.set_major_locator(MultipleLocator(0.5))
+    axthekc.yaxis.set_minor_locator(MultipleLocator(0.1))
+    axthekc.set_ylim(-0.01,1.51)
+    axthekc.legend(loc="upper right", ncol=1, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
+    axthekc.text(0.75, 0.075, r"(e)", fontsize=FontSize, transform=axthekc.transAxes)
 
     plt.tight_layout(pad=0.1)
     plt.savefig("figures/wall_pitch.pdf", format="pdf")
