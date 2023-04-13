@@ -54,10 +54,11 @@ def main():
     #qs = np.arange(0.0,8.1,0.4)
     K = 1
     C, R = 1,1
-    Cs = np.arange(0.5,10.1,0.5)
+    Cs = np.arange(0.2,8.1,0.2)
 
     #del_Ftot_Ks_qs_plot("../data/pydata/Jan26_2023",K,Cs,1)
-    del_Ftot_Ks_qs_plot("../data/pydata/Mar19_2023",K,Cs,1)
+    del_Ftot_Ks_qs_plot("../data/pydata/Mar20_2023",K,Cs,1,mi=0,mj=2)
+    del_Ftot_Ks_qs_plot("../data/pydata/Mar20_2023",K,Cs,1,mi=0,mj=3)
 
 if __name__ == "__main__":
     main()

@@ -269,7 +269,7 @@ def walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize):
     # axlf_q.set_ylim(0.35,1.0)
     axlf_q.xaxis.set_major_locator(MultipleLocator(0.5))
     axlf_q.xaxis.set_minor_locator(MultipleLocator(0.25))
-    axlf_q.set_xlabel(r"$q$", fontsize=FontSize)
+    axlf_q.set_xlabel(r"$k_c$", fontsize=FontSize)
     axlf_q.legend(title=legendtitle, loc="upper right", ncol=1, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
     x1, y1 = 0.85, 0.1
     axlf_q.text(x1, y1, r"(e)", fontsize=FontSize, transform=axlf_q.transAxes)

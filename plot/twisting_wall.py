@@ -245,7 +245,8 @@ def wall_pitch_q_plot(LineWidth, FontSize, LabelSize):
 
     # single tube plot
     #fname = "../data/Ne2/May12_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q1.5_Cn4.0.csv"
-    fname = "../data/Ne2/Dec7_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q1.5_Cn4.0_id0.csv"
+    #fname = "../data/Ne2/Dec7_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q1.5_Cn4.0_id0.csv"
+    fname = "../data/Ne2/Dec7_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q1.5_Cn6.0_id0.csv"
 
     ax_pitch_phi_z_plot(fname, axcfg, axunphi, axphi0z, msize, LineWidth, nbin=5, z_relative_range=(1 / 4, 3 / 4))
     axcfg.margins(y=0)

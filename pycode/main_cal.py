@@ -81,8 +81,8 @@ def main():
         #Ftot_qs_cal("./pydata", 10, 1, qs, 2, 50, 50, "Powell")
         #
         #qs = np.arange(0.01,0.1,0.002)
-        Cs = np.arange(1,3.1,1)
-        qs = -np.arange(0.0,1.1,0.05)
+        Cs = np.arange(1,8.1,2)
+        qs = np.arange(0.0,2.01,0.1)
         m = 0
         R = 1
         K = 1
@@ -97,7 +97,8 @@ def main():
                     pass
                     #print("R=%f,q=%f \n"%(R,q))
                     #print("Ftot_unit_length/R= ",Ftot_unit_length(K, C, q, m, alpha, gamma, bn_phi, bn_z, R))
-                Ftot_qs_cal("../data/pydata/local/Mar19_2023", K, C, qs, m, bn_phi, bn_z, R, "Powell")
+                Ftot_qs_cal("../data/pydata/local/Apr13_2023", K, C, qs, m, bn_phi, bn_z, R, "Cholesteric Powell")
+                #Ftot_qs_cal("../data/pydata/local/Apr13_2023", K, C, qs, m, bn_phi, bn_z, R, "Powell")
 
 
 if __name__ == "__main__":

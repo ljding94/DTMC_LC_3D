@@ -229,8 +229,10 @@ def obj_Ftot(xs, K, C, q, m, bn_phi, bn_z, R=1):
 def opt_alpha_gamma_fun(fun, K, C, q, m, bn_phi, bn_z, R, method):
     paras = (K, C, q, m, bn_phi, bn_z, R)
     alpha_gamma_0 = (0.25*np.pi, 0.5)
-    if method:
-        opt = optimize.minimize(fun, alpha_gamma_0, args=paras, bounds=((0, 0.5 * np.pi), (0, 1)), method=method)
+    if method=="Cholesteric Powell":
+        opt = optimize.minimize(fun, alpha_gamma_0, args=paras, bounds=((-0.5*np.pi, 0.5 * np.pi), (0.9, 1)), method="Powell")
+    elif method:
+        opt = optimize.minimize(fun, alpha_gamma_0, args=paras, bounds=((-0.5*np.pi, 0.5 * np.pi), (0, 1)), method=method)
     else:
         opt = optimize.minimize(fun, alpha_gamma_0, args=paras)
     return opt

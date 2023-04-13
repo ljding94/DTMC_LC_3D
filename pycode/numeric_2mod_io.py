@@ -32,13 +32,13 @@ def Ftot_qs_cal(folder, K, C, qs, m, bn_phi, bn_z, R, method):
         for i in range(len(qs)):
             f.write("%f,%f,%f,%f\n" % (qs[i],optFtots[i],optalphas[i], optgammas[i]))
 
-def del_Ftot_Ks_qs_plot(folder,K,Cs,R):
+def del_Ftot_Ks_qs_plot(folder,K,Cs,R,mi=0,mj=2):
     LineWidth, FontSize, LabelSize = 1,9,8
     optFtot_m0, optalpha_m0, optgamma_m0 = [], [], []
     optFtot_m2, optalpha_m2, optgamma_m2 = [], [], []
     for C in Cs:
-        filename_m0 = folder + "/optFtot_K%.2f_C%.1f_m0_R%.1f_qs.csv" % (K, C, R)
-        filename_m2 = folder + "/optFtot_K%.2f_C%.1f_m2_R%.1f_qs.csv" % (K, C, R)
+        filename_m0 = folder + "/optFtot_K%.2f_C%.1f_m%d_R%.1f_qs.csv" % (K, C,mi, R)
+        filename_m2 = folder + "/optFtot_K%.2f_C%.1f_m%d_R%.1f_qs.csv" % (K, C,mj, R)
 
         qs,optFtot,optalpha,optgamma = np.loadtxt(filename_m0, skiprows=1, delimiter=",", unpack=True)
         optFtot_m0.append(optFtot)
@@ -96,11 +96,13 @@ def del_Ftot_Ks_qs_plot(folder,K,Cs,R):
     axFdiff.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="off", labelbottom=True, labelleft=True, labelsize=LabelSize)
     cbar.ax.set_title(r"$\Delta E'R^2/K$",fontsize=LabelSize)
     axFdiff.xaxis.set_major_locator(MultipleLocator(1))
-    axFdiff.xaxis.set_minor_locator(MultipleLocator(0.5))
+    axFdiff.xaxis.set_minor_locator(MultipleLocator(0.2))
     axFdiff.yaxis.set_major_locator(MultipleLocator(1))
     axFdiff.yaxis.set_minor_locator(MultipleLocator(0.5))
-    axFdiff.text(-1.5,2,r"$m=2$")
-    axFdiff.text(-0.8,8,r"$m=0$")
+
+    if(mi==0 and mj==2):
+        axFdiff.text(0.5,6,r"$m=%d$"%mi)
+        axFdiff.text(1.5,2,r"$m=%d$"%mj)
 
     x1, y1 = 0.8, 0.1
     axFdiff.text(x1, y1, r"(a)", fontsize=FontSize, transform=axFdiff.transAxes)
@@ -151,7 +153,7 @@ def del_Ftot_Ks_qs_plot(folder,K,Cs,R):
 
 
     plt.tight_layout(pad=0.01)
-    plt.savefig(folder+"/two_mod_del_E.pdf",format="pdf")
+    plt.savefig(folder+"/two_mod_del_E_m%d_m%d.pdf"%(mi,mj),format="pdf")
     #plt.show()
     plt.close()
 
