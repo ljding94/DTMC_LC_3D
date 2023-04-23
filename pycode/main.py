@@ -13,7 +13,9 @@ def main():
     #cylinder_2mod_plot("./pydata/optFtot_K10.0_C1.0_m2_qs.csv")
 
     #F_compot_param_plot("../data/pydata/local/Mar18_2023_params_test/F_compot_m2_R1.0_alphas_gammas.csv",2)
-    #F_compot_param_plot("../data/pydata/local/Mar18_2023_params_test/F_compot_m0_R1.0_alphas_gammas.csv",0)
+    #F_compot_param_plot("../data/pydata/local/#Apr16_2023_params_test/F_compot_m0_R1.0_alphas_gammas.csv",0)
+    #F_compot_param_plot("../data/pydata/local/Apr16_2023_params_test/F_compot_m2_R1.0_alphas_gammas.csv",2)
+    #F_compot_param_plot("../data/pydata/local/Apr16_2023_params_test/F_compot_m3_R1.0_alphas_gammas.csv",3)
     #return 0
 
     K = 2 #[0.1,0.5,2.0,4.0]
@@ -56,9 +58,9 @@ def main():
     C, R = 1,1
     Cs = np.arange(0.2,8.1,0.2)
 
-    #del_Ftot_Ks_qs_plot("../data/pydata/Jan26_2023",K,Cs,1)
-    del_Ftot_Ks_qs_plot("../data/pydata/Mar20_2023",K,Cs,1,mi=0,mj=2)
-    del_Ftot_Ks_qs_plot("../data/pydata/Mar20_2023",K,Cs,1,mi=0,mj=3)
+    del_Ftot_Ks_qs_plot("../data/pydata/Apr16_2023",K,Cs,1,mi=0,mj=2)
+    #del_Ftot_Ks_qs_plot("../data/pydata/Mar20_2023",K,Cs,1,mi=0,mj=2)
+    #del_Ftot_Ks_qs_plot("../data/pydata/Mar20_2023",K,Cs,1,mi=0,mj=3)
 
 if __name__ == "__main__":
     main()

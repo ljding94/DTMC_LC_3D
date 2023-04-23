@@ -278,3 +278,15 @@ def walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize):
     plt.savefig("figures/smectic_to_walls.pdf",format="pdf")
 
 
+def walls_membrane_shape_slice(LineWidth, FontSize, LabelSize):
+    print("see if (cyindrical) cross section shape twist with pi wall")
+    ppi = 72
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 0.4))
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+    axcfg = plt.subplot2grid((1, 1), (0, 0),colspan=1,rowspan=1)
+    fname = "../data/Ne2/Nov30_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd2.0_q1.5_Cn6.0.csv"
+    zs = np.arange(-14,14,4)
+    for i in range(len(zs)-1):
+        ax_config_plot_xyz(axcfg, fname, "gray", LineWidth, pov="xy",xshift = 8*i,zslice = [zs[i],zs[i+1]], mesh=1,bead=1,rod=1,d=1)
+    plt.show()

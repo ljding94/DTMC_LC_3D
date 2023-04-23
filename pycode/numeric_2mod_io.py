@@ -143,8 +143,10 @@ def del_Ftot_Ks_qs_plot(folder,K,Cs,R,mi=0,mj=2):
     axgamma.yaxis.set_label_position("right")
     axgamma.yaxis.tick_right()
     axgamma.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="off", labelbottom=True, labelleft=False, labelsize=LabelSize)
+
     axgamma.xaxis.set_major_locator(MultipleLocator(1))
     axgamma.xaxis.set_minor_locator(MultipleLocator(0.5))
+
     axgamma.yaxis.set_major_locator(MultipleLocator(0.2))
     axgamma.yaxis.set_minor_locator(MultipleLocator(0.1))
 
@@ -179,14 +181,14 @@ def F_compot_param(folder, m, alphas, gammas,  bn_phi, bn_z, R):
             f.write("%f,%f,%f,%f,%f,%f,%f\n" % (alpha_write[i],gamma_write[i],intSS[i],intTT[i],intT[i],intBB[i],intC[i]))
 
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-def F_compot_param_plot(filename,m):
+def F_compot_param_plot(filename,m,ms=12):
     data = np.loadtxt(filename,delimiter=",",skiprows=1,unpack=True)
     alpha,gamma,intSS,intTT,intT,intBB,intC = data
     cmap = cm.get_cmap("jet_r")
     plt.figure()
     fig, axs = plt.subplots(5,1,figsize=(4,3*4))
     axs[0].set_title("m=%d"%m)
-    im0 = axs[0].scatter(alpha,gamma,c=intSS,cmap=cmap)
+    im0 = axs[0].scatter(alpha,gamma,c=intSS,cmap=cmap,s=ms)
     select = intSS==0
     axs[0].scatter(alpha[select],gamma[select],marker="+",color="white")
     divider = make_axes_locatable(axs[0])
@@ -194,7 +196,7 @@ def F_compot_param_plot(filename,m):
     cbar = fig.colorbar(im0, cax=cax, orientation='vertical')
     cbar.ax.set_ylabel(r"$\int S^2$")
 
-    im1 = axs[1].scatter(alpha,gamma,c=intTT,cmap=cmap)
+    im1 = axs[1].scatter(alpha,gamma,c=intTT,cmap=cmap,s=ms)
     select = intTT==0
     axs[1].scatter(alpha[select],gamma[select],marker="+",color="white")
     divider = make_axes_locatable(axs[1])
@@ -202,7 +204,7 @@ def F_compot_param_plot(filename,m):
     cbar = fig.colorbar(im1, cax=cax, orientation='vertical')
     cbar.ax.set_ylabel(r"$\int T^2$")
 
-    im1 = axs[2].scatter(alpha,gamma,c=intT,cmap=cmap)
+    im1 = axs[2].scatter(alpha,gamma,c=intT,cmap=cmap,s=ms)
     select = intT==0
     axs[2].scatter(alpha[select],gamma[select],marker="+",color="white")
     divider = make_axes_locatable(axs[2])
@@ -210,7 +212,7 @@ def F_compot_param_plot(filename,m):
     cbar = fig.colorbar(im1, cax=cax, orientation='vertical')
     cbar.ax.set_ylabel(r"$\int T$")
 
-    im2 = axs[3].scatter(alpha,gamma,c=intBB,cmap=cmap)
+    im2 = axs[3].scatter(alpha,gamma,c=intBB,cmap=cmap,s=ms)
     select = intBB==0
     axs[3].scatter(alpha[select],gamma[select],marker="+",color="white")
     divider = make_axes_locatable(axs[3])
@@ -218,7 +220,7 @@ def F_compot_param_plot(filename,m):
     cbar = fig.colorbar(im2, cax=cax, orientation='vertical')
     cbar.ax.set_ylabel(r"$\int B^2$")
 
-    im3 = axs[4].scatter(alpha,gamma,c=intC,cmap=cmap)
+    im3 = axs[4].scatter(alpha,gamma,c=intC,cmap=cmap,s=ms)
     select = intC==0
     axs[4].scatter(alpha[select],gamma[select],marker="+",color="white")
     divider = make_axes_locatable(axs[4])

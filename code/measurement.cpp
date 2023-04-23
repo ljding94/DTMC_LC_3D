@@ -873,4 +873,35 @@ std::vector<double> dtmc_lc::uucdis_m(int bin_num)
     return uucdis;
 }
 
+std::vector<double> dtmc_lc::un2dis_m(int bin_num)
+{
+
+    std::vector<double> un2dis;
+    double del_un2 = 1.0 / bin_num;               // un2 take [0,1]
+    double un2_increment = 1.0 / mesh.size();
+    int bin;
+    double un2_buff;
+    un2dis.clear();
+
+    // initialize bins
+    for (int k = 0; k < bin_num; k++)
+    {
+        un2dis.push_back(0);
+    }
+
+    for (int i = 0; i < mesh.size(); i++)
+    {
+        un2_buff = un2_m(i);
+        bin = int(un2_buff / del_un2);
+        if (bin >= bin_num)
+        {
+            std::cout << "out of range for un2dis bin_num\n";
+        }
+        un2dis[bin] += un2_increment;
+    }
+    return un2dis;
+}
+
+
+
 #pragma endregion

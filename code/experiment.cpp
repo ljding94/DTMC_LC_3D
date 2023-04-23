@@ -299,7 +299,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<double> D_edge_all;
     std::vector<std::vector<double>> Gij_all;
     //std::vector<std::vector<double>> rhor_all;
-    std::vector<std::vector<double>> uucdis_all;
+    //std::vector<std::vector<double>> uucdis_all;
+    std::vector<std::vector<double>> un2dis_all;
 
     double bead_accept = 0;
     double spin_accept = 0;
@@ -346,9 +347,10 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         if (sweep_n % sweep_p_G == 0)
         {
             Gij_all.push_back(Gij_m());
-            D_edge_all.push_back(D_edge_com_m());
+            //D_edge_all.push_back(D_edge_com_m());
             //rhor_all.push_back(rho_rcom_m(delta_r, bin_num));
-            uucdis_all.push_back(uucdis_m(bin_num));
+            //uucdis_all.push_back(uucdis_m(bin_num));
+            un2dis_all.push_back(un2dis_m(bin_num));
         }
         for (int i = 0; i < step_p_sweep; i++)
         {
@@ -412,8 +414,9 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             f << IdA_all[i] << "," << I2H_all[i] << "," << I2H2_all[i] << "," << I2H2dis_all[i] << "," << IK_all[i] << "," << Tp2uu_all[i] << "," << Tuuc_all[i] << "," << Bond_num_all[i] << "," << Tun2_all[i] << "," << Tuz2_all[i] << "," << Tuz_abs_all[i] << "," << Tlb_all[i] << "\n";
         }
     }
-    /*
     f.close();
+
+
     std::ofstream fG(folder + "/Gij_" + finfo + ".csv");
     if (fG.is_open())
     {
@@ -429,7 +432,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     fG.close();
-    */
+
 /*
     std::ofstream fuuc(folder + "/uucdis_" + finfo + ".csv");
     if (fuuc.is_open())
@@ -462,4 +465,20 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     }
     frhor.close();
     */
+
+   std::ofstream fun2(folder + "/un2dis_" + finfo + ".csv");
+    if (fun2.is_open())
+    {
+        for (int i = 0; i < un2dis_all.size(); i++)
+        {
+            fun2 << un2dis_all[i][0];
+            for (int j = 1; j < un2dis_all[i].size(); j++)
+            {
+                fun2 << "," << un2dis_all[i][j];
+            }
+            fun2 << "\n";
+        }
+    }
+    fun2.close();
+
 }
