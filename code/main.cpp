@@ -75,7 +75,7 @@ int main(int argc, char const *argv[])
             //membrane.State_write(folder + "/State_" + finfo + "_therm.csv");
         }
         //membrane.Thermal(100, int(N / (delta_s * delta_s)) + 1, 1, delta_s, delta_theta);
-        membrane.O_MC_measure(100, 50, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo, seq);
+        membrane.O_MC_measure(100, 10, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo, seq);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 
         return 0;

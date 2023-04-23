@@ -347,7 +347,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         if (sweep_n % sweep_p_G == 0)
         {
             Gij_all.push_back(Gij_m());
-            //D_edge_all.push_back(D_edge_com_m());
+            D_edge_all.push_back(D_edge_com_m());
             //rhor_all.push_back(rho_rcom_m(delta_r, bin_num));
             //uucdis_all.push_back(uucdis_m(bin_num));
             un2dis_all.push_back(un2dis_m(bin_num));
