@@ -171,12 +171,11 @@ public:
     double D_edge_com_m();
     // normalized twist from center of mass measurement
     // (u(r)*nu)^2, how mush director twist about membrane nematic director
-    std::vector<double> un2dis_m(int bin_num);
-    // distribution of un2 among beads, good indication for pi wall formation
-
+    std::vector<double> un2dis_m(int bin_num);                  // distribution of un2 among beads, good indication for pi wall formation
     std::vector<double> comR_m();                              // center of mass measurement
     std::vector<double> rho_rcom_m(double del_r, int bin_num); // density distribution from center of mass
     std::vector<double> uucdis_m(int bin_num);                 // distribution of twist, take from 0 to pi/4
+    std::vector<double> dA2H2dis_m(int bin_num);                // distribution of dA(2H)^2 (since it's unit less)
 
     // useful tools
     double distance2(int ind_1, int ind_2);
