@@ -631,3 +631,39 @@ def plot_O_MCsteps(filename):
 
 def plot_vs_rescaled_q(foldername, pars, par_nm, par_dg, mode):
     pass
+
+def un2_distribution_plot(filename,tag):
+    data = np.loadtxt(filename, delimiter = ",", unpack = True)
+
+    bin_num = len(data)
+    un2pdf = np.average(data,axis=1)*bin_num
+    un2x = np.linspace(0.5/bin_num,1-0.5/bin_num,bin_num)
+    un2x_ave = np.sum(un2pdf*un2x)/bin_num
+
+    plt.figure()
+    plt.plot(un2x,un2pdf)
+    plt.plot([un2x_ave,un2x_ave],[0,6],"-")
+    plt.xlabel(r"$(u\cdot n)^2$")
+    plt.ylabel(r"$p((u\cdot n)^2)$")
+    plt.ylim(0,6)
+    plt.legend(title=tag)
+    plt.savefig(filename[:-4]+".png")
+    plt.close()
+
+def dA2H2_distribution_plot(filename,tag):
+    data = np.loadtxt(filename, delimiter = ",", unpack = True)
+
+    bin_num = len(data)
+    dA2H2pdf = np.average(data,axis=1)*bin_num
+    dA2H2x = np.linspace(0.5/bin_num,1-0.5/bin_num,bin_num)
+    dA2H2x_ave = np.sum(dA2H2pdf*dA2H2x)/bin_num
+    print("hello")
+    plt.figure()
+    plt.plot(dA2H2x,dA2H2pdf)
+    #plt.plot([dA2H2x_ave,dA2H2x_ave],[0,6],"-")
+    plt.xlabel(r"$dA (2H)^2$")
+    plt.ylabel(r"$p(dA (2H)^2)$")
+    #plt.ylim(0,6)
+    plt.legend(title=tag)
+    plt.savefig(filename[:-4]+".png")
+    plt.close()

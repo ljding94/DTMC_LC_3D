@@ -176,6 +176,7 @@ public:
     std::vector<double> rho_rcom_m(double del_r, int bin_num); // density distribution from center of mass
     std::vector<double> uucdis_m(int bin_num);                 // distribution of twist, take from 0 to pi/4
     std::vector<double> dA2H2dis_m(int bin_num);                // distribution of dA(2H)^2 (since it's unit less)
+    std::vector<double> twoHdis_m(int bin_num);                // distribution of 2H
 
     // useful tools
     double distance2(int ind_1, int ind_2);

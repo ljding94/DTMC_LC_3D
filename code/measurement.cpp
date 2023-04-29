@@ -904,9 +904,8 @@ std::vector<double> dtmc_lc::un2dis_m(int bin_num)
 
 std::vector<double> dtmc_lc::dA2H2dis_m(int bin_num)
 {
-
     std::vector<double> dA2H2dis;
-    double del_dA2H2 = 0.5 / bin_num;               // take range [0,0.3] hope it's sufficient
+    double del_dA2H2 = 0.5 / bin_num;               // take range [0,0.5] hope it's sufficient
     double dA2H2_increment = 1.0 / mesh.size();
     int bin;
     double dA2H2_buff;
@@ -929,6 +928,35 @@ std::vector<double> dtmc_lc::dA2H2dis_m(int bin_num)
         dA2H2dis[bin] += dA2H2_increment;
     }
     return dA2H2dis;
+}
+
+std::vector<double> dtmc_lc::twoHdis_m(int bin_num)
+{
+    std::vector<double> twoHdis;
+    double del_2H = 2.0 / bin_num;               // take range [-1,1] hope it's sufficient
+    double twoH_increment = 1.0 / mesh.size();
+    int bin;
+    double twoH_buff;
+    twoHdis.clear();
+
+    // initialize bins
+    for (int k = 0; k < bin_num; k++)
+    {
+        twoHdis.push_back(0);
+    }
+
+    for (int i = 0; i < mesh.size(); i++)
+    {
+        twoH_buff =  mesh[i].dAn2H[1];
+        bin = int((twoH_buff+1) / del_2H);
+        if (bin >= bin_num || bin < 0 )
+        {
+            std::cout << twoH_buff <<" out of range for twoHdis bin_num\n";
+        }else{
+        twoHdis[bin] += twoH_increment;
+        }
+    }
+    return twoHdis;
 }
 
 
