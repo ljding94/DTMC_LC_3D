@@ -891,8 +891,7 @@ std::vector<double> dtmc_lc::un2dis_m(int bin_num)
 
     for (int i = 0; i < mesh.size(); i++)
     {
-        un2_buff = un2_m(i);
-        bin = int(un2_buff / del_un2);
+        bin = int(mesh[i].un2 / del_un2);
         if (bin >= bin_num)
         {
             std::cout << "out of range for un2dis bin_num\n";
@@ -901,6 +900,34 @@ std::vector<double> dtmc_lc::un2dis_m(int bin_num)
     }
     return un2dis;
 }
+std::vector<double> dtmc_lc::un2thetadis_m(int bin_num)
+{
+    std::vector<double> un2thetadis;
+
+    double del_un2theta = 0.5 * PI/ bin_num;               // un2theta take [0,0.5pi]
+    double un2theta_increment = 1.0 / mesh.size();
+    int bin;
+    double un2_buff;
+    un2thetadis.clear();
+
+    // initialize bins
+    for (int k = 0; k < bin_num; k++)
+    {
+        un2thetadis.push_back(0);
+    }
+
+    for (int i = 0; i < mesh.size(); i++)
+    {
+        bin = int(std::acos(std::sqrt(mesh[i].un2)) / del_un2theta);
+        if (bin >= bin_num)
+        {
+            std::cout << "out of range for un2thetadis bin_num\n";
+        }
+        un2thetadis[bin] += un2theta_increment;
+    }
+    return un2thetadis;
+}
+
 
 std::vector<double> dtmc_lc::dA2H2dis_m(int bin_num)
 {

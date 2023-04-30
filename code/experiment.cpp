@@ -301,6 +301,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     //std::vector<std::vector<double>> rhor_all;
     //std::vector<std::vector<double>> uucdis_all;
     std::vector<std::vector<double>> un2dis_all;
+    std::vector<std::vector<double>> un2thetadis_all;
     std::vector<std::vector<double>> dA2H2dis_all;
     std::vector<std::vector<double>> twoHdis_all;
 
@@ -354,7 +355,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             //rhor_all.push_back(rho_rcom_m(delta_r, bin_num));
             //uucdis_all.push_back(uucdis_m(bin_num));
             un2dis_all.push_back(un2dis_m(bin_num));
-            dA2H2dis_all.push_back(dA2H2dis_m(bin_num));
+            un2thetadis_all.push_back(un2thetadis_m(bin_num));
+            //dA2H2dis_all.push_back(dA2H2dis_m(bin_num));
             twoHdis_all.push_back(twoHdis_m(bin_num));
         }
         for (int i = 0; i < step_p_sweep; i++)
@@ -486,6 +488,22 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     }
     fun2.close();
 
+
+   std::ofstream fun2theta(folder + "/un2thetadis_" + finfo + ".csv");
+    if (fun2theta.is_open())
+    {
+        for (int i = 0; i < un2thetadis_all.size(); i++)
+        {
+            fun2theta << un2thetadis_all[i][0];
+            for (int j = 1; j < un2thetadis_all[i].size(); j++)
+            {
+                fun2theta << "," << un2thetadis_all[i][j];
+            }
+            fun2theta << "\n";
+        }
+    }
+    fun2theta.close();
+/*
     std::ofstream fdA2H2(folder + "/dA2H2dis_" + finfo + ".csv");
     if (fdA2H2.is_open())
     {
@@ -500,7 +518,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     fdA2H2.close();
-
+*/
     std::ofstream f2H(folder + "/2Hdis_" + finfo + ".csv");
     if (f2H.is_open())
     {
