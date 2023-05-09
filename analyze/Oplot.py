@@ -8,6 +8,33 @@ from scipy import stats
 import scipy.signal
 import scipy.fft
 
+def get_All_data(head, f2rtail, foldername, pars, par_nm, par_dg, mode):
+    Alldata, O_label = [], []
+    xLabel = mode
+    cpar_ind = find_cpar_ind(par_nm, mode)
+    for i in range(len(pars)):
+        par = pars[i]
+        par_dealing = par[:]
+        # par_dealing[cpar_ind] = par[cpar_ind][i]
+        f2rtail = "MC"
+        label = ""
+        for j in range(len(par)):
+            if j == cpar_ind:
+                f2rtail += "_" + par_nm[j] + "s"
+            else:
+                f2rtail += "_" + par_nm[j] + "%.*f" % (par_dg[j], par_dealing[j])
+                label += par_nm[j] + "%.*f," % (par_dg[j], par_dealing[j])
+        f2rtail += "_ana.csv"
+        filename = foldername + head + f2rtail
+        if(os.path.exists(filename)):
+            print(filename,"exists")
+            data = np.loadtxt(filename, skiprows=1, delimiter=",", unpack=True)
+            if(len(Alldata)==0):
+                Alldata = [[] for i in range(len(data))]
+            for i in range(len(data)):
+                Alldata[i].append(data[i])
+            O_label.append(label)
+
 
 def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     colors, alphas = None, None
@@ -650,6 +677,24 @@ def un2_distribution_plot(filename,tag):
     plt.savefig(filename[:-4]+".png")
     plt.close()
 
+
+def un2theta_distribution_plot(filename, tag):
+    data = np.loadtxt(filename, delimiter = ",", unpack = True)
+    bin_num = len(data)
+    un2thetapdf = np.average(data,axis=1)*bin_num/(0.5*np.pi)
+    un2thetax = np.linspace(0.5/bin_num,1-0.5/bin_num,bin_num)*0.5*np.pi
+    un2thetax_ave = np.sum(un2thetapdf*un2thetax)/bin_num
+
+    plt.figure()
+    plt.plot(un2thetax,un2thetapdf)
+    #plt.plot([un2thetax_ave,un2thetax_ave],[0,0.5*np/pi],"-")
+    plt.xlabel(r"$\theta (u,n)$")
+    plt.ylabel(r"$p(\theta)$")
+    plt.ylim(0,1.4)
+    plt.legend(title=tag)
+    plt.savefig(filename[:-4]+".png")
+    plt.close()
+
 def dA2H2_distribution_plot(filename,tag):
     data = np.loadtxt(filename, delimiter = ",", unpack = True)
 
@@ -667,3 +712,21 @@ def dA2H2_distribution_plot(filename,tag):
     plt.legend(title=tag)
     plt.savefig(filename[:-4]+".png")
     plt.close()
+
+def twoH_distribution_plot(filename,tag):
+    data = np.loadtxt(filename, delimiter = ",", unpack = True)
+
+    bin_num = len(data)
+    twoHpdf = np.average(data,axis=1)*bin_num
+    twoHx = np.linspace(-1+1/bin_num,1-1/bin_num,bin_num)
+
+    print("twoH distribution")
+    plt.figure()
+    plt.plot(twoHx,twoHpdf)
+    plt.xlabel(r"$2H$")
+    plt.ylabel(r"$p(2H)$")
+    #plt.ylim(0,6)
+    plt.legend(title=tag)
+    plt.savefig(filename[:-4]+".png")
+    plt.close()
+

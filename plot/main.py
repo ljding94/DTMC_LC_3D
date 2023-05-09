@@ -22,12 +22,12 @@ def main():
     #cholesteric_q_plot(LineWidth, FontSize, LabelSize)
     #walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize)
     #twist_q_plot(LineWidth, FontSize, LabelSize)
-    #wall_pitch_q_plot(LineWidth, FontSize, LabelSize)
+    wall_pitch_q_plot(LineWidth, FontSize, LabelSize)
 
 
     #demo_config_2mod_u_plot(LineWidth, FontSize, LabelSize)
     #two_mod_diagram_plot(LineWidth, FontSize, LabelSize)
-    walls_membrane_shape_slice(LineWidth, FontSize, LabelSize)
+    #walls_membrane_shape_slice(LineWidth, FontSize, LabelSize)
 
 if __name__ == "__main__":
     main()

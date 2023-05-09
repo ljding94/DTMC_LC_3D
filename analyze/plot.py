@@ -450,9 +450,9 @@ def tilt_slice_distri_plot(filename):
             #print("para_fit ", para_fit)
     z_r_mean = np.array(z_mean)/np.array(R_mean)
     axs[3].plot(z_r_mean, phi0, "o", markersize=8, mfc="None")
-    params, pcov = optimize.curve_fit(test_func_abx,z_r_mean, phi0, p0=[0, 0.1])
+    params, pcov = optimize.curve_fit(test_func_abx,z_r_mean, phi0, p0=[0, 1])
     perr = np.sqrt(np.diag(pcov))
-    axs[3].plot(z_mean,test_func_abx(z_r_mean,params[0],params[1]),"-",label=r"$\phi_0 = %.1f+%.3f z/r$"%(params[0],params[1]))
+    axs[3].plot(z_r_mean,test_func_abx(z_r_mean,params[0],params[1]),"-",label=r"$\phi_0 = %.1f+%.3f z/r$"%(params[0],params[1]))
     print(filename, params[1])
     # axs[2].scatter(phi,x)
 

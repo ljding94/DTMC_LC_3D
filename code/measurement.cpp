@@ -933,7 +933,13 @@ std::vector<double> dtmc_lc::dA2H2dis_m(int bin_num)
 {
     std::vector<double> dA2H2dis;
     double del_dA2H2 = 0.5 / bin_num;               // take range [0,0.5] hope it's sufficient
-    double dA2H2_increment = 1.0 / mesh.size();
+    // find number of interior bead
+    int N_edge_bead = 0;
+    for (int e = 0; e < Ne; e++)
+    {
+        N_edge_bead += edge_lists[e].size();
+    }
+    double dA2H2_increment = 1.0 / (mesh.size() - N_edge_bead);
     int bin;
     double dA2H2_buff;
     dA2H2dis.clear();
@@ -961,7 +967,13 @@ std::vector<double> dtmc_lc::twoHdis_m(int bin_num)
 {
     std::vector<double> twoHdis;
     double del_2H = 2.0 / bin_num;               // take range [-1,1] hope it's sufficient
-    double twoH_increment = 1.0 / mesh.size();
+    // find number of interior bead
+    int N_edge_bead = 0;
+    for (int e = 0; e < Ne; e++)
+    {
+        N_edge_bead += edge_lists[e].size();
+    }
+    double twoH_increment = 1.0 / (mesh.size() - N_edge_bead);
     int bin;
     double twoH_buff;
     twoHdis.clear();
