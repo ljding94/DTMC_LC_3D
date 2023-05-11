@@ -54,7 +54,7 @@ def main():
 
     # return 0
 
-    foldername = "../data/Ne2/May6_2023"
+    foldername = "../data/Ne2/May9_2023"
     print("analyzing " + foldername)
     N = 300
     #Ns = [100, 200, 300, 400, 500]

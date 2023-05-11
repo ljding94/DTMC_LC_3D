@@ -987,6 +987,7 @@ std::vector<double> dtmc_lc::twoHdis_m(int bin_num)
     for (int i = 0; i < mesh.size(); i++)
     {
         twoH_buff =  mesh[i].dAn2H[1];
+        if(mesh[i].edge_nei.size()) continue;
         bin = int((twoH_buff+1) / del_2H);
         if (bin >= bin_num || bin < 0 )
         {
