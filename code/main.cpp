@@ -19,7 +19,7 @@ int main(int argc, char const *argv[])
     double delta_s = 0.1;
     double delta_theta = 0.5;
     double delta_r = 0.1;
-    double bin_num = 80;
+    double bin_num = 50;
     //int nEu = 3; // number of harmonic oscilattors for umbrella sampling bias energy Eu
 
     int seq = 0; // steps in sequence that record configuration for sequence figure
@@ -96,7 +96,8 @@ int main(int argc, char const *argv[])
         }
         // 5000, 15000 for structure change
         // see how it evolves for now
-        membrane.O_MC_measure(15000, 1000, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo, seq);
+        // also tried 30000 just to see if 2H distribution get smoother
+        membrane.O_MC_measure(15000, 50, int(N / (delta_s * delta_s)) + 1, delta_s, delta_theta, delta_r, bin_num, folder, finfo, seq);
         membrane.State_write(folder + "/State_" + finfo + ".csv");
 
         return 0;

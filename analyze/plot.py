@@ -6,7 +6,7 @@ from matplotlib import cm
 from matplotlib.colors import Normalize
 from analyze import *
 from scipy import optimize
-
+import time
 
 def find_nu(ux, uy, uz):
     Q = np.array([[1.5 * np.average(ux * ux) - 0.5, np.average(ux * uy), 1.5 * np.average(ux * uz)], [0, 1.5 * np.average(uy * uy) - 0.5, np.average(uy * uz)], [0, 0, 1.5 * np.average(uz * uz) - 0.5]])
@@ -388,17 +388,34 @@ def test_func_sin(phi,a,b,c):
 def test_func_sin1(phi,c):
     return 0.5+0.5*np.sin(2*(phi-c))
 
+def test_func_3sin(phi,a,b,c,d,e):
+    return a+b*np.sin(2*(phi-c))+d*np.sin(4*(phi-c))+e*np.sin(6*(phi-c))
+
+def test_func_exp_sin(phi,lamphi,phi0):
+    return (np.exp(1/lamphi)-np.exp(np.sin(2*(phi-phi0))/lamphi))/(np.exp(1/lamphi)-np.exp(-1/lamphi))
+
+def test_func_exp_sin_m3(phi,lamphi,phi0):
+    # 3 pi-walls
+    return (np.exp(1/lamphi)-np.exp(np.sin(3*(phi-phi0))/lamphi))/(np.exp(1/lamphi)-np.exp(-1/lamphi))
+
+
 def test_func_abx(x,a,b):
     return a+b*np.array(x)
 
-def un2_fit_phi(phi,un2,phi0_bound):
-    params, params_covariance = optimize.curve_fit(test_func_sin, phi, un2, p0=[0.5, 0.5, np.average(phi0_bound)],bounds=((0.45,0.45,phi0_bound[0]),(0.55,0.55,phi0_bound[1])))
+def un2_fit_phi(phi,un2,phi0_bound,m=2):
+    #params, params_covariance = optimize.curve_fit(test_func_sin, phi, un2, p0=[0.5, 0.5, np.average(phi0_bound)],bounds=((0.45,0.45,phi0_bound[0]),(0.55,0.55,phi0_bound[1])))
+    #params, params_covariance = optimize.curve_fit(test_func_sin, phi, un2, p0=[0.5, 0.5, np.average(phi0_bound)],bounds=((0.45,0.45,phi0_bound[0]),(0.55,0.55,phi0_bound[1])))
     #params, params_covariance = optimize.curve_fit(test_func_sin1, phi, un2, p0=phi0_bound[0],bounds=(phi0_bound[0],phi0_bound[1]))
+    if m==3:
+        params, params_covariance = optimize.curve_fit(test_func_exp_sin_m3, phi, un2, p0=[3, np.average(phi0_bound)],bounds=((0.1,phi0_bound[0]),(10,phi0_bound[1])))
+    else:
+        params, params_covariance = optimize.curve_fit(test_func_exp_sin, phi, un2, p0=[3, np.average(phi0_bound)],bounds=((0.1,phi0_bound[0]),(10,phi0_bound[1])))
     print("params: ", params)
     #print("params_covariance: ",params_covariance)
-    return params
+    return (params, np.sqrt(np.diag(params_covariance)))
 
-def tilt_slice_distri_plot(filename):
+def tilt_slice_distri_plot(filename,m=2):
+    print(filename,m)
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
     x, y, z, ux, uy, uz, nx, ny, nz, dA, d2H, ds, dAK, un2, enum, en0, en1 = data[:17]
     ns = np.transpose(data[17:])
@@ -421,7 +438,9 @@ def tilt_slice_distri_plot(filename):
     colors = ["red","blue","green","tomato","black","purple"]
     z_mean = []
     R_mean = []
+    lamphi = []
     phi0 = []
+    phi0_err = []
     for i in range(nbin):
         zl, zr = zmin + (zmax - zmin) * i / nbin, zmin + (zmax - zmin) * (i + 1) / nbin
         select = np.logical_and(z > zl, z <= zr)
@@ -431,7 +450,18 @@ def tilt_slice_distri_plot(filename):
         axs[1].hist(un2[select], histtype="step", label=r"$z\in[%.1f,%.1f)$" % (zl, zr), bins=15, color = colors[i])
 
         if(i==0):
-            phi0_bound = [-np.pi/2,np.pi/2]
+            phi0_bound = [-3*np.pi/4,np.pi/4]
+            if("Cn6.0" in filename):
+                phi0_bound = [-3*np.pi/4-1,np.pi/4-1]
+                if("q1.5" in filename):
+                    phi0_bound = [-3*np.pi/4,np.pi/4]
+            if("Cn2.0" in filename and ("q1.5" in filename or "q1.7" in filename)):
+                print("reset phi0_bound\n")
+                time.sleep(1)
+                phi0_bound = [-3*np.pi/4-1.5,np.pi/4-1.5]
+            if("Cn10.0" in filename and "q2.0" in filename):
+                phi0_bound = [-3*np.pi/4-1.5,np.pi/4-1.5]
+
         if (1):
             un2_sort = un2[select][phi[select].argsort()]
             phi_sort = np.sort(phi[select])
@@ -441,19 +471,29 @@ def tilt_slice_distri_plot(filename):
             axs[2].plot(phi_sort, un2_sort+i, "o:",markersize=5, alpha=0.7, color = colors[i])
             # plot fit sin curve
             print("phi0_bound",phi0_bound)
-            para_fit = un2_fit_phi(phi_sort,un2_sort,phi0_bound)
-            phi0_bound = [para_fit[2]-1,para_fit[2]+1]
+            para_fit, para_fit_err = un2_fit_phi(phi_sort,un2_sort,phi0_bound,m)
+            #phi0_bound = [para_fit[2]-1,para_fit[2]+1]
+            phi0_bound = [para_fit[1]-1,para_fit[1]+1]
 
-            axs[2].plot(phi_sort,test_func_sin(phi_sort,para_fit[0],para_fit[1],para_fit[2])+i, color = colors[i], label = r"$\phi_0=%.1f$"%para_fit[2])
+            #axs[2].plot(phi_sort,test_func_sin(phi_sort,para_fit[0],para_fit[1],para_fit[2])+i, color = colors[i], label = r"$\phi_0=%.1f$"%para_fit[2])
             #axs[2].plot(phi_sort,test_func_sin1(phi_sort,para_fit[0])+i*0.5, color = colors[i], label = r"$\phi_0=%.1f$"%para_fit[0])
-            phi0.append(para_fit[2])
+            phi_plot = np.linspace(-np.pi,np.pi,100)
+            if m==3:
+                axs[2].plot(phi_plot,test_func_exp_sin_m3(phi_plot,para_fit[0],para_fit[1])+i, color = colors[i], label = r"$\phi_0=%.1f$"%para_fit[1])
+            else:
+                axs[2].plot(phi_plot,test_func_exp_sin(phi_plot,para_fit[0],para_fit[1])+i, color = colors[i], label = r"$\phi_0=%.1f$"%para_fit[1])
+            #phi0.append(para_fit[2])
+            lamphi.append(para_fit[0])
+            phi0.append(para_fit[1])
+            phi0_err.append(para_fit_err[1])
             #print("para_fit ", para_fit)
+
     z_r_mean = np.array(z_mean)/np.array(R_mean)
-    axs[3].plot(z_r_mean, phi0, "o", markersize=8, mfc="None")
-    params, pcov = optimize.curve_fit(test_func_abx,z_r_mean, phi0, p0=[0, 1])
+    axs[3].errorbar(z_r_mean, phi0, yerr = phi0_err)
+    params, pcov = optimize.curve_fit(test_func_abx,z_r_mean, phi0, sigma=phi0_err, absolute_sigma=True, p0=[0, 1])
     perr = np.sqrt(np.diag(pcov))
     axs[3].plot(z_r_mean,test_func_abx(z_r_mean,params[0],params[1]),"-",label=r"$\phi_0 = %.1f+%.3f z/r$"%(params[0],params[1]))
-    print(filename, params[1])
+    #print(filename, params[1])
     # axs[2].scatter(phi,x)
 
     axs[0].set_xlabel("x")
@@ -469,7 +509,7 @@ def tilt_slice_distri_plot(filename):
     axs[3].set_xlabel(r"$\left<z\right>/\left<\sqrt{x^2+y^2}\right>$")
     axs[3].set_ylabel(r"$\phi_0$")
     axs[3].legend()
-    plt.savefig(filename[:-4]+"_slice.png")
+    plt.savefig(filename[:-4]+"_exp_slice.png")
     plt.close()
     return params[1], perr[1]
 

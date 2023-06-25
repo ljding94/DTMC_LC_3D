@@ -87,7 +87,7 @@ def eff_Le_sym_cal(Les):
     return asym
 
 
-def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, tau_c=6):
+def O_stat_ana(foldername, par, par_nm, par_dg, mode,thermN=0, CnequalsKc=0, tau_c=6):
     cpar_valid = []
     E_ave, E_tau, E_err = [], [], []
     Ne = par[find_cpar_ind(par_nm, "Ne")]
@@ -125,7 +125,8 @@ def O_stat_ana(foldername, par, par_nm, par_dg, mode, thermN=0, CnequalsKc=0, ta
         f2rtail = "MC"
         for j in range(len(par_dealing)):
             f2rtail += "_" + par_nm[j] + "%.*f" % (par_dg[j], par_dealing[j])
-        f2rtail += "_id0.csv"
+        #f2rtail += "_id%d.csv"%id
+        f2rtail += ".csv"
         # print("f2rtail",f2rtail)
         file2read = foldername + "/O_" + f2rtail
         print("file2read", file2read)

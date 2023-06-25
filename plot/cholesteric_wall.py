@@ -7,12 +7,13 @@ from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLoca
 
 
 def tilt_qs_Cn_data_get():
-    foldername = "../data/Ne2/Nov30_2022"
+    foldername = "../data/Ne2/data_2022/Nov30_2022"
     lf = 25
     Kd = 2.0
     Cns = [6, 9, 12]
     datas, labels, colors, markers = [], [], [], []
-    colors = ["red", "green", "blue", "royalblue"]
+    #colors = ["red", "green", "blue", "royalblue"]
+    colors = ["blue", "orange", "purple", "red"]
     markers = ["v", "s", "p", "h", "o"]
     for i in range(len(Cns)):
         fname = foldername + "/O_MC_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kd2.0_qs_Cn%.1f_ana.csv" % (lf, Cns[i])
@@ -31,7 +32,7 @@ def tilt_qs_Cn_data_get():
 def tilt_qs_config_data_get():
     # foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     # foldername = "../data/Ne2/Apr_2022/Apr9_2022"
-    foldername = "../data/Ne2/Nov30_2022"
+    foldername = "../data/Ne2/data_2022/Nov30_2022"
     lf = 25.0
     Cn = 6.0
     qs = [0.0, 1.5]
@@ -59,11 +60,12 @@ def tilt_qs_config_data_get():
 
 
 def tilt_qs_lf_data_get():
-    foldername = "../data/Ne2/Nov30_2022"
+    foldername = "../data/Ne2/data_2022/Nov30_2022"
     Cn = 6.0
     lfs = [20, 25, 30]
     datas, labels, colors, markers = [], [], [], []
-    colors = ["red", "green", "blue", "royalblue"]
+    #colors = ["red", "green", "blue", "royalblue"]
+    colors = ["blue", "orange", "purple", "red"]
     markers = ["v", "s", "p", "h", "o"]
     for i in range(len(lfs)):
         fname = foldername + "/O_MC_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kd2.0_qs_Cn%.1f_ana.csv" % (lfs[i], Cn)

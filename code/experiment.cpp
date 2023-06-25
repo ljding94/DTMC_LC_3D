@@ -304,6 +304,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<std::vector<double>> un2thetadis_all;
     std::vector<std::vector<double>> dA2H2dis_all;
     std::vector<std::vector<double>> twoHdis_all;
+    std::vector<std::vector<double>> dAdis_all;
 
 
     double bead_accept = 0;
@@ -358,6 +359,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
             un2thetadis_all.push_back(un2thetadis_m(bin_num));
             //dA2H2dis_all.push_back(dA2H2dis_m(bin_num));
             twoHdis_all.push_back(twoHdis_m(bin_num));
+            dAdis_all.push_back(dAdis_m(bin_num));
         }
         for (int i = 0; i < step_p_sweep; i++)
         {
@@ -533,4 +535,19 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     f2H.close();
+
+    std::ofstream fdA(folder + "/dAdis_" + finfo + ".csv");
+    if (fdA.is_open())
+    {
+        for (int i = 0; i < dAdis_all.size(); i++)
+        {
+            fdA << dAdis_all[i][0];
+            for (int j = 1; j < dAdis_all[i].size(); j++)
+            {
+                fdA << "," << dAdis_all[i][j];
+            }
+            fdA << "\n";
+        }
+    }
+    fdA.close();
 }

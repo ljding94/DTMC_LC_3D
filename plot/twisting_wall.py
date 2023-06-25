@@ -8,12 +8,13 @@ from scipy import optimize
 def twist_q_data_get():
     # foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     # foldername = "../data/Ne2/Mar_2022/Mar23_2022"
-    foldername = "../data/Ne2/May12_2022"
+    foldername = "../data/Ne2/data_2022/May12_2022"
     lfs = [15, 25, 35]
     Kd = 4.0
     Cn = 4.0
     datas, labels, colors, markers = [], [], [], []
-    colors = ["red", "green", "blue", "royalblue", "purple"]
+    #colors = ["red", "green", "blue", "royalblue", "purple"]
+    colors = ["blue", "orange", "purple", "red"]
     markers = ["v", "s", "p", "h", "o"]
     for i in range(len(lfs)):
         fname = foldername + "/O_MC_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kd%.1f_qs_Cn%.1f_ana.csv" % (lfs[i], Kd, Cn)
@@ -27,7 +28,7 @@ def twist_q_data_get():
 
 def twist_q_config_data_get():
     # foldername = "../data/Ne2/Mar_2022/Mar23_2022"
-    foldername = "../data/Ne2/May12_2022"
+    foldername = "../data/Ne2/data_2022/May12_2022"
     lf = 25.0
     Kd = 4.0
     Cn = 4.0
@@ -148,16 +149,25 @@ def test_func_sin(phi, a, b, c):
 def test_func_abx(x, a, b):
     return a + b * np.array(x)
 
+def test_func_exp_sin(phi,lamphi,phi0):
+    return (np.exp(1/lamphi)-np.exp(np.sin(2*(phi-phi0))/lamphi))/(np.exp(1/lamphi)-np.exp(-1/lamphi))
 
-def un2_fit_phi(phi, un2, phi0_bound):
-    params, params_covariance = optimize.curve_fit(test_func_sin, phi, un2, p0=[0.5, 0.5, np.average(phi0_bound)], bounds=((0.45, 0.45, phi0_bound[0]), (0.55, 0.55, phi0_bound[1])))
+def test_func_exp_sin_m3(phi,lamphi,phi0):
+    return (np.exp(1/lamphi)-np.exp(np.sin(3*(phi-phi0))/lamphi))/(np.exp(1/lamphi)-np.exp(-1/lamphi))
+
+def un2_fit_phi(phi, un2, phi0_bound,m=2):
+    #params, params_covariance = optimize.curve_fit(test_func_sin, phi, un2, p0=[0.5, 0.5, np.average(phi0_bound)], bounds=((0.45, 0.45, phi0_bound[0]), (0.55, 0.55, phi0_bound[1])))
+    if m==3:
+        params, params_covariance = optimize.curve_fit(test_func_exp_sin_m3, phi, un2, p0=[5, np.average(phi0_bound)],bounds=((0.02,phi0_bound[0]),(20,phi0_bound[1])))
+    else:
+        params, params_covariance = optimize.curve_fit(test_func_exp_sin, phi, un2, p0=[5, np.average(phi0_bound)],bounds=((0.02,phi0_bound[0]),(20,phi0_bound[1])))
     print("params: ", params)
     print("params_covariance: ", params_covariance)
     return params
 
 
-def ax_pitch_phi_z_plot(filename, axcfg, axunphis, axphi0z,msize,LineWidth, nbin=5, z_relative_range=(1 / 4, 3 / 4)):
-    colors = ["red", "blue", "green", "tomato", "black", "purple"]
+def ax_pitch_phi_z_plot(filename, axcfg, axunphis, axphi0z,msize,LineWidth, nbin=5, z_relative_range=(1 / 4, 3 / 4),m=2):
+    colors = ["red", "blue", "purple", "tomato", "black"]
 
     # configuration plot
     ax_config_plot_xyz(axcfg, filename, "gray", LineWidth, pov="zx", rotxyz=(-1,0,0.5*np.pi), mesh=1, bead=0, rod=0, d=1, pwlim=np.pi / 3)
@@ -190,6 +200,7 @@ def ax_pitch_phi_z_plot(filename, axcfg, axunphis, axphi0z,msize,LineWidth, nbin
 
         if i == 0:
             phi0_bound = [-np.pi/2, np.pi/2]
+            phi0_bound = [-3*np.pi/4,np.pi/4]
         if 1:
             un2_sort = un2[select][phi[select].argsort()]
             phi_sort = np.sort(phi[select])
@@ -199,19 +210,27 @@ def ax_pitch_phi_z_plot(filename, axcfg, axunphis, axphi0z,msize,LineWidth, nbin
 
             # find fitting parameters
             print("phi0_bound", phi0_bound)
-            para_fit = un2_fit_phi(phi_sort, un2_sort, phi0_bound)
-            phi0_bound = [para_fit[2]-1.1, para_fit[2]+1.1]
-            # plot fit sin curve
+            para_fit = un2_fit_phi(phi_sort, un2_sort, phi0_bound,m)
+            phi0_bound = [para_fit[1]-1, para_fit[1]+1]
+
+            # plot fit exp sin curve
+            phi_p = np.linspace(-np.pi,np.pi,100)
             #axunphis[i].plot(phi_sort, test_func_sin(phi_sort, para_fit[0], para_fit[1], para_fit[2]) + i * 1, color=colors[i], label=r"$\phi_0=%.1f$" % para_fit[2],linewidth=LineWidth)
-            axunphis[i].plot(phi_sort, test_func_sin(phi_sort, para_fit[0], para_fit[1], para_fit[2]), color=colors[i], label=r"$\phi_0=%.1f$" % para_fit[2],linewidth=LineWidth) # no need to lift since plotting in different axis
-            phi0.append(para_fit[2])
+            if m==3:
+                axunphis[i].plot(phi_p, test_func_exp_sin_m3(phi_p, para_fit[0], para_fit[1]), color=colors[i], label=r"$\phi_0=%.1f$" % para_fit[1],linewidth=LineWidth) # no need to lift since plotting in different axis
+            else:
+                axunphis[i].plot(phi_p, test_func_exp_sin(phi_p, para_fit[0], para_fit[1]), color=colors[i], label=r"$\phi_0=%.1f$" % para_fit[1],linewidth=LineWidth) # no need to lift since plotting in different axis
+            phi0.append(para_fit[1])
             print("para_fit ", para_fit)
-    z_r_mean = np.array(z_mean)/np.array(R_mean)
-    axphi0z.plot(z_r_mean, phi0, "o", markersize=msize, mfc="None")
-    params, pcov = optimize.curve_fit(test_func_abx, z_r_mean, phi0, p0=[0, 0.1])
-    perr = np.sqrt(np.diag(pcov))
-    axphi0z.plot(z_r_mean, test_func_abx(z_r_mean, params[0], params[1]), "k-", label=r"$\phi_0 \propto %.2f \left<z\right>/\left<R\right>$" % params[1],linewidth=LineWidth)
-    #label=r"$\phi_0 = %.1f+%.3f z$" % (params[0], params[1])
+
+    if(axphi0z):
+        z_r_mean = np.array(z_mean)/np.array(R_mean)
+        axphi0z.plot(z_r_mean, phi0, "o", markersize=msize, mfc="None")
+        #params, pcov = optimize.curve_fit(test_func_abx, z_r_mean, phi0, p0=[0, 0.1])
+        params, pcov = optimize.curve_fit(test_func_abx, z_r_mean, phi0, p0=[0, 1])
+        perr = np.sqrt(np.diag(pcov))
+        axphi0z.plot(z_r_mean, test_func_abx(z_r_mean, params[0], params[1]), "k-", label=r"$\phi_0 \propto %.2f \left<z\right>/\left<R\right>$" % params[1],linewidth=LineWidth)
+        #label=r"$\phi_0 = %.1f+%.3f z$" % (params[0], params[1])
 
 
 def wall_pitch_tan_data_get(date = "07Dec22"):
@@ -231,7 +250,25 @@ def wall_pitch_tan_data_get(date = "07Dec22"):
         alpha_u_Cn6 = [1.4723108811252246, 1.5041477642870125, 1.4917032885592725, 1.452903089289555, 1.4079053024350594, 1.2838809156284545, 1.2616937264686248, 1.286026793720392, 1.201167754223943, 1.1713746818378825, 1.179985018426367, 1.1796708016489579, 1.05374140829622, 1.1316281497275797, 1.1489902037650463, 1.0977612630096436, 1.1029307965274928, 1.0954793387023247, 1.1320166475595055, 1.1146776358131572, 1.120967449783173]
 
 
+
     elif date == "30Apr23":
+        Cn2res = [(-0.11633306968492305, 0.010740171921583146), (0.02889834561250445, 0.012104671729228224), (0.14536657110775228, 0.009424554062040123), (0.23163537104547371, 0.012532305426477614), (0.15242515912558696, 0.011828347927171115), (0.3383650109102564, 0.013303459487575945), (0.32812378810336923, 0.015303794316518316), (0.3958276997010184, 0.012301162482190552), (0.5460453290916114, 0.014723038149688615), (0.5178272828040912, 0.013972401274183381), (0.5033549066549912, 0.015299011909463414), (0.6128242431292195, 0.015681116130027137), (0.6918466443805671, 0.01513918105497437), (0.6770631570702865, 0.011337144806755167), (0.6784676135416423, 0.01632924507241361), (0.7553366644956055, 0.01476431165829157), (0.7473072031259186, 0.015832862144440737), (0.7402415141386746, 0.015464888676972356), (0.10449255074334102, 0.041862147304928474), (0.9461768572345498, 0.015338113212859623), (1.0287804996912322, 0.01913611674836628)]
+
+        alpha_u_Cn2 =  [1.4536502683367474, 1.5008864602876106, 1.4298242207760699, 1.3948865379129618, 1.3403124680111602, 1.2623773236398417, 1.3052043219371414, 1.2289067903679272, 1.2359757261695994, 1.1317656543653687, 1.2055757077200768, 1.1494504378281738, 1.1760822208883062, 1.1430329316557593, 1.1063317515497106, 1.1159600769695934, 1.1151404358811252, 1.094876277560001, 1.0223460968190237, 1.1322001802555726, 1.1723219911870746]
+
+
+
+        Cn6res = [(-0.021496452100589723, 0.009319555659713357), (0.08380090604755229, 0.009891076560503732), (0.13970665082997513, 0.010489262712641395), (0.1112378833214494, 0.010217652125542256), (0.1897762456583451, 0.008848776057425482), (0.16656730805732914, 0.014563681607756614), (0.2985432125802804, 0.012087503461885897), (0.2552125058486404, 0.01409933642331965), (0.4275975332173634, 0.0094441211602855), (0.38440808254564895, 0.01041579451086998), (0.5599359539724217, 0.013663444884041885), (0.5979475138383012, 0.01029268204481081), (0.5598997936041182, 0.011698713178781557), (0.5860280270654185, 0.014118861948521674), (0.6131479019989021, 0.015576374473752595), (0.6780195144190486, 0.013756037790265331), (0.7184009178718741, 0.014612735157675331), (0.7451960027193545, 0.01751645464925723), (0.7282448400302478, 0.013281414637939764), (0.9064281288303504, 0.01719146097317193), (0.9679705518462316, 0.016889538681756307)]
+
+        alpha_u_Cn6 = [1.4714654357062324, 1.4575304430869886, 1.4067202469922706, 1.3961578240297008, 1.2924201444935788, 1.3495072401951909, 1.3330172908717124, 1.2342889372070387, 1.2467632333643517, 1.186270939204213, 1.2622193959567545, 1.1208306416293747, 1.1449681730107903, 1.1417538486145935, 1.0957334853421825, 1.1143667137000213, 1.0705347911305676, 1.0932534138488819, 1.0610275596342196, 1.138363464153026, 1.0757924546471185]
+
+        Cn10res = [(0.06268735392759966, 0.012177334177347341), (0.15994602721350706, 0.01432364634257157), (-0.02201762070093192, 0.011733974876419556), (0.0507381948970757, 0.010422982063210778), (0.12760640477598706, 0.008486235622841334), (0.14515378084939845, 0.0083004628979234), (0.21823353784378166, 0.009968221319150738), (0.26809086992378695, 0.013158923752696542), (0.3154331050104796, 0.015518491289588637), (0.45777726039912325, 0.016600252675420517), (0.3553016012221598, 0.010820693271903653), (0.6174671664618034, 0.013705834592107514), (0.5275855664364433, 0.014305117647165385), (0.5663989299235854, 0.012148950215260232), (0.6383469378789263, 0.014199791927901093), (0.6940250710098543, 0.014362743210874036), (0.8254836087904688, 0.016527532526784197), (0.7914264248253348, 0.019728166066496876), (0.8105673062023333, 0.014657977015245833), (0.7935655838902916, 0.017490215056394694), (0.8431991978341025, 0.016478712636909334)]
+        #Cn10res = np.delete()
+
+        alpha_u_Cn10 =   [100, 100, 100, 1.412646452801134, 1.3641394550966177, 1.343791066633191, 1.2346498382504412, 1.2757218181447256, 1.1515589840806653, 1.1396427962946054, 1.139608973026255, 1.1521907009625163, 1.1748493961842763, 1.0973241955431385, 1.1679076273294344, 1.1115510242401012, 1.1511004505454516, 1.080418521356136, 1.0755006110710026, 1.111711364873674, 1.0996561668047167]
+        skips = {"Cn2":2,"Cn6":2,"Cn10":3}
+        # old sin fit
+        '''
         Cn2res = [(-0.1266917912297794, 0.028526144941257346), (0.03448459711010362, 0.021914611891257332), (0.14206239416067942, 0.017764021142885944), (0.22794243775152848, 0.032057432175757954), (0.1507376230559613, 0.007342720988852514), (0.3419144779124007, 0.017372991458620566), (0.32026997771143173, 0.023791505657524647), (0.38749059993344853, 0.022949144458460795), (0.5410837577031876, 0.026214282207906427), (0.5142430326951268, 0.021072181324653355), (0.49776940417296167, 0.017377034523919217), (0.6085401084765352, 0.014436498669558978), (0.7199551625493794, 0.04317562205592464), (0.6850685858717577, 0.04317093876367643), (0.6788219692688503, 0.014579482469368658), (0.7523789230604944, 0.01964163835734322), (0.7438863115931948, 0.021158990454350806), (0.7249128151697681, 0.022558553381528332), (0.08483305286422016, 0.1732957368363053), (0.9610505448774892, 0.041433492016104384), (1.0242414505969502, 0.018165144611271725)]
 
         alpha_u_Cn2 = [1.4536502683367474, 1.5008864602876106, 1.4298242207760699, 1.3948865379129618, 1.3403124680111602, 1.2623773236398417, 1.3052043219371414, 1.2289067903679272, 1.2359757261695994, 1.1317656543653687, 1.2055757077200768, 1.1494504378281738, 1.1760822208883062, 1.1430329316557593, 1.1063317515497106, 1.1159600769695934, 1.1151404358811252, 1.094876277560001, 1.0223460968190237, 1.1322001802555726, 1.1723219911870746]
@@ -243,14 +280,15 @@ def wall_pitch_tan_data_get(date = "07Dec22"):
         Cn10res = [(0.5320036419942554, 0.16985677026033116), (0.7409560935086157, 0.08836030053038502), (-0.4555559374187401, 0.2161245170226461), (0.047344663804099595, 0.018522430562407353), (0.1252471388348498, 0.013226304820043448), (0.14305276311087384, 0.026718288029681694), (0.21325604437544712, 0.01325945077681793), (0.2620877440107482, 0.013314947076784133), (0.33569171691069577, 0.020484705398043302), (0.4575902439057407, 0.012276430931733936), (0.3907546063390977, 0.04296482633730491), (0.5922038895427746, 0.016169677009297785), (0.5387520536725244, 0.022684990772079118), (0.5659818661793371, 0.026805302422244544), (0.6281478094197216, 0.025035669793035724), (0.7039746814278789, 0.012660329725113953), (0.8272223033389206, 0.017560732609299273), (0.7879447563994834, 0.012784495007270401), (0.8099440155707626, 0.020722140839961364), (0.7953545915942407, 0.012351842158211846), (0.8300654466064288, 0.038448685070608196)]
 
         alpha_u_Cn10 = [-100, -100, -100, 1.412646452801134, 1.3641394550966177, 1.343791066633191, 1.2346498382504412, 1.2757218181447256, 1.1515589840806653, 1.1396427962946054, 1.139608973026255, 1.1521907009625163, 1.1748493961842763, 1.0973241955431385, 1.1679076273294344, 1.1115510242401012, 1.1511004505454516, 1.080418521356136, 1.0755006110710026, 1.111711364873674, 1.0996561668047167]
-
         skips = {"Cn2":2,"Cn6":1,"Cn10":4}
+        '''
+
 
 
     return [kcs, Cn2res,Cn6res,Cn10res,alpha_u_Cn2,alpha_u_Cn6,alpha_u_Cn10,skips]
 
 
-
+# no longer used
 def wall_pitch_q_plot(LineWidth, FontSize, LabelSize):
     print("👌")
     from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -343,7 +381,9 @@ def wall_pitch_q_plot(LineWidth, FontSize, LabelSize):
 
     #axtankc.errorbar(kcs,ta,yerr = taerr, color = "k", marker = "o", linestyle="None" ,ms=msize,mfc="None")
     n0Cn2,n0Cn6,n0Cn10 = skips["Cn2"],skips["Cn6"],skips["Cn10"]
+    # remove -3th for Cn2 due to three pi walls
     axtankc.errorbar(np.delete(kcs[n0Cn2:],-3),np.delete(Cn2ta[n0Cn2:],-3),yerr = np.delete(Cn2taerr[n0Cn2:],-3), color = "b", marker = "o", linestyle="None" ,ms=msize,mfc="None", label="C=2")
+
     axtankc.errorbar(kcs[n0Cn6:],Cn6ta[n0Cn6:],yerr = Cn6taerr[n0Cn6:], color = "r", marker = "o", linestyle="None" ,ms=msize,mfc="None", label="C=6")
     axtankc.errorbar(kcs[n0Cn10:],Cn10ta[n0Cn10:],yerr = Cn10taerr[n0Cn10:], color = "k", marker = "o", linestyle="None" ,ms=msize,mfc="None", label="C=10")
     axtankc.set_xlabel(r"$k_c$",fontsize=FontSize)
@@ -383,4 +423,218 @@ def wall_pitch_q_plot(LineWidth, FontSize, LabelSize):
     #plt.tight_layout()
     plt.subplots_adjust(wspace=0.4,hspace=0.3,left=0.12,right=0.97,bottom=0.08,top=0.98)
     plt.savefig("figures/wall_pitch.pdf", format="pdf")
+    plt.close()
+
+
+def wall_pitch_q_analysis_plot(LineWidth, FontSize, LabelSize):
+    print("👌 only config + (multi mode) sinuous fit")
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    ppi = 72
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 1.3))
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+
+
+    axcfg = plt.subplot2grid((5, 3), (0, 0), rowspan=2)
+    axunphi0 = plt.subplot2grid((5, 3), (2, 0), rowspan=3)
+    divider = make_axes_locatable(axunphi0)
+    axunphi1 = divider.append_axes("top",size="100%",pad=0.03)
+    axunphi2 = divider.append_axes("top",size="100%",pad=0.03)
+    axunphi3 = divider.append_axes("top",size="100%",pad=0.03)
+    axunphi4 = divider.append_axes("top",size="100%",pad=0.03)
+    axunphis = [axunphi0,axunphi1,axunphi2,axunphi3,axunphi4]
+    #for i in range(5):
+        #axunphis.append()
+
+    Caxcfg = plt.subplot2grid((5, 3), (0, 1), rowspan=2)
+    Caxunphi0 = plt.subplot2grid((5, 3), (2, 1), rowspan=3,sharex=axunphi0,sharey = axunphi0)
+    Cdivider = make_axes_locatable(Caxunphi0)
+    Caxunphi1 = Cdivider.append_axes("top",size="100%",pad=0.03)
+    Caxunphi2 = Cdivider.append_axes("top",size="100%",pad=0.03)
+    Caxunphi3 = Cdivider.append_axes("top",size="100%",pad=0.03)
+    Caxunphi4 = Cdivider.append_axes("top",size="100%",pad=0.03)
+    Caxunphis = [Caxunphi0,Caxunphi1,Caxunphi2,Caxunphi3,Caxunphi4]
+
+
+    m3axcfg = plt.subplot2grid((5, 3), (0, 2), rowspan=2)
+    m3axunphi0 = plt.subplot2grid((5, 3), (2, 2), rowspan=3,sharex=axunphi0,sharey = axunphi0)
+    m3divider = make_axes_locatable(m3axunphi0)
+    m3axunphi1 = m3divider.append_axes("top",size="100%",pad=0.03)
+    m3axunphi2 = m3divider.append_axes("top",size="100%",pad=0.03)
+    m3axunphi3 = m3divider.append_axes("top",size="100%",pad=0.03)
+    m3axunphi4 = m3divider.append_axes("top",size="100%",pad=0.03)
+    m3axunphis = [m3axunphi0,m3axunphi1,m3axunphi2,m3axunphi3,m3axunphi4]
+
+
+    msize = 4
+
+    # single tube plot
+    #fname = "../data/Ne2/May12_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q1.5_Cn4.0.csv"
+    #fname = "../data/Ne2/Dec7_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q1.5_Cn4.0_id0.csv"
+    #fname = "../data/Ne2/Dec7_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q1.5_Cn6.0_id0.csv"
+    fname = "../data/Ne2/Apr30_2023/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q0.6_Cn2.0_id0.csv"
+    Cfname = "../data/Ne2/Apr30_2023/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q0.6_Cn10.0_id0.csv"
+    m3fname = "../data/Ne2/data_2022/May12_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q2.5_Cn4.0.csv"
+
+    # note on fitting parameters:
+    # C=2.0
+    # [lambda_phi, phi_0] = [ 3.70942418 -1.07228748], [ 1.23443782 -0.86462099],[ 2.02118749 -0.6631666 ],  [ 1.87194865 -0.29302407],  [ 6.02565435 -0.07906099]
+    # C=10.0
+    # [lamda_phi, phi_0] =  [ 0.62228951 -0.85362876], [ 0.43715192 -0.6679593 ], [ 0.62382063 -0.50554623], [ 0.36347581 -0.28858196], [ 0.48607145 -0.1689633 ]
+    lam_phiC2 =np.array([3.70942418,1.23443782,2.02118749,1.87194865,6.02565435])
+    lam_phiC10 = np.array([0.62228951,0.43715192,0.62382063,0.36347581])
+    print("C2 lam_phi:", lam_phiC2)
+    print("C2 np.average(lam_phi), np.std(lam_phi):", np.average(lam_phiC2), np.std(lam_phiC2))
+    print("C2 Exp(1/lam_phi):", np.exp(1/lam_phiC2))
+    print("C2 Exp(-1/lam_phi):", np.exp(-1/lam_phiC2))
+    print("C2 Exp(1/lam_phi)- Exp(-1/lam_phi):", np.exp(1/lam_phiC2) - np.exp(-1/lam_phiC2))
+    print("-----------------------")
+    print("C10 lam_phi:", lam_phiC10)
+    print("C10 np.average(lam_phi), np.std(lam_phi):", np.average(lam_phiC10), np.std(lam_phiC10))
+    print("C10 Exp(1/lam_phi):", np.exp(1/lam_phiC10))
+    print("C10 Exp(1/lam_phi) - Exp(-1/lam_phi):", np.exp(1/lam_phiC10)- np.exp(-1/lam_phiC10))
+    print("-----------------------")
+
+    ax_pitch_phi_z_plot(fname, axcfg, axunphis, 0, msize, LineWidth, nbin=5, z_relative_range=(1 / 4, 3 / 4))
+    axcfg.margins(y=0)
+    # config plot
+    x1, y1 = 0.7, 1.2+0.075/6*5
+    axcfg.text(x1, y1, r"(a)", fontsize=FontSize, transform=axunphis[4].transAxes)
+
+    ax_pitch_phi_z_plot(Cfname, Caxcfg, Caxunphis, 0, msize, LineWidth, nbin=5, z_relative_range=(1 / 4, 3 / 4))
+    Caxcfg.margins(y=0)
+    # config plot
+    x1, y1 = 0.7, 1.2+0.075/6*5
+    Caxcfg.text(x1, y1, r"(b)", fontsize=FontSize, transform=Caxunphis[4].transAxes)
+
+
+
+    ax_pitch_phi_z_plot(m3fname, m3axcfg, m3axunphis, 0, msize, LineWidth, nbin=5, z_relative_range=(1 / 4, 3 / 4), m=3)
+    m3axcfg.margins(y=0)
+    # config plot
+    x1, y1 = 0.7, 1.2+0.075/6*5
+    m3axcfg.text(x1, y1, r"(c)", fontsize=FontSize, transform=m3axunphis[4].transAxes)
+
+    # print(filename, params[1])
+    # axs[2].scatter(phi,x)
+    for i in range(5):
+        axunphis[i].tick_params(which="both", direction="in", bottom="on", top="on", right="on", left="on", labelbottom=False, labelleft=True, labelsize=LabelSize)
+        #axunphis[i].set_xlim(-2.7, 2.7)
+        axunphis[i].yaxis.set_major_locator(MultipleLocator(0.5))
+        axunphis[i].yaxis.set_minor_locator(MultipleLocator(0.25))
+        axunphis[i].set_ylim(-0.1, 1.1)
+    axunphi0.set_xlabel(r"$\phi = \arctan(y/x)$",fontsize=FontSize)
+    axunphi0.xaxis.set_major_locator(MultipleLocator(2))
+    axunphi0.xaxis.set_minor_locator(MultipleLocator(1))
+    axunphi0.tick_params(which="both", direction="in", bottom="on", top="on", right="on", left="on", labelbottom=True, labelleft=True, labelsize=LabelSize)
+    axunphis[2].set_ylabel(r"$(\vu{u}\cdot \vu{n})^2$",fontsize=FontSize)
+
+    x1, y1 = 0.7, 0.057*5/9*5
+    axunphi0.text(x1, y1, r"(c)", fontsize=FontSize, transform=axunphis[0].transAxes)
+
+    for i in range(5):
+        Caxunphis[i].tick_params(which="both", direction="in", bottom="on", top="on", right="on", left="on", labelbottom=False, labelleft=False, labelsize=LabelSize)
+        #axunphis[i].set_xlim(-2.7, 2.7)
+        Caxunphis[i].yaxis.set_major_locator(MultipleLocator(0.5))
+        Caxunphis[i].yaxis.set_minor_locator(MultipleLocator(0.25))
+        Caxunphis[i].set_ylim(-0.1, 1.1)
+    Caxunphi0.set_xlabel(r"$\phi = \arctan(y/x)$",fontsize=FontSize)
+    Caxunphi0.xaxis.set_major_locator(MultipleLocator(2))
+    Caxunphi0.xaxis.set_minor_locator(MultipleLocator(1))
+    Caxunphi0.tick_params(which="both", direction="in", bottom="on", top="on", right="on", left="on", labelbottom=True, labelleft=False, labelsize=LabelSize)
+    #Caxunphis[2].set_ylabel(r"$(\vu{u}\cdot \vu{n})^2$",fontsize=FontSize)
+    x1, y1 = 0.7, 0.057*5/9*5
+    Caxunphi0.text(x1, y1, r"(d)", fontsize=FontSize, transform=Caxunphis[0].transAxes)
+
+    for i in range(5):
+        m3axunphis[i].tick_params(which="both", direction="in", bottom="on", top="on", right="on", left="on", labelbottom=False, labelleft=False, labelsize=LabelSize)
+        #axunphis[i].set_xlim(-2.7, 2.7)
+        m3axunphis[i].yaxis.set_major_locator(MultipleLocator(0.5))
+        m3axunphis[i].yaxis.set_minor_locator(MultipleLocator(0.25))
+        m3axunphis[i].set_ylim(-0.1, 1.1)
+    m3axunphi0.set_xlabel(r"$\phi = \arctan(y/x)$",fontsize=FontSize)
+    m3axunphi0.xaxis.set_major_locator(MultipleLocator(2))
+    m3axunphi0.xaxis.set_minor_locator(MultipleLocator(1))
+    m3axunphi0.tick_params(which="both", direction="in", bottom="on", top="on", right="on", left="on", labelbottom=True, labelleft=False, labelsize=LabelSize)
+    #m3axunphis[2].set_ylabel(r"$(\vu{u}\cdot \vu{n})^2$",fontsize=FontSize)
+    x1, y1 = 0.7, 0.057*5/9*5
+    m3axunphi0.text(x1, y1, r"(d)", fontsize=FontSize, transform=m3axunphis[0].transAxes)
+
+    #plt.tight_layout(pad=0.1)
+    plt.subplots_adjust(wspace=0.05,hspace=0.3,left=0.12,right=0.97,bottom=0.08,top=0.98)
+    plt.savefig("figures/wall_pitch_analysis.pdf", format="pdf")
+    plt.close()
+
+
+
+def wall_pitch_q_result_plot(LineWidth, FontSize, LabelSize):
+    print("👌")
+    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    ppi = 72
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 0.5))
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+    axtankc = plt.subplot2grid((1, 2), (0, 0))
+    axthekc = plt.subplot2grid((1, 2), (0, 1), sharex = axtankc)
+
+    msize = 4
+    # no longer needed, since R already considered in fitting slope
+    kcs, Cn2res,Cn6res,Cn10res,alpha_u_Cn2,alpha_u_Cn6,alpha_u_Cn10, skips = wall_pitch_tan_data_get(date = "30Apr23")
+    R = 1
+    Cn2res = R*np.array(Cn2res)
+    Cn2ta, Cn2taerr = Cn2res[:,0], Cn2res[:,1]
+    Cn6res = R*np.array(Cn6res)
+    Cn6ta, Cn6taerr = Cn6res[:,0], Cn6res[:,1]
+    Cn10res = R*np.array(Cn10res)
+    Cn10ta, Cn10taerr = Cn10res[:,0], Cn10res[:,1]
+
+    #kcs = np.delete(kcs,9)
+    #ta = np.delete(ta,9)
+    #taerr = np.delete(taerr,9)
+
+    #print(ta)
+    #print(taerr)
+
+    #axtankc.errorbar(kcs,ta,yerr = taerr, color = "k", marker = "o", linestyle="None" ,ms=msize,mfc="None")
+    n0Cn2,n0Cn6,n0Cn10 = skips["Cn2"],skips["Cn6"],skips["Cn10"]
+    axtankc.errorbar(np.delete(kcs[n0Cn2:],-3),np.delete(Cn2ta[n0Cn2:],-3),yerr = np.delete(Cn2taerr[n0Cn2:],-3), color = "b", marker = "o", linestyle="None" ,ms=msize,mfc="None", label="C=2")
+    axtankc.errorbar(kcs[n0Cn6:],Cn6ta[n0Cn6:],yerr = Cn6taerr[n0Cn6:], color = "r", marker = "o", linestyle="None" ,ms=msize,mfc="None", label="C=6")
+    axtankc.errorbar(kcs[n0Cn10:],Cn10ta[n0Cn10:],yerr = Cn10taerr[n0Cn10:], color = "k", marker = "o", linestyle="None" ,ms=msize,mfc="None", label="C=10")
+    axtankc.set_xlabel(r"$k_c$",fontsize=FontSize)
+    axtankc.set_ylabel(r"$\tan\alpha$",fontsize=FontSize)
+    axtankc.yaxis.set_label_position("left")
+    #axtankc.yaxis.tick_right()
+    axtankc.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="on", labelbottom=True, labelleft=True, labelsize=LabelSize)
+
+    axtankc.xaxis.set_major_locator(MultipleLocator(0.5))
+    axtankc.xaxis.set_minor_locator(MultipleLocator(0.25))
+    #axtankc.set_xlim(-2.7, 2.7)
+    axtankc.yaxis.set_major_locator(MultipleLocator(0.5))
+    axtankc.yaxis.set_minor_locator(MultipleLocator(0.1))
+    axtankc.set_ylim(-0.01,1.1)
+    axtankc.legend(loc="upper left", ncol=1, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
+
+    x1, y1 = 0.75, 0.075
+    axtankc.text(x1, y1, r"(a)", fontsize=FontSize, transform=axtankc.transAxes)
+
+    axthekc.plot(np.delete(kcs[n0Cn2:],-3),np.delete(alpha_u_Cn2[n0Cn2:],-3) - np.arctan(np.delete(Cn2ta[n0Cn2:],-3)), color = "b", marker = "s", linestyle="None", ms=msize, mfc = "None", label = "C=2")
+    axthekc.plot(kcs[n0Cn6:],alpha_u_Cn6[n0Cn6:] - np.arctan(Cn6ta[n0Cn6:]), color = "r", marker = "s", linestyle="None", ms=msize, mfc = "None", label = "C=6")
+    axthekc.plot(kcs[n0Cn10:],alpha_u_Cn10[n0Cn10:] - np.arctan(Cn10ta[n0Cn10:]), color = "k", marker = "s", linestyle="None", ms=msize, mfc = "None", label = "C=10")
+    axthekc.set_xlabel(r"$k_c$",fontsize=FontSize)
+    axthekc.set_ylabel(r"$\theta = \alpha_u - \alpha$",fontsize=FontSize)
+    axthekc.yaxis.set_label_position("left")
+    #axthekc.yaxis.tick_right()
+    axthekc.tick_params(which="both", direction="in", bottom="on", top="off", right="off", left="on", labelbottom=True, labelleft=True, labelsize=LabelSize)
+
+    axthekc.xaxis.set_major_locator(MultipleLocator(0.5))
+    axthekc.xaxis.set_minor_locator(MultipleLocator(0.25))
+    axthekc.yaxis.set_major_locator(MultipleLocator(0.5))
+    axthekc.yaxis.set_minor_locator(MultipleLocator(0.1))
+    axthekc.set_ylim(-0.01,1.51)
+    axthekc.legend(loc="upper right", ncol=1, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
+    axthekc.text(0.75, 0.075, r"(b)", fontsize=FontSize, transform=axthekc.transAxes)
+
+    #plt.tight_layout()
+    plt.subplots_adjust(wspace=0.4,hspace=0.3,left=0.12,right=0.97,bottom=0.2,top=0.98)
+    plt.savefig("figures/wall_pitch_result.pdf", format="pdf")
     plt.close()

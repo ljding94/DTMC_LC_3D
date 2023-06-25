@@ -4,6 +4,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits import mplot3d
 from matplotlib import cm
 from matplotlib.colors import Normalize
+import matplotlib.colors as colors
+from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
 
 def n(m, alpha, gamma, phi, z):
     nx = np.cos(phi)
@@ -189,6 +191,7 @@ def ax_2mod_2Dplot(ax,mod,view,hshift=0,vshift=0,du=0.2,dt=0.1,label="",FontSize
         #plot circle
         pphi = np.linspace(0,2*np.pi,200)
         ax.plot(np.cos(pphi)+hshift,np.sin(pphi)+vshift,"-",color="gray",lw=1)
+        ax.text(-1.4+hshift,0.7+vshift,label,fontsize=FontSize)
         #plot director in T shape
         print(mod,"xy len(x)",len(x),x,ux)
         for i in range(len(x)):
@@ -219,7 +222,7 @@ def ax_2mod_2Dplot(ax,mod,view,hshift=0,vshift=0,du=0.2,dt=0.1,label="",FontSize
         #plot box
         zshift=-1.6
         ax.plot(np.array([-1,1,1,-1,-1])+hshift,0.5*(np.array([-0.5,-0.5,0.5,0.5,-0.5]))+vshift+zshift,"-",color="gray",lw=1)
-        ax.text(1.15+hshift,-0.35+vshift+zshift,label,fontsize=FontSize)
+        #ax.text(1.4+hshift,-0.1+vshift+zshift,label,fontsize=FontSize)
         #plot director in T shape
         for i in range(-bn_phi//2-1,0):
             #ax.text(x[i],z[i]+zshift,i)
@@ -284,7 +287,7 @@ def ax_2mod_2Dplot(ax,mod,view,hshift=0,vshift=0,du=0.2,dt=0.1,label="",FontSize
         nrho = np.zeros(len(phi)) + vshift
         # negative rho direction
         #plot box
-        nrhoshift=-2.9
+        nrhoshift=-3.1
         #ax.plot(np.pi/2*np.array([-1,1,1,-1,-1])+hshift,0.1*(np.array([-0.5,-0.5,0.5,0.5,-0.5]))+vshift+nrhoshift,"-",color="gray",lw=1)
         ax.plot(np.pi/2*np.array([-1,1])+hshift,0.1*(np.array([0,0]))+vshift+nrhoshift,"-",color="gray",lw=1)
         #plot director in T shape
@@ -317,31 +320,33 @@ def two_mod_diagram_plot(LineWidth, FontSize, LabelSize):
     ppi = 72
     plt.rc("text", usetex=True)
     plt.rc("text.latex", preamble=r"\usepackage{physics}")
-    fig, ax = plt.subplots(1, 1,figsize=(246 / ppi * 1, 246 / ppi * 0.9) )
+    fig, ax = plt.subplots(1, 1,figsize=(246 / ppi * 1, 246 / ppi * 1.05) )
 
-    delh,delv=3.5,4.5
+    delh,delv=3.6,4.6
+    delh0 = 1.0
 
-    ax_2mod_2Dplot(ax,"nematic-z","xy",hshift=delh,vshift=0)
-    ax_2mod_2Dplot(ax,"nematic-z","xz",hshift=delh,vshift=0,label=r"(d)")
-    ax_2mod_2Dplot(ax,"nematic-z","phiz",hshift=delh,vshift=0)
-    ax_2mod_2Dplot(ax,"nematic-z","phinrho",hshift=delh,vshift=0)
-
-    ax_2mod_2Dplot(ax,"smectic","xy",hshift=0,vshift=delv)
-    ax_2mod_2Dplot(ax,"smectic","xz",hshift=0,vshift=delv,label=r"(a)")
+    ax_2mod_2Dplot(ax,"smectic","xy",hshift=0,vshift=delv,label=r"(a)")
+    ax_2mod_2Dplot(ax,"smectic","xz",hshift=0,vshift=delv)
     ax_2mod_2Dplot(ax,"smectic","phiz",hshift=0,vshift=delv)
     ax_2mod_2Dplot(ax,"smectic","phinrho",hshift=0,vshift=delv)
 
-    ax_2mod_2Dplot(ax,"nematic-x","xy",hshift=delh,vshift=delv)
-    ax_2mod_2Dplot(ax,"nematic-x","xz",hshift=delh,vshift=delv,label=r"(b)")
+    ax_2mod_2Dplot(ax,"nematic-x","xy",hshift=delh,vshift=delv,label=r"(b)")
+    ax_2mod_2Dplot(ax,"nematic-x","xz",hshift=delh,vshift=delv)
     ax_2mod_2Dplot(ax,"nematic-x","phiz",hshift=delh,vshift=delv)
     ax_2mod_2Dplot(ax,"nematic-x","phinrho",hshift=delh,vshift=delv)
 
-    ax_2mod_2Dplot(ax,"cholesteric","xy",hshift=2*delh,vshift=delv)
-    ax_2mod_2Dplot(ax,"cholesteric","xz",hshift=2*delh,vshift=delv,label=r"(c)")
-    ax_2mod_2Dplot(ax,"cholesteric","phiz",hshift=2*delh,vshift=delv)
-    ax_2mod_2Dplot(ax,"cholesteric","phinrho",hshift=2*delh,vshift=delv)
+    ax_2mod_2Dplot(ax,"cholesteric","xy",hshift=0,vshift=0,label=r"(c)")
+    ax_2mod_2Dplot(ax,"cholesteric","xz",hshift=0,vshift=0)
+    ax_2mod_2Dplot(ax,"cholesteric","phiz",hshift=0,vshift=0)
+    ax_2mod_2Dplot(ax,"cholesteric","phinrho",hshift=0,vshift=0)
 
-    axins = ax.inset_axes([0.75,0.05,0.02,0.35])
+    ax_2mod_2Dplot(ax,"nematic-z","xy",hshift=delh,vshift=0,label=r"(d)")
+    ax_2mod_2Dplot(ax,"nematic-z","xz",hshift=delh,vshift=0)
+    ax_2mod_2Dplot(ax,"nematic-z","phiz",hshift=delh,vshift=0)
+    ax_2mod_2Dplot(ax,"nematic-z","phinrho",hshift=delh,vshift=0)
+
+
+    axins = ax.inset_axes([0.02,0.05,0.02,0.35])
 
     cbar=plt.colorbar(cm.ScalarMappable(norm=Normalize(vmin=0,vmax=0.5*np.pi), cmap=cm.get_cmap("jet_r")),cax=axins,ticks=[0,np.pi/6,np.pi/3,np.pi/2])
     cbar.ax.set_yticklabels([r"$0$",r"$\pi/6$",r"$\pi/3$",r"$\pi/2$"],fontsize=FontSize)
@@ -349,11 +354,36 @@ def two_mod_diagram_plot(LineWidth, FontSize, LabelSize):
     cbar.ax.set_title(r"$\arccos{|\vu{u}\cdot\vu{n}|}$",fontsize=FontSize)
 
 
+    #axcoor = ax.inset_axes([-0.1,0.55,0.02,0.35])
+
+    # plot the follorgin coordinate in axcoor
     delar = 0.4
-    delh_mt = 0.25
-    delvar = -0
+    delh_mt = -0.7
+    delvar = delv
     lshift = - 0.27
     hw = 0.05
+    '''
+    axcoor.arrow(delh_mt*delh+0.5,delvar, delar,0, head_width=hw)
+    axcoor.arrow(delh_mt*delh+0.5,delvar, 0,delar, head_width=hw)
+    axcoor.text(delh_mt*delh+delar+0.5,delvar+lshift, r"$x$", fontsize=FontSize)
+    axcoor.text(delh_mt*delh+lshift+0.5,delvar+delar, r"$y$", fontsize=FontSize)
+
+    axcoor.arrow(delh_mt*delh+0.3,-1.7+delvar, delar,0, head_width=hw)
+    axcoor.arrow(delh_mt*delh+0.3,-1.7+delvar, 0,delar, head_width=hw)
+    axcoor.text(delh_mt*delh+delar+0.3,+lshift-1.7+delvar, r"$x$", fontsize=FontSize)
+    axcoor.text(delh_mt*delh+lshift+0.3,delar-1.7+delvar, r"$z$", fontsize=FontSize)
+
+    axcoor.arrow(delh_mt*delh,-2.55+delvar, delar,0, head_width=hw)
+    axcoor.arrow(delh_mt*delh,-2.55+delvar, 0,delar, head_width=hw)
+    axcoor.text(delh_mt*delh+delar-lshift,lshift-2.55+delvar, r"$\phi$", fontsize=FontSize)
+    axcoor.text(delh_mt*delh+lshift,delar-2.55+delvar, r"$z$", fontsize=FontSize)
+
+    axcoor.arrow(delh_mt*delh,-2.75+delvar, delar,0, head_width=hw)
+    axcoor.arrow(delh_mt*delh,-2.75+delvar, 0,-delar, head_width=hw)
+    #axcoor.text(delh_mt*delh+delar,+lshift-2.95+delvar, r"$\phi$", fontsize=FontSize)
+    axcoor.text(delh_mt*delh+lshift,-delar-2.75+delvar, r"$\rho$", fontsize=FontSize)
+
+    '''
     ax.arrow(delh_mt*delh+0.5,delvar, delar,0, head_width=hw)
     ax.arrow(delh_mt*delh+0.5,delvar, 0,delar, head_width=hw)
     ax.text(delh_mt*delh+delar+0.5,delvar+lshift, r"$x$", fontsize=FontSize)
@@ -366,13 +396,13 @@ def two_mod_diagram_plot(LineWidth, FontSize, LabelSize):
 
     ax.arrow(delh_mt*delh,-2.55+delvar, delar,0, head_width=hw)
     ax.arrow(delh_mt*delh,-2.55+delvar, 0,delar, head_width=hw)
-    ax.text(delh_mt*delh+delar-lshift,lshift-2.55+delvar, r"$\phi$", fontsize=FontSize)
+    ax.text(delh_mt*delh+delar-lshift-0.2,lshift-2.55+delvar, r"$\phi$", fontsize=FontSize)
     ax.text(delh_mt*delh+lshift,delar-2.55+delvar, r"$z$", fontsize=FontSize)
 
-    ax.arrow(delh_mt*delh,-2.75+delvar, delar,0, head_width=hw)
-    ax.arrow(delh_mt*delh,-2.75+delvar, 0,-delar, head_width=hw)
+    ax.arrow(delh_mt*delh,-2.95+delvar, delar,0, head_width=hw)
+    ax.arrow(delh_mt*delh,-2.95+delvar, 0,-delar, head_width=hw)
     #ax.text(delh_mt*delh+delar,+lshift-2.95+delvar, r"$\phi$", fontsize=FontSize)
-    ax.text(delh_mt*delh+lshift,-delar-2.75+delvar, r"$\rho$", fontsize=FontSize)
+    ax.text(delh_mt*delh+lshift,-delar-2.95+delvar, r"$\rho$", fontsize=FontSize)
 
 
     #cbar=plt.colorbar(cm.ScalarMappable(norm=Normalize(vmin=0,vmax=0.5*np.pi), cmap=cm.get_cmap("jet_r")),ax=ax,ticks=[0,np.pi/6,np.pi/3,np.pi/2])
@@ -382,7 +412,8 @@ def two_mod_diagram_plot(LineWidth, FontSize, LabelSize):
     ax.set_xticks([])
     ax.set_frame_on(False)
 
-    plt.tight_layout(pad=0)
+    #plt.tight_layout(pad=0)
+    plt.subplots_adjust(left=0.05,bottom=0.,right=1,top=1)
     #plt.tight_layout(pad=-1)
     #plt.show()
     plt.savefig("figures/diagram_walls.pdf", format="pdf")
@@ -396,4 +427,149 @@ def energy_color_map_plot(LineWidth, FontSize, LabelSize):
     pass
     # can use diverging color maps
     # e.g. 'coolwarm'
+
+def get_del_Ftot_data():
+    K = 1
+    R = 1
+    folder = "../data/pydata/Mar20_2023"
+    Cs = np.arange(0.2,8.1,0.2)
+    optFtot_m0, optalpha_m0, optgamma_m0 = [], [], []
+    optFtot_m2, optalpha_m2, optgamma_m2 = [], [], []
+    mi,mj = 0, 2
+    for C in Cs:
+        filename_m0 = folder + "/optFtot_K%.2f_C%.1f_m%d_R%.1f_qs.csv" % (K, C,mi, R)
+        filename_m2 = folder + "/optFtot_K%.2f_C%.1f_m%d_R%.1f_qs.csv" % (K, C,mj, R)
+
+        qs,optFtot,optalpha,optgamma = np.loadtxt(filename_m0, skiprows=1, delimiter=",", unpack=True)
+        optFtot_m0.append(optFtot)
+        optalpha_m0.append(optalpha)
+        optgamma_m0.append(optgamma)
+
+        qs,optFtot,optalpha,optgamma = np.loadtxt(filename_m2, skiprows=1, delimiter=",", unpack=True)
+        optFtot_m2.append(optFtot)
+        optalpha_m2.append(optalpha)
+        optgamma_m2.append(optgamma)
+    return(qs,Cs, optFtot_m0, optalpha_m0, optgamma_m0,optFtot_m2, optalpha_m2, optgamma_m2)
+
+def del_Ftot_phase_Ks_qs_plot(LineWidth, FontSize, LabelSize):
+    qs,Cs,optFtot_m0, optalpha_m0, optgamma_m0,optFtot_m2, optalpha_m2, optgamma_m2 = get_del_Ftot_data()
+    mi,mj=0,2
+    #qmesh,Kmesh = np.meshgrid(qs,Ks)
+    qmesh,Kmesh = np.meshgrid(qs,Cs) # testing CR^2/K
+    optFtot_diff = np.array(optFtot_m2) - np.array(optFtot_m0)
+    absFdiffmax = np.max(np.abs(optFtot_diff))
+    print("absFdiffmax=",absFdiffmax)
+    ppi = 72
+    plt.figure()
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 0.65))
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+    axFdiff = plt.subplot2grid((2, 3), (0, 0),rowspan=2, colspan=2)
+    axalpha = plt.subplot2grid((2, 3), (0, 2),rowspan=1)
+    axgamma = plt.subplot2grid((2, 3), (1, 2),rowspan=1,sharex=axalpha)
+    msize = 4
+
+    cmap = cm.get_cmap("bwr")
+    #cf = axs[0].pcolormesh(qmesh,Kmesh,optFtot_diff, shading="nearest", cmap = cmap,
+                            #norm = colors.DivergingNorm(vmin=np.min(optFtot_diff), vcenter = 0,vmax = np.max(optFtot_diff) ))
+    Fdiffmin,Fdiffmax = np.min(optFtot_diff),np.max(optFtot_diff)
+    print(Fdiffmin,Fdiffmax)
+    #Fdiffmin,Fdiffmax = round(Fdiffmin,0),round(Fdiffmax,2)
+    levels = [Fdiffmin,Fdiffmin*3/4,Fdiffmin*2/4,Fdiffmin/4,0,Fdiffmax/4,Fdiffmax*2/4,Fdiffmax*3/4,Fdiffmax]
+    print("qmesh.shape(),Kmesh.shape,optFtot.shape()",np.shape(qmesh),np.shape(Kmesh),np.shape(optFtot_diff))
+    #cf = axFdiff.pcolormesh(qs,Cs,optFtot_diff,shading="gouraud",cmap=cmap)
+    #cf = axFdiff.pcolormesh(qmesh,Kmesh,optFtot_diff,shading="gouraud",cmap=cmap, norm=colors.TwoSlopeNorm(vmin=Fdiffmin,vcenter=0,vmax=Fdiffmax))
+    #cf = axFdiff.pcolormesh(qmesh,Kmesh,optFtot_diff, shading="nearest",cmap=cmap, norm=colors.TwoSlopeNorm(vmin=Fdiffmin,vcenter=0,vmax=Fdiffmax))
+    levels = [Fdiffmin,0,Fdiffmax]
+    cfc = axFdiff.contourf(qmesh,Kmesh,optFtot_diff,levels,cmap=cmap,alpha=0.75, norm=colors.TwoSlopeNorm(vmin=Fdiffmin,vcenter=0,vmax=Fdiffmax))
+    cs = axFdiff.contour(cfc,levels=[0],colors=("k"),linestyles="--",linewidths=(LineWidth))
+    qR = np.linspace(0,1.7,20)
+    axFdiff.plot(qR,2*(1+qR**2),linestyle=":",color="cyan",label=r"$CR^2/K=2(1+q^2R^2)$")
+    axFdiff.legend(loc="center left",ncol=1,columnspacing=0.1,handlelength=0.5,handletextpad=0.5,labelspacing=0.1,markerscale=1,frameon=False,fontsize=LabelSize)
+    '''
+    divider = make_axes_locatable(axFdiff)
+    cax = divider.append_axes("top", size="3%", pad=0.02)
+    #cbar=plt.colorbar(cf, cax = cax,ax=axFdiff,orientation="vertical",ticks=levels)
+    cbar=plt.colorbar(cf, cax = cax,ax=axFdiff,orientation="horizontal",ticks=levels)
+    #cbar.add_lines(cs)
+    #cbar.ax.set_yticklabels([str(round(Fdiffmin,1)),"",str(round(Fdiffmin*2/4,1)),"","0","",str(round(Fdiffmax*2/4,2)),"",str(round(Fdiffmax,2))],fontsize=LabelSize)
+    cbar.ax.set_xticklabels([str(round(Fdiffmin,1)),"",str(round(Fdiffmin*2/4,1)),"","0","",str(round(Fdiffmax*2/4,1)),"",str(round(Fdiffmax,1))],fontsize=LabelSize)
+    cbar.ax.xaxis.set_ticks_position('top')
+    cbar.ax.tick_params(direction="in")
+    '''
+
+    #cbar.ax.set_yticklabels([str(round(Fdiffmin,1)),"",str(round(Fdiffmin*2/4,1)),"","0","",str(round(Fdiffmax*2/4,2)),"",str(round(Fdiffmax,2))],fontsize=LabelSize)
+    axFdiff.set_xlabel(r"$qR$",fontsize=LabelSize)
+    axFdiff.set_ylabel(r"$CR^2/K$",fontsize=LabelSize)
+    axFdiff.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="off", labelbottom=True, labelleft=True, labelsize=LabelSize)
+    #cbar.ax.set_title(r"$\Delta E'R^2/K$",fontsize=LabelSize)
+    axFdiff.xaxis.set_major_locator(MultipleLocator(1))
+    axFdiff.xaxis.set_minor_locator(MultipleLocator(0.2))
+    axFdiff.yaxis.set_major_locator(MultipleLocator(1))
+    axFdiff.yaxis.set_minor_locator(MultipleLocator(0.5))
+
+    if(mi==0 and mj==2):
+        axFdiff.text(0.4,6,"Smectic-A\n" + r"$(m=%d)$"%mi,fontsize=LabelSize,multialignment='center')
+        axFdiff.text(1.0,2,"Cholesteric\n" + r"$(m=%d)$"%mj,fontsize=LabelSize,multialignment='center')
+
+    x1, y1 = 0.8, 0.05
+    axFdiff.text(x1, y1, r"(a)", fontsize=FontSize, transform=axFdiff.transAxes)
+
+
+    # plot tan alpha
+    nlegend = 4
+    gap=len(optalpha_m2)//nlegend
+    if not gap:
+        gap=1
+    print("gap",gap)
+    ccolors = ["red", "blue", "purple", "tomato", "black"]
+    c = 0
+    for i in range(len(optalpha_m2))[::gap]:
+        select = optFtot_diff[i]<0
+        #select = optFtot_diff[i]<100000
+        axalpha.plot(qs[select][:],np.tan(optalpha_m2[i][select][:]),"-",ms=msize,mfc="None",lw=LineWidth,label="%.1f"%Cs[i],color=ccolors[c])
+        #print("K[i]=",Ks[i])
+        c=c+1
+        print("optalpha_m2[i][select]=",optalpha_m2[i][select])
+    #axalpha.set_xlabel(r"$qR$",fontsize=LabelSize)
+    axalpha.legend(loc="upper left",ncol=1,columnspacing=0.1,handlelength=0.5,handletextpad=0.5,labelspacing=0.1,markerscale=1,frameon=False,fontsize=LabelSize)
+    axalpha.set_ylabel(r"$\tan\alpha$",fontsize=LabelSize)
+    axalpha.yaxis.set_label_position("right")
+    axalpha.yaxis.tick_right()
+    axalpha.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="off", labelbottom=False, labelleft=False, labelsize=LabelSize)
+    axalpha.xaxis.set_major_locator(MultipleLocator(1))
+    axalpha.xaxis.set_minor_locator(MultipleLocator(0.5))
+    axalpha.yaxis.set_major_locator(MultipleLocator(0.5))
+    axalpha.yaxis.set_minor_locator(MultipleLocator(0.25))
+    x1, y1 = 0.7, 0.1
+    axalpha.text(x1, y1, r"(b)", fontsize=FontSize, transform=axalpha.transAxes)
+
+
+    # plot gamma
+    c = 0
+    for i in range(len(optalpha_m2))[::gap]:
+        select = optFtot_diff[i]<0
+        axgamma.plot(qs[select],optgamma_m2[i][select],"-",ms=msize,mfc="None",lw=LineWidth,color=ccolors[c])
+        c+=1
+    axgamma.set_xlabel(r"$qR$",fontsize=LabelSize)
+    axgamma.set_ylabel(r"$\gamma$",fontsize=LabelSize)
+    axgamma.yaxis.set_label_position("right")
+    axgamma.yaxis.tick_right()
+    axgamma.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="off", labelbottom=True, labelleft=False, labelsize=LabelSize)
+
+    axgamma.xaxis.set_major_locator(MultipleLocator(1))
+    axgamma.xaxis.set_minor_locator(MultipleLocator(0.5))
+
+    axgamma.yaxis.set_major_locator(MultipleLocator(0.1))
+    axgamma.yaxis.set_minor_locator(MultipleLocator(0.05))
+
+    x1, y1 = 0.7, 0.1
+    axgamma.text(x1, y1, r"(c)", fontsize=FontSize, transform=axgamma.transAxes)
+
+
+    plt.tight_layout(pad=0.01)
+    plt.savefig("figures/two_mod_del_E.pdf",format="pdf")
+    #plt.show()
+    plt.close()
+
 

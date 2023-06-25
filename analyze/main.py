@@ -26,14 +26,19 @@ def main():
 
     tanalpha = []
     alpha_u = []
-    qs = np.arange(0.0,2.01,0.1)
-    if (0):
+    qs = np.arange(0.0,4.01,0.1)
+    #qs = [0.6]
+    if (1):
         for q in qs:
         #for q in [1.9]:
             print("q=",q)
             #filename = "../data/Ne2/Dec7_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q%.1f_Cn2.0_id0.csv"%q
-            filename = "../data/Ne2/Apr30_2023/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q%.1f_Cn6.0_id0.csv"%q
-            ans = tilt_slice_distri_plot(filename)
+            #filename = "../data/Ne2/Apr30_2023/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q%.1f_Cn2.0_id0.csv"%q
+            filename = "../data/Ne2/data_2022/May12_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q%.1f_Cn4.0.csv"%q
+            m = 2
+            if q>2.0:
+                m=3
+            ans = tilt_slice_distri_plot(filename,m)
             tanalpha.append(ans)
             ans_u = wall_director_alpha_calc(filename,pwlim = np.pi/3)
             alpha_u.append(ans_u)
@@ -41,7 +46,7 @@ def main():
         #alpha_u_plot()
         print("tanalpha",tanalpha,"\n")
         #tanalpha_q_plot()
-    #return 0
+    return 0
 
 
     # sequence config plotting
@@ -54,7 +59,7 @@ def main():
 
     # return 0
 
-    foldername = "../data/Ne2/May9_2023"
+    foldername = "../data/Ne2/May26_2023"
     print("analyzing " + foldername)
     N = 300
     #Ns = [100, 200, 300, 400, 500]
@@ -66,23 +71,25 @@ def main():
     C0 = 0.0
     karg = 0.0
 
-    lam = 50.0
-    Kd = 2.0
-    Kds = [2.0,3.0,4.0]
-    qs = np.arange(0.0, 3.01, 0.1)
+    lam = 6.0
+    Kd = 4.0
+    Kds = [4.0]
+    qs = np.arange(-3.0, 3.01, 0.1)
     #Cns = np.arange(10.0,30.1,5.0)
     Cn = 4.0
+    ids = [0,1,2,3,4,5]
+    ids = [0]
     #Cns = np.arange(6.0,12.1,2.0)
     pars = []
     pars1, pars2 = [], []
     #for lf in lfs[:]:
-    for Kd in Kds[:]:
+    for id in ids[:]:
         #Cn = Kd
-        pars.append([N, imod, Ne, lf, kar, C0, karg, lam, Kd, qs, Cn])
+        pars.append([N, imod, Ne, lf, kar, C0, karg, lam, Kd, qs, Cn, id])
         # pars1.append([N, 1, 2, lf, kar, C0, karg, lam, Kd, qs, Cn])
         # pars2.append([N, 3, 2, lf, kar, C0, karg, lam, Kd, qs, Cn])
-    par_nm = ["N", "imod", "Ne", "lf", "kar", "C0", "karg", "lam", "Kd", "q", "Cn"]
-    par_dg = [0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1]  # number of digit for each
+    par_nm = ["N", "imod", "Ne", "lf", "kar", "C0", "karg", "lam", "Kd", "q", "Cn", "id"]
+    par_dg = [0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0]  # number of digit for each
     mod = "q"
 
     # run test plot
@@ -91,18 +98,19 @@ def main():
 
     for i in range(len(pars)):
         print("analyzing", pars[i])
-        N, imod, Ne, lf, kar, C0, karg, lam, Kd, q, Cn = pars[i]
-        O_stat_ana(foldername, pars[i], par_nm, par_dg, mode=mod, thermN=5000, CnequalsKc=0, tau_c=6)
+        N, imod, Ne, lf, kar, C0, karg, lam, Kd, q, Cn, id = pars[i]
+        #O_stat_ana(foldername, pars[i], par_nm, par_dg, mode=mod, thermN=5000, CnequalsKc=0, tau_c=6)
+        #O_stat_ana(foldername, pars[i], par_nm, par_dg,mode=mod, thermN=5000, CnequalsKc=0, tau_c=6)
         #O_stat_ana_multi(foldername, pars[i], par_nm, par_dg, mode=mod, nmulti=13, thermN=5000, CnequalsKc=0, tau_c=6)
-        if 1:
+        if 0:
             pass
             #Gij_stat_ana(foldername, pars[i], par_nm, par_dg, mode=mod, tau_c=6)
             # rhor_ave_plot(foldername, pars[i], par_nm, par_dg, mode=mod, del_r=0.1, tag="", leg_num=5)
 
         if 1:
-            for q in qs[::2]:
-                if 1:
-                    filename = foldername + "/State_N%.0f_imod%.0f_Ne%.0f_lf%.1f_kar%.0f_C0%.1f_karg%.1f_lam%.1f_Kd%.1f_q%.1f_Cn%.1f_id0.csv" % (N, imod, Ne, lf, kar, C0, karg, lam, Kd, q, Cn)
+            for q in qs[::1]:
+                if 0:
+                    filename = foldername + "/State_N%.0f_imod%.0f_Ne%.0f_lf%.1f_kar%.0f_C0%.1f_karg%.1f_lam%.1f_Kd%.1f_q%.1f_Cn%.1f_id%d.csv" % (N, imod, Ne, lf, kar, C0, karg, lam, Kd, q, Cn, id)
                     ctag = r"$l_f=%.1f,C_0=%.1f,\lambda=%.1f,q=%.1f, Kd=%.1f$" % (lf, C0, lam, q, Kd)
                     #config_plot_xyz(filename[:-4]+"_therm.csv", mesh=1, rod=0, piwall=1, tag=ctag, Format="png")
                     if os.path.exists(filename):
@@ -137,7 +145,7 @@ def main():
 
                 if 1:
                     print("plotting 2H distribution")
-                    twoHfilename = foldername + "/2Hdis_N%.0f_imod%.0f_Ne%.0f_lf%.1f_kar%.0f_C0%.1f_karg%.1f_lam%.1f_Kd%.1f_q%.1f_Cn%.1f_id0.csv" % (N, imod, Ne, lf, kar, C0, karg, lam, Kd, q, Cn)
+                    twoHfilename = foldername + "/2Hdis_N%.0f_imod%.0f_Ne%.0f_lf%.1f_kar%.0f_C0%.1f_karg%.1f_lam%.1f_Kd%.1f_q%.1f_Cn%.1f_id%d.csv" % (N, imod, Ne, lf, kar, C0, karg, lam, Kd, q, Cn, id)
                     ctag = r"$l_f=%.1f,Kd=%.1f,q=%.1f,C=%.1f$" % (lf, Kd, q, Cn)
                     if os.path.exists(twoHfilename):
                         pass

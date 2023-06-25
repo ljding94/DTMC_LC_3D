@@ -999,6 +999,43 @@ std::vector<double> dtmc_lc::twoHdis_m(int bin_num)
     return twoHdis;
 }
 
+std::vector<double> dtmc_lc::dAdis_m(int bin_num)
+{
+    std::vector<double> dAdis;
+    double del_dA = 3.0 / bin_num;               // take range [0,3] should be sufficient
+    // find number of interior bead
+    int N_edge_bead = 0;
+    for (int e = 0; e < Ne; e++)
+    {
+        N_edge_bead += edge_lists[e].size();
+    }
+    double dA_increment = 1.0 / (mesh.size() - N_edge_bead);
+    int bin;
+    double dA_buff;
+    dAdis.clear();
+
+    // initialize bins
+    for (int k = 0; k < bin_num; k++)
+    {
+        dAdis.push_back(0);
+    }
+
+    for (int i = 0; i < mesh.size(); i++)
+    {
+        dA_buff =  mesh[i].dAn2H[0];
+        if(mesh[i].edge_nei.size()) continue;
+        bin = int(dA_buff / del_dA);
+        if (bin >= bin_num || bin < 0 )
+        {
+            std::cout << dA_buff <<" out of range for dAdis bin_num\n";
+        }else{
+        dAdis[bin] += dA_increment;
+        }
+    }
+    return dAdis;
+}
+
+
 
 
 #pragma endregion

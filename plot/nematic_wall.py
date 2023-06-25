@@ -7,11 +7,12 @@ from matplotlib.ticker import (MultipleLocator, FormatStrFormatter,AutoMinorLoca
 def tilt_Kds_Cn_data_get():
     #foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     #foldername = "../data/Ne2/Apr_2022/Apr9_2022"
-    foldername = "../data/Ne2/May12_2022"
+    foldername = "../data/Ne2/data_2022/May12_2022"
     lf = 25
     Cns = [2,4,6,8]
     datas, labels, colors, markers = [], [], [], []
-    colors = ["red", "green", "blue", "royalblue"]
+    #colors = ["red", "purple", "blue", "royalblue"]
+    colors = ["blue", "orange", "purple", "red"]
     markers = ["v", "s", "p", "h", "o"]
     for i in range(len(Cns)):
         fname = foldername + "/O_MC_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kds_q0.0_Cn%.1f_ana.csv" % (lf,Cns[i])
@@ -33,7 +34,7 @@ def tilt_Kds_Cn_data_get():
 def tilt_Kds_config_data_get():
     #foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     #foldername = "../data/Ne2/Apr_2022/Apr9_2022"
-    foldername = "../data/Ne2/May12_2022"
+    foldername = "../data/Ne2/data_2022/May12_2022"
     lf=25.0
     Cn = 6.0
     Kds = [4.0,2.0]
@@ -62,11 +63,12 @@ def tilt_Kds_config_data_get():
 def tilt_Kds_lf_data_get():
     #foldername = "../data/Ne2/Oct_2021/Oct18_2021"
     #foldername = "../data/Ne2/Apr_2022/Apr9_2022"
-    foldername = "../data/Ne2/May12_2022"
+    foldername = "../data/Ne2/data_2022/May12_2022"
     Cn=4.0
     lfs = [15,25,35]
     datas, labels, colors, markers = [], [], [], []
-    colors = ["red", "green", "blue", "royalblue"]
+    #colors = ["red", "green", "blue", "royalblue"]
+    colors = ["blue", "orange", "purple", "red"]
     markers = ["v", "s", "p", "h", "o"]
     for i in range(len(lfs)):
         fname = foldername + "/O_MC_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kds_q0.0_Cn%.1f_ana.csv" % (lfs[i],Cn)
@@ -149,7 +151,7 @@ def nematic_Kd_plot(LineWidth, FontSize, LabelSize):
 def smectic_to_walls_config_data_get():
     lf=25.0
     Cn = 6.0
-    fns = ["../data/Ne2/May12_2022","../data/Ne2/May12_2022","../data/Ne2/Nov30_2022"]
+    fns = ["../data/Ne2/data_2022/May12_2022","../data/Ne2/data_2022/May12_2022","../data/Ne2/data_2022/Nov30_2022"]
     Kds = [2.0,4.0,2.0]
     qs = [0.0,0.0,1.5]
     Kps = []
@@ -210,7 +212,6 @@ def walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize):
 
     ni = 0 # initial point
     n = 2 # date inteval
-
     # smectic to nematic
     ## tilt drops as Kd increases
     Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle = tilt_Kds_Cn_data_get()
@@ -285,7 +286,7 @@ def walls_membrane_shape_slice(LineWidth, FontSize, LabelSize):
     plt.rc("text", usetex=True)
     plt.rc("text.latex", preamble=r"\usepackage{physics}")
     axcfg = plt.subplot2grid((1, 1), (0, 0),colspan=1,rowspan=1)
-    fname = "../data/Ne2/Nov30_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd2.0_q1.5_Cn6.0.csv"
+    fname = "../data/Ne2/data_2022/Nov30_2022/State_N300_imod3_Ne2_lf25.0_kar50_C00.0_karg0.0_lam6.0_Kd2.0_q1.5_Cn6.0.csv"
     zs = np.arange(-14,14,4)
     for i in range(len(zs)-1):
         ax_config_plot_xyz(axcfg, fname, "gray", LineWidth, pov="xy",xshift = 8*i,zslice = [zs[i],zs[i+1]], mesh=1,bead=1,rod=1,d=1)

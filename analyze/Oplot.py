@@ -155,6 +155,8 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
         #O_cpar_plot(axs[6, 1], Leshort_ave, Leshort_ave * 0, O_label, "min(L1,L2)", r"$min(L1,L2)$", cpar, colors, alphas)
         axs[6, 1].set_xlabel(xLabel)
 
+    O_cpar_plot(axs[2, 1], Lasym_ave, Lasym_err, O_label, "L_asym", r"$L_asym$", cpar, colors, alphas)
+
     O_cpar_plot(axs[2, 0], IdA_ave, IdA_err, O_label, "IdA", r"$\int dA$", cpar, colors, alphas)
     O_cpar_plot(axs[3, 0], I2H_ave, I2H_err, O_label, "I2H", r"$\int dA (2H)$", cpar, colors, alphas)
 
@@ -714,7 +716,7 @@ def dA2H2_distribution_plot(filename,tag):
     plt.close()
 
 def twoH_distribution_plot(filename,tag):
-    data = np.loadtxt(filename, delimiter = ",", unpack = True)
+    data = np.loadtxt(filename, skiprows=400,delimiter = ",", unpack = True)
 
     bin_num = len(data)
     twoHpdf = np.average(data,axis=1)*bin_num
