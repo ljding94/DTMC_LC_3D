@@ -8,6 +8,7 @@ from analyze import *
 from scipy import optimize
 import time
 
+
 def find_nu(ux, uy, uz):
     Q = np.array([[1.5 * np.average(ux * ux) - 0.5, np.average(ux * uy), 1.5 * np.average(ux * uz)], [0, 1.5 * np.average(uy * uy) - 0.5, np.average(uy * uz)], [0, 0, 1.5 * np.average(uz * uz) - 0.5]])
     Q[1, 0] = Q[0, 1]
@@ -287,7 +288,7 @@ def autocorrelation_plot(rho, tau_int, savefile):
     plt.close()
 
 
-def O_MCstep_plot(filename, thermN, Ne):
+def O_MCstep_plot(filename, thermN, Ne, maxStep=5000):
     data = np.loadtxt(filename, skiprows=14, delimiter=",", unpack=True)
     E = data[0]
     Les = data[1 : 1 + Ne]
@@ -316,21 +317,23 @@ def O_MCstep_plot(filename, thermN, Ne):
     plt.figure()
     plt.rc("text")
     na = 5
-    fig, axs = plt.subplots(na, 1, figsize=(246 / ppi * 1, 246 / ppi * 0.5 * na), sharex=True)  # , sharex=True
+    fig, axs = plt.subplots(na, 2, figsize=(246 / ppi * 2, 246 / ppi * 0.5 * na))  # , sharex=True
     mcs = np.arange(1, len(E) + 0.1, 1)
-    axs[0].plot(mcs, E, "-")
-    axs[0].set_ylabel("E")
-    axs[1].plot(mcs[thermN:], E[thermN:], "-")
-    axs[1].set_ylabel("E")
+    axs[0,0].plot(mcs, E, "-")
+    axs[0,1].plot(mcs[:maxStep], E[:maxStep], "-")
+    axs[0,0].set_ylabel("E")
+    axs[1,0].plot(mcs[thermN:], E[thermN:], "-")
+    axs[1,0].set_ylabel("E")
     for i in range(len(Les)):
-        axs[2].plot(mcs, Les[i], "-")
+        axs[2,0].plot(mcs, Les[i], "-")
+        axs[2,1].plot(mcs[:maxStep], Les[i][:maxStep], "-")
         print(Les[i])
-    axs[2].set_ylabel("Le")
-    axs[3].plot(mcs, Lasym, "-")
-    axs[3].set_ylabel("Lasym")
-    axs[4].plot(mcs, I2H2, "-")
-    axs[4].set_ylabel("I2H2")
-    axs[-1].set_xlabel("MC steps")
+    axs[2,0].set_ylabel("Le")
+    axs[3,0].plot(mcs, Lasym, "-")
+    axs[3,0].set_ylabel("Lasym")
+    axs[4,0].plot(mcs, I2H2, "-")
+    axs[4,0].set_ylabel("I2H2")
+    axs[-1,0].set_xlabel("MC steps")
     plt.tight_layout()
     plt.savefig(filename[:-4] + "_MCstep.png")
     plt.close()
@@ -361,7 +364,7 @@ def tan_alpha_distribution_plot(filename):
     # x,y,z,sx,sy,sz,phi,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:15]
     # find center (x0,y0) for the cylinderical part
     x, y, z = x - np.average(x), y - np.average(y), z - np.average(z)
-    x_uni, y_uni = x / (np.sqrt(x ** 2 + y ** 2)), y / (np.sqrt(x ** 2 + y ** 2))
+    x_uni, y_uni = x / (np.sqrt(x**2 + y**2)), y / (np.sqrt(x**2 + y**2))
 
     tan_alpha = uz / (-y_uni * ux + x_uni * uy)  # u*z/u*t_phi #t_phi = (-y,x)
 
@@ -377,52 +380,56 @@ def tan_alpha_distribution_plot(filename):
     plt.close()
 
 
-
-
-
 # pi wall wrapping angle analysis
 
-def test_func_sin(phi,a,b,c):
-    return a+b*np.sin(2*(phi-c))
 
-def test_func_sin1(phi,c):
-    return 0.5+0.5*np.sin(2*(phi-c))
+def test_func_sin(phi, a, b, c):
+    return a + b * np.sin(2 * (phi - c))
 
-def test_func_3sin(phi,a,b,c,d,e):
-    return a+b*np.sin(2*(phi-c))+d*np.sin(4*(phi-c))+e*np.sin(6*(phi-c))
 
-def test_func_exp_sin(phi,lamphi,phi0):
-    return (np.exp(1/lamphi)-np.exp(np.sin(2*(phi-phi0))/lamphi))/(np.exp(1/lamphi)-np.exp(-1/lamphi))
+def test_func_sin1(phi, c):
+    return 0.5 + 0.5 * np.sin(2 * (phi - c))
 
-def test_func_exp_sin_m3(phi,lamphi,phi0):
+
+def test_func_3sin(phi, a, b, c, d, e):
+    return a + b * np.sin(2 * (phi - c)) + d * np.sin(4 * (phi - c)) + e * np.sin(6 * (phi - c))
+
+
+def test_func_exp_sin(phi, lamphi, phi0):
+    return (np.exp(1 / lamphi) - np.exp(np.sin(2 * (phi - phi0)) / lamphi)) / (np.exp(1 / lamphi) - np.exp(-1 / lamphi))
+
+
+def test_func_exp_sin_m3(phi, lamphi, phi0):
     # 3 pi-walls
-    return (np.exp(1/lamphi)-np.exp(np.sin(3*(phi-phi0))/lamphi))/(np.exp(1/lamphi)-np.exp(-1/lamphi))
+    return (np.exp(1 / lamphi) - np.exp(np.sin(3 * (phi - phi0)) / lamphi)) / (np.exp(1 / lamphi) - np.exp(-1 / lamphi))
 
 
-def test_func_abx(x,a,b):
-    return a+b*np.array(x)
+def test_func_abx(x, a, b):
+    return a + b * np.array(x)
 
-def un2_fit_phi(phi,un2,phi0_bound,m=2):
-    #params, params_covariance = optimize.curve_fit(test_func_sin, phi, un2, p0=[0.5, 0.5, np.average(phi0_bound)],bounds=((0.45,0.45,phi0_bound[0]),(0.55,0.55,phi0_bound[1])))
-    #params, params_covariance = optimize.curve_fit(test_func_sin, phi, un2, p0=[0.5, 0.5, np.average(phi0_bound)],bounds=((0.45,0.45,phi0_bound[0]),(0.55,0.55,phi0_bound[1])))
-    #params, params_covariance = optimize.curve_fit(test_func_sin1, phi, un2, p0=phi0_bound[0],bounds=(phi0_bound[0],phi0_bound[1]))
-    if m==3:
-        params, params_covariance = optimize.curve_fit(test_func_exp_sin_m3, phi, un2, p0=[3, np.average(phi0_bound)],bounds=((0.1,phi0_bound[0]),(10,phi0_bound[1])))
+
+def un2_fit_phi(phi, un2, phi0_bound, m=2):
+    # params, params_covariance = optimize.curve_fit(test_func_sin, phi, un2, p0=[0.5, 0.5, np.average(phi0_bound)],bounds=((0.45,0.45,phi0_bound[0]),(0.55,0.55,phi0_bound[1])))
+    # params, params_covariance = optimize.curve_fit(test_func_sin, phi, un2, p0=[0.5, 0.5, np.average(phi0_bound)],bounds=((0.45,0.45,phi0_bound[0]),(0.55,0.55,phi0_bound[1])))
+    # params, params_covariance = optimize.curve_fit(test_func_sin1, phi, un2, p0=phi0_bound[0],bounds=(phi0_bound[0],phi0_bound[1]))
+    if m == 3:
+        params, params_covariance = optimize.curve_fit(test_func_exp_sin_m3, phi, un2, p0=[3, np.average(phi0_bound)], bounds=((0.1, phi0_bound[0]), (10, phi0_bound[1])))
     else:
-        params, params_covariance = optimize.curve_fit(test_func_exp_sin, phi, un2, p0=[3, np.average(phi0_bound)],bounds=((0.1,phi0_bound[0]),(10,phi0_bound[1])))
+        params, params_covariance = optimize.curve_fit(test_func_exp_sin, phi, un2, p0=[3, np.average(phi0_bound)], bounds=((0.1, phi0_bound[0]), (10, phi0_bound[1])))
     print("params: ", params)
-    #print("params_covariance: ",params_covariance)
+    # print("params_covariance: ",params_covariance)
     return (params, np.sqrt(np.diag(params_covariance)))
 
-def tilt_slice_distri_plot(filename,m=2):
-    print(filename,m)
+
+def tilt_slice_distri_plot(filename, m=2):
+    print(filename, m)
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
     x, y, z, ux, uy, uz, nx, ny, nz, dA, d2H, ds, dAK, un2, enum, en0, en1 = data[:17]
     ns = np.transpose(data[17:])
     # x,y,z,sx,sy,sz,phi,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:15]
     # find center (x0,y0) for the cylinderical part
     x, y, z = x - np.average(x), y - np.average(y), z - np.average(z)
-    r = np.sqrt(x**2+y**2)
+    r = np.sqrt(x**2 + y**2)
     zmin, zmax = np.min(z), np.max(z)
     zmin, zmax = zmin + (zmax - zmin) * 1 / 4, zmin + (zmax - zmin) * 3 / 4
     phi = np.arctan2(y, x)
@@ -432,10 +439,10 @@ def tilt_slice_distri_plot(filename,m=2):
     ax1 = plt.subplot2grid((2, 3), (1, 0))
     ax2 = plt.subplot2grid((2, 3), (0, 1), rowspan=2)
     ax3 = plt.subplot2grid((2, 3), (0, 2), rowspan=2)
-    axs = [ax0,ax1,ax2,ax3]
+    axs = [ax0, ax1, ax2, ax3]
 
     nbin = 5
-    colors = ["red","blue","green","tomato","black","purple"]
+    colors = ["red", "blue", "green", "tomato", "black", "purple"]
     z_mean = []
     R_mean = []
     lamphi = []
@@ -446,54 +453,54 @@ def tilt_slice_distri_plot(filename,m=2):
         select = np.logical_and(z > zl, z <= zr)
         z_mean.append(np.average(z[select]))
         R_mean.append(np.average(r[select]))
-        axs[0].scatter(x[select], y[select],color=colors[i])
-        axs[1].hist(un2[select], histtype="step", label=r"$z\in[%.1f,%.1f)$" % (zl, zr), bins=15, color = colors[i])
+        axs[0].scatter(x[select], y[select], color=colors[i])
+        axs[1].hist(un2[select], histtype="step", label=r"$z\in[%.1f,%.1f)$" % (zl, zr), bins=15, color=colors[i])
 
-        if(i==0):
-            phi0_bound = [-3*np.pi/4,np.pi/4]
-            if("Cn6.0" in filename):
-                phi0_bound = [-3*np.pi/4-1,np.pi/4-1]
-                if("q1.5" in filename):
-                    phi0_bound = [-3*np.pi/4,np.pi/4]
-            if("Cn2.0" in filename and ("q1.5" in filename or "q1.7" in filename)):
+        if i == 0:
+            phi0_bound = [-3 * np.pi / 4, np.pi / 4]
+            if "Cn6.0" in filename:
+                phi0_bound = [-3 * np.pi / 4 - 1, np.pi / 4 - 1]
+                if "q3.0" in filename:
+                    phi0_bound = [-3 * np.pi / 4, np.pi / 4]
+            if "Cn2.0" in filename and ("q1.5" in filename or "q1.7" in filename):
                 print("reset phi0_bound\n")
                 time.sleep(1)
-                phi0_bound = [-3*np.pi/4-1.5,np.pi/4-1.5]
-            if("Cn10.0" in filename and "q2.0" in filename):
-                phi0_bound = [-3*np.pi/4-1.5,np.pi/4-1.5]
+                phi0_bound = [-3 * np.pi / 4 - 1.5, np.pi / 4 - 1.5]
+            if "Cn10.0" in filename and "q2.3" in filename:
+                phi0_bound = [-3 * np.pi / 4 - 1.5, np.pi / 4 - 1.5]
 
-        if (1):
+        if 1:
             un2_sort = un2[select][phi[select].argsort()]
             phi_sort = np.sort(phi[select])
-            #print("phi_sort", phi_sort)
-            #print("un2_sort", un2_sort)
+            # print("phi_sort", phi_sort)
+            # print("un2_sort", un2_sort)
             # axs[2].scatter(phi[select],un2[select])
-            axs[2].plot(phi_sort, un2_sort+i, "o:",markersize=5, alpha=0.7, color = colors[i])
+            axs[2].plot(phi_sort, un2_sort + i, "o:", markersize=5, alpha=0.7, color=colors[i])
             # plot fit sin curve
-            print("phi0_bound",phi0_bound)
-            para_fit, para_fit_err = un2_fit_phi(phi_sort,un2_sort,phi0_bound,m)
-            #phi0_bound = [para_fit[2]-1,para_fit[2]+1]
-            phi0_bound = [para_fit[1]-1,para_fit[1]+1]
+            print("phi0_bound", phi0_bound)
+            para_fit, para_fit_err = un2_fit_phi(phi_sort, un2_sort, phi0_bound, m)
+            # phi0_bound = [para_fit[2]-1,para_fit[2]+1]
+            phi0_bound = [para_fit[1] - 1, para_fit[1] + 1]
 
-            #axs[2].plot(phi_sort,test_func_sin(phi_sort,para_fit[0],para_fit[1],para_fit[2])+i, color = colors[i], label = r"$\phi_0=%.1f$"%para_fit[2])
-            #axs[2].plot(phi_sort,test_func_sin1(phi_sort,para_fit[0])+i*0.5, color = colors[i], label = r"$\phi_0=%.1f$"%para_fit[0])
-            phi_plot = np.linspace(-np.pi,np.pi,100)
-            if m==3:
-                axs[2].plot(phi_plot,test_func_exp_sin_m3(phi_plot,para_fit[0],para_fit[1])+i, color = colors[i], label = r"$\phi_0=%.1f$"%para_fit[1])
+            # axs[2].plot(phi_sort,test_func_sin(phi_sort,para_fit[0],para_fit[1],para_fit[2])+i, color = colors[i], label = r"$\phi_0=%.1f$"%para_fit[2])
+            # axs[2].plot(phi_sort,test_func_sin1(phi_sort,para_fit[0])+i*0.5, color = colors[i], label = r"$\phi_0=%.1f$"%para_fit[0])
+            phi_plot = np.linspace(-np.pi, np.pi, 100)
+            if m == 3:
+                axs[2].plot(phi_plot, test_func_exp_sin_m3(phi_plot, para_fit[0], para_fit[1]) + i, color=colors[i], label=r"$\phi_0=%.1f$" % para_fit[1])
             else:
-                axs[2].plot(phi_plot,test_func_exp_sin(phi_plot,para_fit[0],para_fit[1])+i, color = colors[i], label = r"$\phi_0=%.1f$"%para_fit[1])
-            #phi0.append(para_fit[2])
+                axs[2].plot(phi_plot, test_func_exp_sin(phi_plot, para_fit[0], para_fit[1]) + i, color=colors[i], label=r"$\phi_0=%.1f$" % para_fit[1])
+            # phi0.append(para_fit[2])
             lamphi.append(para_fit[0])
             phi0.append(para_fit[1])
             phi0_err.append(para_fit_err[1])
-            #print("para_fit ", para_fit)
+            # print("para_fit ", para_fit)
 
-    z_r_mean = np.array(z_mean)/np.array(R_mean)
-    axs[3].errorbar(z_r_mean, phi0, yerr = phi0_err)
-    params, pcov = optimize.curve_fit(test_func_abx,z_r_mean, phi0, sigma=phi0_err, absolute_sigma=True, p0=[0, 1])
+    z_r_mean = np.array(z_mean) / np.array(R_mean)
+    axs[3].errorbar(z_r_mean, phi0, yerr=phi0_err)
+    params, pcov = optimize.curve_fit(test_func_abx, z_r_mean, phi0, sigma=phi0_err, absolute_sigma=True, p0=[0, 1])
     perr = np.sqrt(np.diag(pcov))
-    axs[3].plot(z_r_mean,test_func_abx(z_r_mean,params[0],params[1]),"-",label=r"$\phi_0 = %.1f+%.3f z/r$"%(params[0],params[1]))
-    #print(filename, params[1])
+    axs[3].plot(z_r_mean, test_func_abx(z_r_mean, params[0], params[1]), "-", label=r"$\phi_0 = %.1f+%.3f z/r$" % (params[0], params[1]))
+    # print(filename, params[1])
     # axs[2].scatter(phi,x)
 
     axs[0].set_xlabel("x")
@@ -509,25 +516,47 @@ def tilt_slice_distri_plot(filename,m=2):
     axs[3].set_xlabel(r"$\left<z\right>/\left<\sqrt{x^2+y^2}\right>$")
     axs[3].set_ylabel(r"$\phi_0$")
     axs[3].legend()
-    plt.savefig(filename[:-4]+"_exp_slice.png")
+    plt.savefig(filename[:-4] + "_exp_slice.png")
     plt.close()
     return params[1], perr[1]
 
 
 def tanalpha_q_plot():
-    kcs = np.arange(0.0,2.01,0.1)
-    #ta = [-0.006388567029160819, 0.030965951628380804, 0.026218232784990175, 0.055499941290762016, 0.0831451415446061, 0.05713229300576396, 0.09805300889223305, 0.10824314872346479, 0.1575055186951583, 0.09059275439065695, 0.19610359491174206, 0.17714045891215047, 0.2003725358394592, 0.2254279156883871, 0.2179849393182559, 0.23040935610576754, 0.2708152045967104]
-    ta = [(-0.04535629139876542, 0.021113893611373585), (0.0859852488954683, 0.02332645619289845), (0.10046459082681683, 0.02004970392703706), (0.132936078911145, 0.029107698275464233), (0.2173186393632259, 0.00869240606734223), (0.28203634123467103, 0.022155009014534842), (0.3643730464719448, 0.004330547417869567), (0.3626924134801637, 0.018990989593462577), (0.4647405159949755, 0.009079895858261126), (0.5022692729650203, 0.033354261771154796), (0.4694281510881381, 0.014153187156549679), (0.5566644040589314, 0.027962283011405485), (0.5451418024359513, 0.033523225772062584), (0.6813221621068155, 0.014908556442604132), (0.7433417090200445, 0.04024179292816863), (0.7711906286273695, 0.014836617946756057), (0.8194082073425, 0.029523235446106667), (0.8228541736488066, 0.0198543734727229), (0.8454411583713057, 0.017040105556118172), (0.909081676268063, 0.018714415026368024), (0.907172499406838, 0.006310711006587178)]
+    kcs = np.arange(0.0, 2.01, 0.1)
+    # ta = [-0.006388567029160819, 0.030965951628380804, 0.026218232784990175, 0.055499941290762016, 0.0831451415446061, 0.05713229300576396, 0.09805300889223305, 0.10824314872346479, 0.1575055186951583, 0.09059275439065695, 0.19610359491174206, 0.17714045891215047, 0.2003725358394592, 0.2254279156883871, 0.2179849393182559, 0.23040935610576754, 0.2708152045967104]
+    ta = [
+        (-0.04535629139876542, 0.021113893611373585),
+        (0.0859852488954683, 0.02332645619289845),
+        (0.10046459082681683, 0.02004970392703706),
+        (0.132936078911145, 0.029107698275464233),
+        (0.2173186393632259, 0.00869240606734223),
+        (0.28203634123467103, 0.022155009014534842),
+        (0.3643730464719448, 0.004330547417869567),
+        (0.3626924134801637, 0.018990989593462577),
+        (0.4647405159949755, 0.009079895858261126),
+        (0.5022692729650203, 0.033354261771154796),
+        (0.4694281510881381, 0.014153187156549679),
+        (0.5566644040589314, 0.027962283011405485),
+        (0.5451418024359513, 0.033523225772062584),
+        (0.6813221621068155, 0.014908556442604132),
+        (0.7433417090200445, 0.04024179292816863),
+        (0.7711906286273695, 0.014836617946756057),
+        (0.8194082073425, 0.029523235446106667),
+        (0.8228541736488066, 0.0198543734727229),
+        (0.8454411583713057, 0.017040105556118172),
+        (0.909081676268063, 0.018714415026368024),
+        (0.907172499406838, 0.006310711006587178),
+    ]
 
-    l0=1.73
-    qs = np.arctan(2*kcs/3)/(2*np.pi*(l0+1))
+    l0 = 1.73
+    qs = np.arctan(2 * kcs / 3) / (2 * np.pi * (l0 + 1))
 
     fig = plt.figure(figsize=(6, 2))
     ax0 = plt.subplot2grid((1, 2), (0, 0))
     ax1 = plt.subplot2grid((1, 2), (0, 1))
 
-    ax0.plot(kcs,ta,"o",ms=8,mfc="None")
-    ax1.plot(qs,ta,"o",ms=8,mfc="None")
+    ax0.plot(kcs, ta, "o", ms=8, mfc="None")
+    ax1.plot(qs, ta, "o", ms=8, mfc="None")
 
     ax0.set_xlabel(r"$k_c$")
     ax0.set_ylabel(r"-$\tan(\alpha)$")
@@ -539,24 +568,23 @@ def tanalpha_q_plot():
     plt.close()
 
 
-
-def wall_director_alpha_calc(filename,pwlim = np.pi/3):
+def wall_director_alpha_calc(filename, pwlim=np.pi / 3):
     data = np.loadtxt(filename, skiprows=6, delimiter=",", unpack=True)
     x, y, z, ux, uy, uz, nx, ny, nz, dA, d2H, ds, dAK, un2, enum, en0, en1 = data[:17]
     ns = np.transpose(data[17:])
     # x,y,z,sx,sy,sz,phi,dA,d2H,ds,dAK,un2,enum, en0, en1 = data[:15]
     # find center (x0,y0) for the cylinderical part
     deg = np.arccos(np.sqrt(un2))
-    deg_slct=deg>pwlim
-    #alpha_u = np.arccos(np.average(np.abs(uz[deg_slct])))
-    abs_uz_norm = np.abs(uz) - np.abs(nz*np.sqrt(un2))
+    deg_slct = deg > pwlim
+    # alpha_u = np.arccos(np.average(np.abs(uz[deg_slct])))
+    abs_uz_norm = np.abs(uz) - np.abs(nz * np.sqrt(un2))
     print(abs_uz_norm[deg_slct])
     alpha_u = np.average(np.arccos(abs_uz_norm[deg_slct]))
     return alpha_u
 
 
 def alpha_u_plot():
-    kcs = np.arange(0.0,2.01,0.1)
+    kcs = np.arange(0.0, 2.01, 0.1)
 
     # arccos ave
     alpha_u0 = [1.4238987620145471, 1.4484840163342692, 1.4481888056447412, 1.4087342533454694, 1.3588457140428045, 1.2512088883782182, 1.2277981432597576, 1.2480724991681404, 1.166390464233919, 1.1380603795651, 1.1345996312871358, 1.1423329249130674, 1.0125158794828715, 1.0955807947441198, 1.0985113186305997, 1.065265335422965, 1.0723092924748612, 1.057182094514105, 1.0979966334465567, 1.07556142759966, 1.0859593192724686]
@@ -567,22 +595,41 @@ def alpha_u_plot():
     alpha_u_Cn4 = [1.4777834484135257, 1.4551264087420979, 1.4207589949494193, 1.3716097525234503, 1.3916646625516402, 1.3072236309459868, 1.2951939281106437, 1.2112390699261928, 1.2023504703701497, 1.130248181346157, 1.0715173721614377, 1.171582291965305, 1.1596850527927227, 1.0970915891251725, 1.1536775294698973, 1.116310670673257, 1.1236886156423231, 1.1357779370983998, 1.0867051511512427, 1.1117527004756618, 1.214311917422728]
     alpha_u_Cn6 = [1.4723108811252246, 1.5041477642870125, 1.4917032885592725, 1.452903089289555, 1.4079053024350594, 1.2838809156284545, 1.2616937264686248, 1.286026793720392, 1.201167754223943, 1.1713746818378825, 1.179985018426367, 1.1796708016489579, 1.05374140829622, 1.1316281497275797, 1.1489902037650463, 1.0977612630096436, 1.1029307965274928, 1.0954793387023247, 1.1320166475595055, 1.1146776358131572, 1.120967449783173]
 
-
     print(np.array(alpha_u) - np.array(alpha_u0))
 
-
-    Cn6res = [(-0.04535629139876542, 0.021113893611373585), (0.0859852488954683, 0.02332645619289845), (0.10046459082681683, 0.02004970392703706), (0.132936078911145, 0.029107698275464233), (0.2173186393632259, 0.00869240606734223), (0.28203634123467103, 0.022155009014534842), (0.3643730464719448, 0.004330547417869567), (0.3626924134801637, 0.018990989593462577), (0.4647405159949755, 0.009079895858261126), (0.5022692729650203, 0.033354261771154796), (0.4694281510881381, 0.014153187156549679), (0.5566644040589314, 0.027962283011405485), (0.5451418024359513, 0.033523225772062584), (0.6813221621068155, 0.014908556442604132), (0.7433417090200445, 0.04024179292816863), (0.7711906286273695, 0.014836617946756057), (0.8194082073425, 0.029523235446106667), (0.8228541736488066, 0.0198543734727229), (0.8454411583713057, 0.017040105556118172), (0.909081676268063, 0.018714415026368024), (0.907172499406838, 0.006310711006587178)]
+    Cn6res = [
+        (-0.04535629139876542, 0.021113893611373585),
+        (0.0859852488954683, 0.02332645619289845),
+        (0.10046459082681683, 0.02004970392703706),
+        (0.132936078911145, 0.029107698275464233),
+        (0.2173186393632259, 0.00869240606734223),
+        (0.28203634123467103, 0.022155009014534842),
+        (0.3643730464719448, 0.004330547417869567),
+        (0.3626924134801637, 0.018990989593462577),
+        (0.4647405159949755, 0.009079895858261126),
+        (0.5022692729650203, 0.033354261771154796),
+        (0.4694281510881381, 0.014153187156549679),
+        (0.5566644040589314, 0.027962283011405485),
+        (0.5451418024359513, 0.033523225772062584),
+        (0.6813221621068155, 0.014908556442604132),
+        (0.7433417090200445, 0.04024179292816863),
+        (0.7711906286273695, 0.014836617946756057),
+        (0.8194082073425, 0.029523235446106667),
+        (0.8228541736488066, 0.0198543734727229),
+        (0.8454411583713057, 0.017040105556118172),
+        (0.909081676268063, 0.018714415026368024),
+        (0.907172499406838, 0.006310711006587178),
+    ]
 
     R = 1
-    Cn6res = R*np.array(Cn6res)
-    Cn6ta, Cn6taerr = Cn6res[:,0], Cn6res[:,1]
-
+    Cn6res = R * np.array(Cn6res)
+    Cn6ta, Cn6taerr = Cn6res[:, 0], Cn6res[:, 1]
 
     plt.figure()
-    plt.plot(kcs,np.arctan(Cn6ta), color = "k", marker = "o", linestyle="None" ,ms=5,mfc="None", label="wall alpha")
-    plt.plot(kcs,alpha_u_Cn2-np.arctan(Cn6ta),"s", linestyle="None",ms=5,mfc="None", label = "director alpha Cn2")
-    plt.plot(kcs,alpha_u_Cn4-np.arctan(Cn6ta),"s", linestyle="None",ms=5,mfc="None", label = "director alpha Cn4")
-    plt.plot(kcs,alpha_u_Cn6-np.arctan(Cn6ta),"s", linestyle="None",ms=5,mfc="None", label = "director alpha Cn6")
+    plt.plot(kcs, np.arctan(Cn6ta), color="k", marker="o", linestyle="None", ms=5, mfc="None", label="wall alpha")
+    plt.plot(kcs, alpha_u_Cn2 - np.arctan(Cn6ta), "s", linestyle="None", ms=5, mfc="None", label="director alpha Cn2")
+    plt.plot(kcs, alpha_u_Cn4 - np.arctan(Cn6ta), "s", linestyle="None", ms=5, mfc="None", label="director alpha Cn4")
+    plt.plot(kcs, alpha_u_Cn6 - np.arctan(Cn6ta), "s", linestyle="None", ms=5, mfc="None", label="director alpha Cn6")
     plt.xlabel(r"$k_c$")
     plt.ylabel(r"$\alpha$")
     plt.legend()

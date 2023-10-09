@@ -763,6 +763,35 @@ std::vector<double> dtmc_lc::Gij_m()
     return Gij;
 }
 
+std::vector<double> dtmc_lc::Qij_m()
+{
+    // Q_ij := (u_i u_j - 1/3 \delta_ij)
+    std::vector<double> Qij(9, 0);
+    for (int n = 0; n < mesh.size(); n++)
+    {
+        for (int i=0; i<3; i++)
+        {
+            for (int j=0; j<3; j++)
+            {
+                Qij[3*i+j] += mesh[n].u[i]*mesh[n].u[j];
+                if(j==i)
+                {
+                    Qij[3*i+j] -= 1/3;
+                }
+            }
+        }
+    }
+    // normalize
+    for(int k=0;k<9;k++)
+    {
+        Qij[k] /= N;
+    }
+    return Qij;
+}
+
+
+
+
 double dtmc_lc::D_edge_com_m()
 {
     // only work for Ne=2 now

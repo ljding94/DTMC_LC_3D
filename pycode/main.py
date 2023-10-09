@@ -42,6 +42,16 @@ def main():
 
     #director_field_plot(2, 0.5, 0.8, 100, 30)
     #director_field_plot(2, 0, 0.5, 100, 30)
+
+    if(0):
+        # plot Ftot vs gammas when q = tan alpha
+        m=3
+        bn_phi = 100
+        bn_z = 100
+        R = 1
+        Ftot_per_q_gamma_plot( m, bn_phi,bn_z,R)
+        return 0
+
     if(0):
         Cs = np.arange(1,3.1,1)
         K = 1
@@ -56,11 +66,21 @@ def main():
     #qs = np.arange(0.0,8.1,0.4)
     K = 1
     C, R = 1,1
-    Cs = np.arange(0.2,8.1,0.2)
+    Cs = np.arange(0.1,10.1,0.1)
 
-    del_Ftot_Ks_qs_plot("../data/pydata/Apr16_2023",K,Cs,1,mi=0,mj=2)
-    #del_Ftot_Ks_qs_plot("../data/pydata/Mar20_2023",K,Cs,1,mi=0,mj=2)
-    #del_Ftot_Ks_qs_plot("../data/pydata/Mar20_2023",K,Cs,1,mi=0,mj=3)
+    '''
+    del_Ftot_Ks_qs_plot("../data/pydata/Aug5_2023",K,Cs,1,mi=0,mj=1)
+    del_Ftot_Ks_qs_plot("../data/pydata/Aug5_2023",K,Cs,1,mi=0,mj=2)
+    del_Ftot_Ks_qs_plot("../data/pydata/Aug5_2023",K,Cs,1,mi=0,mj=3)
+    del_Ftot_Ks_qs_plot("../data/pydata/Aug5_2023",K,Cs,1,mi=1,mj=2)
+    del_Ftot_Ks_qs_plot("../data/pydata/Aug5_2023",K,Cs,1,mi=1,mj=3)
+    del_Ftot_Ks_qs_plot("../data/pydata/Aug5_2023",K,Cs,1,mi=2,mj=3)
+    '''
+
+    ms = [0,1,2,3]
+    min_m_plot("../data/pydata/Aug5_2023",K,Cs,R,ms)
+
+
 
 if __name__ == "__main__":
     main()

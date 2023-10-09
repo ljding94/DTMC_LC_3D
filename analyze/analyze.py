@@ -706,3 +706,67 @@ def Gij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
                 "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n"
                 % (cpar[i], Dedge_ave[i], Dedge_tau[i], Dedge_err[i], Gxx_ave[i], Gxx_tau[i], Gxx_err[i], Gyy_ave[i], Gyy_tau[i], Gyy_err[i], Gzz_ave[i], Gzz_tau[i], Gzz_err[i], Geig0_ave[i], Geig0_tau[i], Geig0_err[i], Geig1_ave[i], Geig1_tau[i], Geig1_err[i], Geig2_ave[i], Geig2_tau[i], Geig2_err[i], GRg2_ave[i], GRg2_tau[i], GRg2_err[i], Gb_ave[i], Gb_tau[i], Gb_err[i], Gkap2_ave[i], Gkap2_tau[i], Gkap2_err[i])
             )
+
+
+def Qij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
+    Qeig0_ave, Qeig0_tau, Qeig0_err = [], [], []
+    Qeig1_ave, Qeig1_tau, Qeig1_err = [], [], []
+    Qeig2_ave, Qeig2_tau, Qeig2_err = [], [], []
+    cpar_ind = find_cpar_ind(par_nm, mode)
+    cpar = par[cpar_ind]
+    for i in range(len(cpar)):
+        par_dealing = par[:]
+        par_dealing[cpar_ind] = par[cpar_ind][i]
+        f2rtail = "/Qij"
+        for j in range(len(par_dealing)):
+            # print("par_dealing[j]",j,par_dealing[j])
+            f2rtail += "_" + par_nm[j] + "%.*f" % (par_dg[j], par_dealing[j])
+        f2rtail += ".csv"
+        file2read = foldername + f2rtail
+        Qdata = np.loadtxt(file2read, skiprows=1, usecols=range(9), delimiter=",", unpack=True)
+        # get edge-edge distance Dedge
+
+        # get eigenvalues of Qij
+        Qijs = np.transpose(Qdata)
+        Qeigs = []
+        for Qij in Qijs:
+            w, v = np.linalg.eig(np.reshape(Qij, (3, 3)))
+            Qeigs.append(np.sort(w))
+        Qeigs = np.transpose(Qeigs)  # Qeigs become np.array() after transpose using numpy
+        print("Qeiqs\n",Qeigs)
+        Qeig0_ave.append(np.average(Qeigs[0]))
+        rho, cov0 = autocorrelation_function_fft(Qeigs[0])
+        tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        Qeig0_tau.append(tau)
+        Qeig0_err.append(np.sqrt(2 * tau / len(Qeigs[0]) * cov0))
+
+        Qeig1_ave.append(np.average(Qeigs[1]))
+        rho, cov0 = autocorrelation_function_fft(Qeigs[1])
+        tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        Qeig1_tau.append(tau)
+        Qeig1_err.append(np.sqrt(2 * tau / len(Qeigs[1]) * cov0))
+
+        Qeig2_ave.append(np.average(Qeigs[2]))
+        rho, cov0 = autocorrelation_function_fft(Qeigs[2])
+        tau, tau_err = tau_int_cal_rho(rho, tau_c)
+        Qeig2_tau.append(tau)
+        Qeig2_err.append(np.sqrt(2 * tau / len(Qeigs[2]) * cov0))
+
+    # save result to file
+    f2stail = "/Qij"
+    for j in range(len(par)):
+        if j == cpar_ind:
+            f2stail += "_" + par_nm[j] + "s"
+        else:
+            f2stail += "_" + par_nm[j] + "%.*f" % (par_dg[j], par_dealing[j])
+    f2stail += "_ana.csv"
+    # only changed "lam" and "B" mode here, others waiting for further decision
+    savefile = foldername + f2stail
+
+    with open(savefile, "w") as f:
+        f.write(mode + ",Qeig0_ave,Qeig0_tau,Qeig0_err,Qeig1_ave,Qeig1_tau,Qeig1_err,Qeig2_ave,Qeig2_tau,Qeig2_err\n")
+        for i in range(len(cpar)):
+            f.write(
+                "%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n"
+                % (cpar[i], Qeig0_ave[i], Qeig0_tau[i], Qeig0_err[i], Qeig1_ave[i], Qeig1_tau[i], Qeig1_err[i], Qeig2_ave[i], Qeig2_tau[i], Qeig2_err[i])
+            )

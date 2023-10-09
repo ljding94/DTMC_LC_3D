@@ -236,3 +236,162 @@ def F_compot_param_plot(filename,m,ms=12):
     plt.tight_layout()
     plt.savefig(filename[:-4]+".pdf",format="pdf")
     plt.close()
+
+
+def Ftot_per_q_gamma_plot_draft(C, m, bn_phi,bn_z,R):
+    qs = np.arange(0.0,5.0,0.2)
+    gammas = np.arange(0.0,1.0,0.05)
+    Ftots = np.zeros((len(qs),len(gammas)))
+    print("np.shape(Ftots),len(Ftots),len(Ftots[0])",np.shape(Ftots),len(Ftots),len(Ftots[0]))
+    print("np.shape(qs)",np.shape(qs))
+    print("np.shape(gammas)",np.shape(gammas))
+    #return 0
+    for i in range(len(qs)):
+        print("calculating q=%.1f"%qs[i])
+        alpha = np.arctan(qs[i]) # set tan alpha to q
+        print("alpha",alpha)
+        for j in range(len(gammas)):
+            Ftot = Ftot_unit_length(1, C, qs[i], m, alpha, gammas[j], bn_phi, bn_z, R)
+            print("i,j",i,j)
+            print("q,gamma",qs[i],gammas[j])
+            print("Ftot,", Ftot)
+            Ftots[i][j] = Ftot #- np.pi*qs[i]**2
+
+    ppi = 72
+    plt.figure()
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 1.7))
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+    axFtot = plt.subplot2grid((2, 1), (0, 0))
+    axFtotq = plt.subplot2grid((2, 1), (1, 0),sharex=axFtot)
+    msize = 4
+    gamma_mesh, q_mesh  = np.meshgrid(gammas,qs)
+    #axFtot.contourf(q_mesh,gamma_mesh,Ftot)
+    cfc = axFtot.contourf(gamma_mesh,q_mesh,Ftots,alpha=1)
+    #cs = axFdiff.contour(cfc,levels=[0],colors=("k"),linestyles="--",linewidths=(LineWidth))
+    for i in range(len(qs))[::5]:
+        axFtotq.plot(gammas,Ftots[i],label="q=%.1f"%qs[i])
+    #axFtot.set_xlabel(r"$\gamma$")
+    axFtot.set_ylabel(r"$q$")
+
+    axFtotq.set_xlabel(r"$\gamma$")
+    axFtotq.legend()
+    #plt.show()
+    plt.savefig("Ftot_per_q_gamma_C%.1f_m%.0f.pdf"%(C,m))
+
+
+def Ftot_per_q_gamma_plot( m, bn_phi,bn_z,R):
+    Cs = [1,4,8]
+    qs = np.arange(0.0,3.1,0.5)
+    gammas = np.arange(0.0,1.0,0.05)
+    #return 0
+
+    ppi = 72
+    plt.figure()
+    fig = plt.figure(figsize=(246 / ppi * 0.4*len(qs), 246 / ppi * 0.8*len(Cs)))
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+    axss = []
+    for i in range(len(Cs)):
+        axFtotq = plt.subplot2grid((3, 1), (len(Cs)-i-1, 0))
+        divider = make_axes_locatable(axFtotq)
+        axs = [axFtotq]
+        for i in range(len(qs)-1):
+            axs.append(divider.append_axes("right",size="100%",pad=0.03))
+        axss.append(axs)
+
+    msize = 4
+    for i in range(len(Cs)):
+        for j in range(len(qs)):
+            print("plotting C%f,q%f"%(Cs[i],qs[j]))
+            alpha = np.arctan(qs[j]) # set tan alpha to q
+            Ftots = []
+            for k in range(len(gammas)):
+                Ftot = Ftot_unit_length(1, Cs[i], qs[j], m, alpha, gammas[k], bn_phi, bn_z, R)
+                Ftots.append(Ftot)
+
+            axss[i][j].plot(Ftots,gammas,label="q=%.1f"%qs[j])
+            axss[i][j].set_title(r"$(C,q)=(%.0f,%.1f)$"%(Cs[i],qs[j]),fontsize=8)
+            argmin_gamma = np.argmin(Ftots)
+            axss[i][j].plot(Ftots[argmin_gamma],gammas[argmin_gamma],"o")
+        axss[i][0].set_ylabel(r"$\gamma$")
+
+    axss[0][len(qs)//2].set_xlabel(r"$E(\tan\alpha=q),m=%d$"%m)
+
+    plt.tight_layout()
+    #plt.show()
+    plt.savefig("Ftot_per_q_gamma_m%.0f.pdf"%m)
+
+def min_m_plot(folder,K,Cs,R,ms):
+    optFms = []
+    optalphas,optgammas=[],[]
+    for i in range(len(ms)):
+        optFms.append([])
+        optalphas.append([])
+        optgammas.append([])
+        for C in Cs:
+            filename_m = folder + "/optFtot_K%.2f_C%.1f_m%d_R%.1f_qs.csv" % (K, C, ms[i], R)
+            qs,optFtot,optalpha,optgamma = np.loadtxt(filename_m, skiprows=1, delimiter=",", unpack=True)
+            optFms[i].append(optFtot)
+            optalphas[i].append(optalpha)
+            optgammas[i].append(optgamma)
+
+    qmesh,Cmesh = np.meshgrid(qs,Cs)
+    optFms = np.array(optFms)
+    #Ftot_min = np.min(allFtot,axes)
+    optFms = np.moveaxis(optFms,[0,1,2],[2,0,1])
+    m_of_minFtot = np.argmin(optFms,axis=2)
+    print(m_of_minFtot)
+
+
+    plt.figure()
+    axF = plt.subplot2grid((2, 3), (0, 0),rowspan=2, colspan=2)
+    axalpha = plt.subplot2grid((2, 3), (0, 2),rowspan=1)
+    axgamma = plt.subplot2grid((2, 3), (1, 2),rowspan=1,sharex=axalpha)
+    msize = 4
+    # tell the colorbar to tick at integers
+    axF.pcolormesh(qmesh,Cmesh,m_of_minFtot,shading="auto",cmap=cm.get_cmap("rainbow"),vmin=-0.5,vmax=3.5)
+    #axF.colorbar(ticks=np.arange(0,4))
+    axF.set_xlabel(r"$qR$")
+    axF.set_ylabel(r"$CR^2/K$")
+
+    ccolors = ["gold","red", "blue", "purple", "black"]
+    lss = [":","--","-"]
+    c = 0
+    #C_to_plot = [1.0,1.5,2.5,4]
+    C_to_plot = [1.0,2.5,4,9]
+
+    for C in C_to_plot:
+        i = int(C*10)-1
+        for m in [1,2,3]:
+            select = m_of_minFtot[i]==m
+            #select = optFtot_diff[i]<100000
+            if m==2:
+                optalpha =optalphas[m][i]
+                axalpha.plot(qs[select][:],np.tan(optalpha[select][:]),ls=lss[m-1],ms=msize,mfc="None",label="%.1f"%Cs[i],color=ccolors[c])
+
+                optgamma =optgammas[m][i]
+                axgamma.plot(qs[select][:],np.tan(optgamma[select][:]),ls=lss[m-1],ms=msize,mfc="None",label="%.1f"%Cs[i],color=ccolors[c])
+
+            else:
+                optalpha =optalphas[m][i]
+                axalpha.plot(qs[select][:],np.tan(optalpha[select][:]),ls=lss[m-1],ms=msize,mfc="None",color=ccolors[c])
+
+                optgamma =optgammas[m][i]
+                axgamma.plot(qs[select][:],np.tan(optgamma[select][:]),ls=lss[m-1],ms=msize,mfc="None",color=ccolors[c])
+
+        c=c+1
+
+    axalpha.legend(ncol=1,columnspacing=0.1,handlelength=0.5,handletextpad=0.25,labelspacing=0.1,markerscale=1,frameon=False)
+    axalpha.set_ylabel(r"$\tan\alpha$")
+    axalpha.yaxis.set_label_position("right")
+    axalpha.yaxis.tick_right()
+    axgamma.set_ylabel(r"$\gamma$")
+    axgamma.yaxis.set_label_position("right")
+    axgamma.yaxis.tick_right()
+
+    #plt.show()
+
+    plt.savefig(folder+"/min_Ftot_m.pdf",format="pdf")
+
+    return m_of_minFtot

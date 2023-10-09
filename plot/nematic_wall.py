@@ -19,7 +19,8 @@ def tilt_Kds_Cn_data_get():
         datas.append(np.loadtxt(fname, skiprows=1, delimiter=",", unpack=True))
 
     datas = np.transpose(np.array(datas), axes=(1, 0, 2))
-    Kds, un2_aves, un2_errs = datas[0], datas[31], datas[33]
+    #Kds, un2_aves, un2_errs = datas[0], datas[31], datas[33] # test using p2uu
+    Kds, p2uu_aves, p2uu_errs = datas[0], datas[25], datas[27] # test using p2uu
     # normalize Kd by Cn
     KdCns=[]
     for i in range(len(Cns)):
@@ -28,7 +29,8 @@ def tilt_Kds_Cn_data_get():
     labels = list(map(str, Cns))
     legendtitle=r"$l_f=%.0f, C$"%lf
 
-    return [Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle]
+    #return [Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle]
+    return [Kds, p2uu_aves,p2uu_errs,labels, colors, markers,legendtitle] # trying p2uu
 
 
 def tilt_Kds_config_data_get():
@@ -76,6 +78,7 @@ def tilt_Kds_lf_data_get():
 
     datas = np.transpose(np.array(datas), axes=(1, 0, 2))
     Kds, un2_aves, un2_errs = datas[0], datas[31], datas[33]
+    Kds, p2uu_aves, p2uu_errs = datas[0], datas[25], datas[27] # test using p2uu
     # normalize Kd by lf
     Kdlfs=[]
     for i in range(len(lfs)):
@@ -84,7 +87,8 @@ def tilt_Kds_lf_data_get():
     labels = list(map(str, lfs))
     legendtitle=r"$C=%.0f,l_f$"%Cn
 
-    return [Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle]
+    #return [Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle]
+    return [Kds, p2uu_aves,p2uu_errs,labels, colors, markers,legendtitle] # trying p2uu
 
 
 def nematic_Kd_plot(LineWidth, FontSize, LabelSize):
@@ -218,7 +222,8 @@ def walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize):
     for i in range(len(Kds)):
         axCn_Kd.errorbar(Kds[i][ni::n],un2_aves[i][ni::n],un2_errs[i][ni::n], ls=":", color=colors[i],mfc="None",marker=markers[i],ms=msize,label=labels[i])
     axCn_Kd.tick_params(which="both",direction="in", top="on", right="on",labelbottom=False, labelleft=True,labelsize=LabelSize)
-    axCn_Kd.set_ylabel(r"$(\vu{u}\cdot\vu{n})^2$", fontsize=FontSize)
+    #axCn_Kd.set_ylabel(r"$\left<(\vu{u}\cdot\vu{n})^2\right>$", fontsize=FontSize)
+    axCn_Kd.set_ylabel(r"$\left<\frac{3}{2}(\vu{u}\cdot\vu{u})-\frac{1}{2}\right>$", fontsize=FontSize)
     axCn_Kd.set_ylim(0.42,0.98)
     axCn_Kd.xaxis.set_major_locator(MultipleLocator(1))
     axCn_Kd.xaxis.set_minor_locator(MultipleLocator(0.5))
@@ -234,7 +239,8 @@ def walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize):
     for i in range(len(Kds)):
         axlf_Kd.errorbar(Kds[i][ni::n],un2_aves[i][ni::n],un2_errs[i][ni::n], ls=":", color=colors[i],mfc="None",marker=markers[i],ms=msize,label=labels[i])
     axlf_Kd.tick_params(which="both",direction="in", top="on", right="on",labelbottom=True, labelleft=True,labelsize=LabelSize)
-    axlf_Kd.set_ylabel(r"$(\vu{u}\cdot\vu{n})^2$", fontsize=FontSize)
+    axlf_Kd.set_ylabel(r"$\left<(\vu{u}\cdot\vu{n})^2\right>$", fontsize=FontSize)
+    axlf_Kd.set_ylabel(r"$\left<\frac{3}{2}(\vu{u}\cdot\vu{u})-\frac{1}{2}\right>$", fontsize=FontSize)
     #axlf_Kd.set_ylim(0.35,1.0)
     axlf_Kd.xaxis.set_major_locator(MultipleLocator(1))
     axlf_Kd.xaxis.set_minor_locator(MultipleLocator(0.5))
@@ -291,3 +297,86 @@ def walls_membrane_shape_slice(LineWidth, FontSize, LabelSize):
     for i in range(len(zs)-1):
         ax_config_plot_xyz(axcfg, fname, "gray", LineWidth, pov="xy",xshift = 8*i,zslice = [zs[i],zs[i+1]], mesh=1,bead=1,rod=1,d=1)
     plt.show()
+
+
+
+
+def walls_3phase_diagram_data_get():
+    foldername = "../data/Ne2/Aug8_2023"
+    lf=15.0
+    Kd=2.0
+    Cns = np.arange(1.0,13.1,1.0)
+    #Cns = np.arange(15.0,34.1,1.0)
+
+    datas = []
+    for i in range(len(Cns)):
+        fname = foldername + "/O_MC_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kd2.0_qs_Cn%.1f_id0_ana.csv" % (lf,Cns[i])
+        #datas.append(np.loadtxt(fname, skiprows=1,max_rows=15, delimiter=",", unpack=True))
+        datas.append(np.loadtxt(fname, skiprows=1, delimiter=",", unpack=True))
+    datas = np.transpose(np.array(datas), axes=(1, 0, 2))
+    qs, uc_aves, uc_errs, un_aves, un_errs,uz2_aves, uz2_errs = datas[0], datas[28], datas[30], datas[31], datas[33], datas[34], datas[36]
+
+    return [qs[0],Cns,uc_aves]
+
+
+def walls_3phase_diagram_config_data_get():
+    foldername="../data/Ne2/Aug8_2023"
+    qCns = [(0.5,7.0),(1.0,2.0),(2.2,4.0)]
+    ypos = 14.1
+    arrowpos=[(0.6,ypos),(1.8,ypos),(2.8,ypos)]
+    fnames = []
+    povs = []
+    rotxyzs = [(0,0.7,0),(-0.3,0.7,0),(0.2,0.7,0)]
+    for i in range(len(qCns)):
+        fnames.append(foldername + "/State_N300_imod3_Ne2_lf15.0_kar50_C00.0_karg0.0_lam6.0_Kd2.0_q%.1f_Cn%.1f_id0.csv" % (qCns[i]))
+        povs.append("zx")
+        #rotxyzs.append([0,0.7,0])
+
+    return [qCns,arrowpos,fnames,povs,rotxyzs]
+
+
+def walls_3phase_diagram(LineWidth, FontSize, LabelSize):
+    print("PRINT 3-PHASE phase diagram plot for m=0,2,3")
+
+    qs,Cns,uc_aves = walls_3phase_diagram_data_get()
+    qCns,arrowpos,fnames,povs,rotxyzs = walls_3phase_diagram_config_data_get()
+
+    ppi = 72
+    #fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 1.05))
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 0.8))
+    plt.rc('text', usetex=True)
+    plt.rc('text.latex', preamble=r'\usepackage{physics}')
+
+    ax = plt.subplot2grid((1,1), (0, 0))
+    #axcfg = ax.inset_axes([-0.1, 0.98, 1.3, 0.4])
+    axcfg = ax.inset_axes([-0.1, 0.98, 1.3, 0.6])
+
+    qp,Cnp = np.meshgrid(qs,Cns)
+    im = ax.pcolormesh(qp,Cnp,uc_aves,shading="auto",cmap=cm.get_cmap("rainbow"))
+    cbar=fig.colorbar(im,ax=ax)
+    cbar.ax.tick_params(direction="in",labelsize=LabelSize)
+    #cbar.set_label(r"$T_s$") # this set on the right side
+    cbar.ax.set_title(r"$T_s$", fontsize=FontSize) # this set on the top
+    ax.tick_params(which="both",direction="in", top="on", right="on",labelbottom=True, labelleft=True,labelsize=LabelSize)
+    ax.set_xlabel(r"$k_c$", fontsize=FontSize)
+    ax.set_ylabel(r"$C$", fontsize=FontSize)
+
+    anotext = ["smectic-A", "2-wall", "3-wall"]
+
+    for i in range(len(fnames)):
+        ax_config_plot_xyz(axcfg, fnames[i], "gray", LineWidth, pov=povs[i], rotxyz=rotxyzs[i],xshift=i*20,yshift=0, mesh=1, bead=1,rod=1,d=1)
+        ax.text(arrowpos[i][0],arrowpos[i][1]+0.2,anotext[i],ha="center",fontsize=LabelSize)
+        ax.annotate("",xy=qCns[i], xytext=arrowpos[i],arrowprops=dict(arrowstyle="->",lw=LineWidth,color="gray"),annotation_clip=False)
+        #axconf.text(i/rn+0.1,0, r"$%.0f$"%lams[i], fontsize=FontSize)
+
+    x1, y1 = -0.035, 0.8
+    #axcfg.text(axcfg.get_xlim()[1]*x1+axcfg.get_xlim()[0]* (1-x1),axcfg.get_ylim()[1]*y1+axcfg.get_ylim()[0]* (1-y1), r"(a)", fontsize=FontSize)
+
+    ax.xaxis.set_major_locator(MultipleLocator(0.5))
+    ax.xaxis.set_minor_locator(MultipleLocator(0.1))
+    ax.yaxis.set_major_locator(MultipleLocator(2))
+    ax.yaxis.set_minor_locator(MultipleLocator(1))
+
+    plt.tight_layout(0.05)
+    #plt.subplots_adjust(wspace=0.05,hspace=0.3,left=0.12,right=0.97,bottom=0.08,top=1.37)
+    plt.savefig("figures/phase_diagram_walls.pdf",format="pdf")

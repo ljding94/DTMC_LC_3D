@@ -36,7 +36,7 @@ def get_All_data(head, f2rtail, foldername, pars, par_nm, par_dg, mode):
             O_label.append(label)
 
 
-def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
+def Os_pars_plot(foldername, pars, par_nm, par_dg, mode,subfix=None):
     colors, alphas = None, None
     Alldata, O_label = [], []
     xLabel = mode
@@ -185,6 +185,8 @@ def Os_pars_plot(foldername, pars, par_nm, par_dg, mode):
     axs[0, 0].xaxis.set_minor_locator(MultipleLocator(1))
     lgd = axs[0, 0].legend(loc="upper center", bbox_to_anchor=(0.5, 0.25 * len(axs)))
     plt.tight_layout(pad=0)
+    if(subfix):
+        mode = mode+"_"+subfix
     plt.savefig(foldername + "/Os_" + mode + ".pdf", format="pdf", bbox_extra_artists=(lgd,), bbox_inches="tight", transparent=True)
     plt.close()
 
@@ -716,7 +718,7 @@ def dA2H2_distribution_plot(filename,tag):
     plt.close()
 
 def twoH_distribution_plot(filename,tag):
-    data = np.loadtxt(filename, skiprows=400,delimiter = ",", unpack = True)
+    data = np.loadtxt(filename, skiprows=100,delimiter = ",", unpack = True)
 
     bin_num = len(data)
     twoHpdf = np.average(data,axis=1)*bin_num
@@ -732,3 +734,20 @@ def twoH_distribution_plot(filename,tag):
     plt.savefig(filename[:-4]+".png")
     plt.close()
 
+def dA_distribution_plot(filename, tag):
+    data = np.loadtxt(filename, skiprows=100,delimiter = ",", unpack = True)
+    bin_num = len(data)
+
+    dApdf = np.average(data,axis=1)*bin_num
+    dAx = np.linspace(0+1/bin_num,3-1/bin_num,bin_num)
+    # dA take [0,3]
+
+    print("twoH distribution")
+    plt.figure()
+    plt.plot(dAx,dApdf)
+    plt.xlabel(r"$\sigma_i$")
+    plt.ylabel(r"$p(\sigma_i)$")
+    #plt.ylim(0,6)
+    plt.legend(title=tag)
+    plt.savefig(filename[:-4]+".png")
+    plt.close()

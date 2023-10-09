@@ -297,7 +297,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     std::vector<double> Eu_all;
 
     std::vector<double> D_edge_all;
-    std::vector<std::vector<double>> Gij_all;
+    //std::vector<std::vector<double>> Gij_all;
+    std::vector<std::vector<double>> Qij_all;
     //std::vector<std::vector<double>> rhor_all;
     //std::vector<std::vector<double>> uucdis_all;
     std::vector<std::vector<double>> un2dis_all;
@@ -324,7 +325,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
 
         if(seq && (sweep_n*seq % MC_sweeps == 0)){
             seq_n = int(sweep_n*seq/MC_sweeps);
-            std::cout<<"seqqqq "<< seq_n<<"\n";
+            std::cout<<"seq "<< seq_n<<"\n";
             State_write(folder + "/State_" + finfo + "_seq"+std::to_string(seq_n)+".csv");
         }
         std::cout << sweep_n << "/" << MC_sweeps << "\n";
@@ -351,15 +352,15 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
 
         if (sweep_n % sweep_p_G == 0)
         {
-            Gij_all.push_back(Gij_m());
+            Qij_all.push_back(Qij_m());
             D_edge_all.push_back(D_edge_com_m());
             //rhor_all.push_back(rho_rcom_m(delta_r, bin_num));
             //uucdis_all.push_back(uucdis_m(bin_num));
-            un2dis_all.push_back(un2dis_m(bin_num));
-            un2thetadis_all.push_back(un2thetadis_m(bin_num));
+            //un2dis_all.push_back(un2dis_m(bin_num));
+            //un2thetadis_all.push_back(un2thetadis_m(bin_num));
             //dA2H2dis_all.push_back(dA2H2dis_m(bin_num));
-            twoHdis_all.push_back(twoHdis_m(bin_num));
-            dAdis_all.push_back(dAdis_m(bin_num));
+            //twoHdis_all.push_back(twoHdis_m(bin_num));
+            //dAdis_all.push_back(dAdis_m(bin_num));
         }
         for (int i = 0; i < step_p_sweep; i++)
         {
@@ -425,7 +426,23 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     }
     f.close();
 
+    std::ofstream fQ(folder + "/Qij_" + finfo + ".csv");
+    if (fQ.is_open())
+    {
+        fQ << "Qxx,Qxy,Qxz,Qyx,Qyy,Qyz,Qzx,Qzy,Qzz\n";
+        for (int i = 0; i < Qij_all.size(); i++)
+        {
+            fQ << Qij_all[i][0];
+            for (int j = 1; j < Qij_all[0].size(); j++)
+            {
+                fQ << "," << Qij_all[i][j];
+            }
+            fQ << "\n";
+        }
+    }
+    fQ.close();
 
+    /*
     std::ofstream fG(folder + "/Gij_" + finfo + ".csv");
     if (fG.is_open())
     {
@@ -441,7 +458,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     fG.close();
-
+*/
 /*
     std::ofstream fuuc(folder + "/uucdis_" + finfo + ".csv");
     if (fuuc.is_open())
@@ -474,7 +491,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     }
     frhor.close();
     */
-
+   /*
    std::ofstream fun2(folder + "/un2dis_" + finfo + ".csv");
     if (fun2.is_open())
     {
@@ -489,8 +506,9 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     fun2.close();
+    */
 
-
+   /*
    std::ofstream fun2theta(folder + "/un2thetadis_" + finfo + ".csv");
     if (fun2theta.is_open())
     {
@@ -505,7 +523,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     fun2theta.close();
-/*
+    */
+    /*
     std::ofstream fdA2H2(folder + "/dA2H2dis_" + finfo + ".csv");
     if (fdA2H2.is_open())
     {
@@ -521,6 +540,7 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
     }
     fdA2H2.close();
 */
+    /*
     std::ofstream f2H(folder + "/2Hdis_" + finfo + ".csv");
     if (f2H.is_open())
     {
@@ -535,7 +555,8 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     f2H.close();
-
+    */
+   /*
     std::ofstream fdA(folder + "/dAdis_" + finfo + ".csv");
     if (fdA.is_open())
     {
@@ -550,4 +571,5 @@ void dtmc_lc::O_MC_measure(int MC_sweeps, int sweep_p_G, int step_p_sweep,
         }
     }
     fdA.close();
+    */
 }

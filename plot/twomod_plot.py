@@ -6,6 +6,7 @@ from matplotlib import cm
 from matplotlib.colors import Normalize
 import matplotlib.colors as colors
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter, AutoMinorLocator
+from scipy.signal import savgol_filter
 
 def n(m, alpha, gamma, phi, z):
     nx = np.cos(phi)
@@ -82,7 +83,7 @@ def ax_2mod_u_3Dplot(ax,m,alpha,gamma,d=0.1):
     ax.plot_surface(x,y,z, linewidth=0,shade=0,color = "gray", edgecolor="gray",alpha=0.6) # ,rstride=1, cstride=1)
     #ax.plot_surface(x,y,z, linewidth=0.5,shade=0,color = "gray",alpha=0.5,rstride=10, cstride=10)
 
-    bn_phi,bn_z = 19,9
+    bn_phi,bn_z = 18,9
     phi, z = np.meshgrid(2 * np.pi * np.linspace(0.0 / bn_phi, 1 + 0.0 / bn_phi, bn_phi), np.linspace(0.5 / bn_z, 1 + 0.5 / bn_z, bn_z))
     x, y = np.cos(phi), np.sin(phi)
     x,y,z,phi = x.flatten(),y.flatten(),z.flatten(),phi.flatten()
@@ -98,15 +99,17 @@ def ax_2mod_u_3Dplot(ax,m,alpha,gamma,d=0.1):
         #ax.plot3D([x[i]-0.5*d*ux[i],x[i]+0.5*d*ux[i]],[y[i]-0.5*d*uy[i],y[i]+0.5*d*uy[i]],[z[i]-0.5*d*uz[i],z[i]+0.5*d*uz[i]],"-",linewidth=1,color=cmap(norm(abs_un[i])),label=r"$u$")
         ax.plot3D([x[i]-0.5*d*ux[i],x[i]+0.5*d*ux[i]],[y[i]-0.5*d*uy[i],y[i]+0.5*d*uy[i]],[z[i]-0.5*d*uz[i],z[i]+0.5*d*uz[i]],"-",linewidth=2,color=cmap(norm(deg[i])))
         # for the propurse of seeing direction
-    ax.scatter([x-0.5*d*ux],[y-0.5*d*uy],[z-0.5*d*uz],s=5,marker="o",color=cmap(norm(deg)))
+    #ax.scatter([x-0.5*d*ux],[y-0.5*d*uy],[z-0.5*d*uz],s=5,marker="o",color=cmap(norm(deg)))
 
     #plot wall line
     z = np.linspace(0,1,50)
-    for delphi in [-np.pi/2,np.pi/2]:
+    delphi = np.pi/m
+    while delphi<2*np.pi:
         phi = np.tan(alpha)*z + delphi
         x = np.cos(phi)
         y = np.sin(phi)
         ax.plot3D(x,y,z, linestyle="-", color="k", alpha=0.9, linewidth = 1)
+        delphi += 2*np.pi/m
 
     #ax.set_aspect("auto")
     ax.view_init(elev=50) #., azim=-40)
@@ -138,7 +141,7 @@ def demo_config_2mod_u_plot(LineWidth, FontSize, LabelSize):
         axs[i,0].text2D(-0.05,0.4, r"$\alpha=%s$"%alphas_label[i], fontsize=FontSize, transform=axs[i,0].transAxes,rotation=90)
         axs[0,i].text2D(0.4,1.05, r"$\gamma=%.1f$"%gammas[i], fontsize=FontSize, transform=axs[0,i].transAxes)
         for j in range(3):
-            ax_2mod_u_3Dplot(axs[i,j],2,alphas[i],gammas[j],d=0.2)
+            ax_2mod_u_3Dplot(axs[i,j],3,alphas[i],gammas[j],d=0.2)
             #uz = uz_at_wall(alphas[i],gammas[j])
             alpha_u = alpha_u_at_wall(alphas[i],gammas[j])
             #if(alpha_u<0):
@@ -146,13 +149,13 @@ def demo_config_2mod_u_plot(LineWidth, FontSize, LabelSize):
             alphas_u.append(alpha_u)
             thetas_u.append(alpha_u-alphas[i])
             print(alpha_u/np.pi*16)
-            axs[i,j].text2D(0.3,-0.05,r"$\theta=%s$"%thetas_label[i][j],fontsize=FontSize, transform=axs[i,j].transAxes)
+            #axs[i,j].text2D(0.3,-0.05,r"$\theta=%s$"%thetas_label[i][j],fontsize=FontSize, transform=axs[i,j].transAxes)
     print("alphas_u/np.pi*16",np.array(alphas_u)/np.pi*16)
     print("(thetas_u)/np.pi*16",np.array(thetas_u)/np.pi*16)
     plt.tight_layout(pad=0.37)
     #plt.tight_layout(pad=-1)
-    plt.show()
-    #plt.savefig("figures/twomode_config_demo.pdf", format="pdf")
+    #plt.show()
+    plt.savefig("figures/twomode_config_demo_m3.pdf", format="pdf")
 
 def ax_2mod_2Dplot(ax,mod,view,hshift=0,vshift=0,du=0.2,dt=0.1,label="",FontSize=9):
     # get ux,uy,uz for different mod
@@ -452,6 +455,7 @@ def get_del_Ftot_data():
     return(qs,Cs, optFtot_m0, optalpha_m0, optgamma_m0,optFtot_m2, optalpha_m2, optgamma_m2)
 
 def del_Ftot_phase_Ks_qs_plot(LineWidth, FontSize, LabelSize):
+    print("aka: phase diagram for interpolation model")
     qs,Cs,optFtot_m0, optalpha_m0, optgamma_m0,optFtot_m2, optalpha_m2, optgamma_m2 = get_del_Ftot_data()
     mi,mj=0,2
     #qmesh,Kmesh = np.meshgrid(qs,Ks)
@@ -480,11 +484,13 @@ def del_Ftot_phase_Ks_qs_plot(LineWidth, FontSize, LabelSize):
     #cf = axFdiff.pcolormesh(qs,Cs,optFtot_diff,shading="gouraud",cmap=cmap)
     #cf = axFdiff.pcolormesh(qmesh,Kmesh,optFtot_diff,shading="gouraud",cmap=cmap, norm=colors.TwoSlopeNorm(vmin=Fdiffmin,vcenter=0,vmax=Fdiffmax))
     #cf = axFdiff.pcolormesh(qmesh,Kmesh,optFtot_diff, shading="nearest",cmap=cmap, norm=colors.TwoSlopeNorm(vmin=Fdiffmin,vcenter=0,vmax=Fdiffmax))
+    qR = np.linspace(0,1.7,20)
+    axFdiff.plot(qR,2*(1+qR**2),linestyle="-",color="gray",label=r"$2(1+q^2R^2)$", zorder=1) # tom's theory
     levels = [Fdiffmin,0,Fdiffmax]
     cfc = axFdiff.contourf(qmesh,Kmesh,optFtot_diff,levels,cmap=cmap,alpha=0.75, norm=colors.TwoSlopeNorm(vmin=Fdiffmin,vcenter=0,vmax=Fdiffmax))
     cs = axFdiff.contour(cfc,levels=[0],colors=("k"),linestyles="--",linewidths=(LineWidth))
-    qR = np.linspace(0,1.7,20)
-    axFdiff.plot(qR,2*(1+qR**2),linestyle=":",color="cyan",label=r"$CR^2/K=2(1+q^2R^2)$")
+
+
     axFdiff.legend(loc="center left",ncol=1,columnspacing=0.1,handlelength=0.5,handletextpad=0.5,labelspacing=0.1,markerscale=1,frameon=False,fontsize=LabelSize)
     '''
     divider = make_axes_locatable(axFdiff)
@@ -522,7 +528,7 @@ def del_Ftot_phase_Ks_qs_plot(LineWidth, FontSize, LabelSize):
     if not gap:
         gap=1
     print("gap",gap)
-    ccolors = ["red", "blue", "purple", "tomato", "black"]
+    ccolors = ["red", "blue", "purple" , "black"]
     c = 0
     for i in range(len(optalpha_m2))[::gap]:
         select = optFtot_diff[i]<0
@@ -569,6 +575,265 @@ def del_Ftot_phase_Ks_qs_plot(LineWidth, FontSize, LabelSize):
 
     plt.tight_layout(pad=0.01)
     plt.savefig("figures/two_mod_del_E.pdf",format="pdf")
+    #plt.show()
+    plt.close()
+
+def get_del_Ftot_data_3phase():
+    K = 1
+    R = 1
+    folder = "../data/pydata/Jul20_2023"
+    Cs = np.arange(0.0,8.1,0.1)
+    optFtot_m0, optalpha_m0, optgamma_m0 = [], [], []
+    optFtot_m2, optalpha_m2, optgamma_m2 = [], [], []
+    optFtot_m3, optalpha_m3, optgamma_m3 = [], [], []
+    mi,mj,mk = 0, 2, 3
+    for C in Cs:
+        filename_m0 = folder + "/optFtot_K%.2f_C%.1f_m%d_R%.1f_qs.csv" % (K, C,mi, R)
+        filename_m2 = folder + "/optFtot_K%.2f_C%.1f_m%d_R%.1f_qs.csv" % (K, C,mj, R)
+        filename_m3 = folder + "/optFtot_K%.2f_C%.1f_m%d_R%.1f_qs.csv" % (K, C,mk, R)
+        mrow = 201
+        jrow = 1
+        qs,optFtot,optalpha,optgamma = np.loadtxt(filename_m0, skiprows=1, max_rows=mrow, delimiter=",", unpack=True)
+        qs,optFtot,optalpha,optgamma = qs[::jrow],optFtot[::jrow],optalpha[::jrow],optgamma[::jrow]
+        optFtot_m0.append(optFtot)
+        optalpha_m0.append(optalpha)
+        optgamma_m0.append(optgamma)
+
+        qs,optFtot,optalpha,optgamma = np.loadtxt(filename_m2, skiprows=1,  max_rows=mrow, delimiter=",", unpack=True)
+        qs,optFtot,optalpha,optgamma = qs[::jrow],optFtot[::jrow],optalpha[::jrow],optgamma[::jrow]
+        optFtot_m2.append(optFtot)
+        optalpha_m2.append(optalpha)
+        optgamma_m2.append(optgamma)
+
+        qs,optFtot,optalpha,optgamma = np.loadtxt(filename_m3, skiprows=1,  max_rows=mrow, delimiter=",", unpack=True)
+        print("len(qs)",len(qs))
+        qs,optFtot,optalpha,optgamma = qs[::jrow],optFtot[::jrow],optalpha[::jrow],optgamma[::jrow]
+        print("len(qs)",len(qs))
+        optFtot_m3.append(optFtot)
+        optalpha_m3.append(optalpha)
+        optgamma_m3.append(optgamma)
+
+    return(qs,Cs, optFtot_m0, optalpha_m0, optgamma_m0, optFtot_m2, optalpha_m2, optgamma_m2, optFtot_m3, optalpha_m3, optgamma_m3)
+
+def m_of_minFtot_3phase_data_get(qs,Cs, optFtot_m0, optFtot_m2, optFtot_m3):
+    qmesh,Cmesh = np.meshgrid(qs,Cs) # testing CR^2/K
+    allFtot = np.array([optFtot_m0, optFtot_m2, optFtot_m3])
+    #Ftot_min = np.min(allFtot,axes)
+    allFtot = np.moveaxis(allFtot,[0,1,2],[2,0,1])
+    m_of_minFtot = np.argmin(allFtot,axis=2)
+    print(m_of_minFtot)
+    return m_of_minFtot
+
+def transition_line_of_m_data_get(qs,Cs,m_of_minFtot):
+    qm0,Cm0 = [],[]
+    qm2,Cm2 = [],[]
+    for j in range(len(m_of_minFtot[0])):
+        # of different q
+        for i in range(len(m_of_minFtot)-1):
+            # of diferent C
+            if m_of_minFtot[i][j] != 0 and m_of_minFtot[i+1][j] == 0:
+                # m0 to other transition
+                #qm0.append((qs[j]+qs[j+1])/2)
+                #Cm0.append(Cs[i])
+                qm0.append(qs[j])
+                Cm0.append((Cs[i]+Cs[i+1])/2)
+
+            '''
+            elif i<len(m_of_minFtot)-1 and m_of_minFtot[i][j] != 0 and m_of_minFtot[i+1][j] == 0:
+                qm0.append(qs[j])
+                Cm0.append(Cs[i])
+            '''
+
+            if m_of_minFtot[i][j] == 1 and m_of_minFtot[i+1][j] == 2:
+                # m2 to m3 transition
+                print("m2 to m3: ",qs[j],Cs[i])
+                #qm2.append((qs[j]+qs[j+1])/2)
+                #Cm2.append(Cs[i])
+                qm2.append(qs[j])
+                Cm2.append((Cs[i]+Cs[i+1])/2)
+            '''
+            elif i<len(m_of_minFtot)-1 and m_of_minFtot[i][j] == 1 and m_of_minFtot[i+1][j] == 2:
+                print("m2 to m3: ",qs[j],Cs[i])
+                qm2.append(qs[j])
+                Cm2.append(Cs[i])
+            '''
+    #qm0 = [qs[0]]+ qm0
+    #Cm0 = [Cm0[0]]+ Cm0
+    #exlopate the las Cm0
+    qm0.append(qm0[-1]+(qm0[-1]-qm0[-2]))
+    Cm0.append(Cm0[-1]+(Cm0[-1]-Cm0[-2]))
+
+    print("qm2,Cm2",qm2,Cm2)
+    #qm2 = [qs[-1]] + qm2
+    #Cm2 = [Cm2[0]]+ Cm2
+    print("qm2,Cm2",qm2,Cm2)
+    #return (qm0,Cm0,qm2[::-1],Cm2[::-1]) # m2 to 3 transition order is reversed
+
+    # smooth these curves
+    Cm0 = savgol_filter(Cm0, 21,3, mode="nearest")
+    Cm2 = savgol_filter(Cm2, 21,3, mode="nearest")
+    return (qm0,Cm0,qm2,Cm2)
+
+
+
+
+def del_Ftot_phase_Ks_qs_plot_3phase(LineWidth, FontSize, LabelSize):
+    print("aka: phase diagram for interpolation model")
+    qs,Cs,optFtot_m0, optalpha_m0, optgamma_m0,optFtot_m2, optalpha_m2, optgamma_m2, optFtot_m3, optalpha_m3, optgamma_m3 = get_del_Ftot_data_3phase()
+    mi,mj, mk=0,2,3
+    qmesh,Cmesh = np.meshgrid(qs,Cs) # testing CR^2/K
+    m_of_minFtot = m_of_minFtot_3phase_data_get(qs,Cs, optFtot_m0, optFtot_m2, optFtot_m3) # 0->m=0, 1->m=2, 2->m=3
+    qm0,Cm0,qm2,Cm2 = transition_line_of_m_data_get(qs,Cs,m_of_minFtot)
+    qm0,Cm0,qm2,Cm2 = np.array(qm0),np.array(Cm0),np.array(qm2),np.array(Cm2)
+
+
+    ppi = 72
+    plt.figure()
+    fig = plt.figure(figsize=(246 / ppi * 1, 246 / ppi * 0.65))
+    plt.rc("text", usetex=True)
+    plt.rc("text.latex", preamble=r"\usepackage{physics}")
+    axFdiff = plt.subplot2grid((2, 3), (0, 0),rowspan=2, colspan=2)
+    axalpha = plt.subplot2grid((2, 3), (0, 2),rowspan=1)
+    axgamma = plt.subplot2grid((2, 3), (1, 2),rowspan=1,sharex=axalpha)
+    msize = 4
+
+    cmap = cm.get_cmap("bwr")
+
+    print(m_of_minFtot)
+    # just for confirming the m=0->3 transition
+    #axFdiff.pcolormesh(qmesh,Cmesh,m_of_minFtot,shading="auto",cmap=cm.get_cmap("rainbow"))
+    #plt.show()
+
+
+    # plot critical lines
+    #axFdiff.plot(qm0,Cm0, "--",color="gray")
+    #axFdiff.plot(qm2,Cm2, "--",color="gray")
+
+    alph = 0.6
+    # fill m0 section
+    axFdiff.fill_between(qm0,Cm0,y2=max(Cs),color="tomato",alpha = alph, edgecolor="None")
+
+    # find tri critial point
+    qt,Ct = qm2[0], Cm2[0]
+    # fill m2 section
+    print("np.concatenate(qm0[qm0<qt],qm2)",np.concatenate((qm0[qm0<qt],qm2)))
+    axFdiff.fill_between(np.concatenate((qm0[qm0<qt],qm2)),np.concatenate((Cm0[qm0<qt],Cm2)),y2=min(Cs), color="royalblue",alpha = alph, edgecolor="None")
+    #axFdiff.fill_between(qm2,Cm2,y2=min(Cs),color="royalblue",alpha = 0.75)
+
+    # fill m3 section
+    axFdiff.fill_betweenx(np.concatenate((Cm2[::-1],Cm0[qm0>=qt])),np.concatenate((qm2[::-1],qm0[qm0>=qt],)),x2=max(qm2), color = "purple",alpha=alph, edgecolor="None")
+    #axFdiff.fill_betweenx(Cm2,qm2,x2=max(qm2), color = "purple",alpha=0.75)
+
+    axFdiff.set_xlim(min(qm0),max(qm2))
+    axFdiff.set_ylim(0,max(Cs))
+
+    qR = np.linspace(0,1.7,20)
+    axFdiff.plot(qR,2*(1+qR**2),linestyle="-",color="k",label=r"$2(1+q^2R^2)$")
+    axFdiff.legend(loc="center left",ncol=1,columnspacing=0.1,handlelength=0.5,handletextpad=0.5,labelspacing=0.1,markerscale=1,frameon=False,fontsize=LabelSize)
+
+    '''
+    levels = np.array([-0.5,0.5,1.5,2.5])
+    cfc = axFdiff.contourf(qmesh,Cmesh,m_of_minFtot,levels, cmap=cmap,alpha=0.75, norm=colors.TwoSlopeNorm(vmin=-1,vcenter=0.5,vmax=3))
+    cs = axFdiff.contour(cfc,levels=levels,colors=("k"),linestyles="--",linewidths=(LineWidth))
+    qR = np.linspace(0,1.7,20)
+    axFdiff.plot(qR,2*(1+qR**2),linestyle="-",color="gray",label=r"$2(1+q^2R^2)$")
+    axFdiff.legend(loc="center left",ncol=1,columnspacing=0.1,handlelength=0.5,handletextpad=0.5,labelspacing=0.1,markerscale=1,frameon=False,fontsize=LabelSize)
+    '''
+
+    axFdiff.set_xlabel(r"$qR$",fontsize=LabelSize)
+    axFdiff.set_ylabel(r"$CR^2/K$",fontsize=LabelSize)
+    axFdiff.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="off", labelbottom=True, labelleft=True, labelsize=LabelSize)
+    #cbar.ax.set_title(r"$\Delta E'R^2/K$",fontsize=LabelSize)
+    axFdiff.xaxis.set_major_locator(MultipleLocator(1))
+    axFdiff.xaxis.set_minor_locator(MultipleLocator(0.2))
+    axFdiff.yaxis.set_major_locator(MultipleLocator(1))
+    axFdiff.yaxis.set_minor_locator(MultipleLocator(0.5))
+
+    if(mi==0 and mj==2 and mk==3):
+        #pass
+        axFdiff.text(0.4,5,"Smectic-A\n" + r"$(m=%d)$"%mi,fontsize=LabelSize,multialignment='center')
+        #axFdiff.text(1.0,2,"Cholesteric\n",fontsize=LabelSize,multialignment='center')
+        axFdiff.text(0.4,0.8,"Cholesteric\n" + r"$(m=%d)$"%mj,fontsize=LabelSize,multialignment='center')
+        axFdiff.text(1.2,3, "Cholesteric\n" +r"$(m=%d)$"%mk,fontsize=LabelSize,multialignment='center')
+
+    x1, y1 = 0.8, 0.05
+    axFdiff.text(x1, y1, r"(a)", fontsize=FontSize, transform=axFdiff.transAxes)
+
+    # to be built for 3 phases case
+
+    # plot tan alpha
+    nlegend = 4
+    gap=len(optalpha_m2)//nlegend
+    if not gap:
+        gap=1
+    print("gap",gap)
+    start = 2
+    ccolors = ["gold","red", "blue", "purple", "black"]
+    lss = ["--","-"]
+    c = 0
+    C_to_plot = [1.0,1.5,2.5,4]
+
+    for C in C_to_plot:
+        i = np.where(Cs==C)[0][0]
+        for m in [2,3]:
+            select = m_of_minFtot[i]==m-1
+            #select = optFtot_diff[i]<100000
+            if m==2:
+                optalpha =optalpha_m2[i]
+                axalpha.plot(qs[select][:],np.tan(optalpha[select][:]),ls=lss[m-2],ms=msize,mfc="None",lw=LineWidth,label="%.1f"%Cs[i],color=ccolors[c])
+            elif m==3:
+                optalpha =optalpha_m3[i]
+                axalpha.plot(qs[select][:],np.tan(optalpha[select][:]),ls=lss[m-2],ms=msize,mfc="None",lw=LineWidth,color=ccolors[c])
+
+            #print("K[i]=",Ks[i])
+        c=c+1
+        #print("optalpha_m2[i][select]=",optalpha_m2[i][select])
+
+    #axalpha.set_xlabel(r"$qR$",fontsize=LabelSize)
+    axalpha.legend(loc="upper left",ncol=1,columnspacing=0.1,handlelength=0.5,handletextpad=0.25,labelspacing=0.1,markerscale=1,frameon=False,fontsize=LabelSize)
+    axalpha.set_ylabel(r"$\tan\alpha$",fontsize=LabelSize)
+    axalpha.yaxis.set_label_position("right")
+    axalpha.yaxis.tick_right()
+    axalpha.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="off", labelbottom=False, labelleft=False, labelsize=LabelSize)
+    axalpha.xaxis.set_major_locator(MultipleLocator(1))
+    axalpha.xaxis.set_minor_locator(MultipleLocator(0.5))
+    axalpha.yaxis.set_major_locator(MultipleLocator(0.5))
+    axalpha.yaxis.set_minor_locator(MultipleLocator(0.25))
+    x1, y1 = 0.7, 0.1
+    axalpha.text(x1, y1, r"(b)", fontsize=FontSize, transform=axalpha.transAxes)
+
+
+    # plot gamma
+    c = 0
+    for C in C_to_plot:
+        i = np.where(Cs==C)[0][0]
+        for m in [2,3]:
+            select = m_of_minFtot[i]==m-1
+            if m==2:
+                axgamma.plot(qs[select],optgamma_m2[i][select],"--",ms=msize,mfc="None",lw=LineWidth,color=ccolors[c])
+            elif m==3:
+                axgamma.plot(qs[select],optgamma_m3[i][select],"-",ms=msize,mfc="None",lw=LineWidth,color=ccolors[c])
+
+
+        c+=1
+    axgamma.set_xlabel(r"$qR$",fontsize=LabelSize)
+    axgamma.set_ylabel(r"$\gamma$",fontsize=LabelSize)
+    axgamma.yaxis.set_label_position("right")
+    axgamma.yaxis.tick_right()
+    axgamma.tick_params(which="both", direction="in", bottom="on", top="off", right="on", left="off", labelbottom=True, labelleft=False, labelsize=LabelSize)
+
+    axgamma.xaxis.set_major_locator(MultipleLocator(1))
+    axgamma.xaxis.set_minor_locator(MultipleLocator(0.5))
+
+    axgamma.yaxis.set_major_locator(MultipleLocator(0.1))
+    axgamma.yaxis.set_minor_locator(MultipleLocator(0.05))
+
+    x1, y1 = 0.7, 0.1
+    axgamma.text(x1, y1, r"(c)", fontsize=FontSize, transform=axgamma.transAxes)
+
+
+    plt.tight_layout(pad=0.1)
+    plt.savefig("figures/two_mod_del_E_3phase.pdf",format="pdf")
     #plt.show()
     plt.close()
 

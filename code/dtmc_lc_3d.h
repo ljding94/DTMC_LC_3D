@@ -167,6 +167,8 @@ public:
     // Structure related measurements
     // Gyration tensor measurement
     std::vector<double> Gij_m();
+    // Q tensor measurement for checking global nematic order
+    std::vector<double> Qij_m();
     // seperation between 2 edges measurement
     double D_edge_com_m();
     // normalized twist from center of mass measurement
