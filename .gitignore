@@ -2,5 +2,6 @@
 !code
 !pycode
 !plot
+plot/figures/*
 !README.md
 !.gitignore
