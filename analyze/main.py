@@ -62,13 +62,13 @@ def main():
 
     # return 0
 
-    foldername = "../data/Ne2/Aug8_2023"
+    foldername = "../data/Ne2/Oct8_2023"
     print("analyzing " + foldername)
     N = 300
     #Ns = [100, 200, 300, 400, 500]
     imod = 3  # 1 for rhombus, 2 disk, 3 cylinder, 4 for mobius strip
     Ne = 2
-    lf = 15.0
+    lf = 25.0
     lfs = [15.0,20.0,25.0,30.0,35.0]
 
     kar = 50
@@ -83,27 +83,30 @@ def main():
 
     qs = np.arange(0.1, 3.01, 0.1)
     Cns = np.arange(1.0,13.1,1.0)
+    Cns = [2,4,6,8]
     Cn = 4.0
-    ids = [0,1,2,3,4,5]
+    lfs = [15,25,35]
+    Kds = np.arange(1.0,7.01,0.2)
+    q = 0
+    #ids = [0,1,2,3,4,5]
     id = 0
     #Cns = np.arange(6.0,12.1,2.0)
     pars = []
     pars1, pars2 = [], []
     #for lf in lfs[:]:
-    for Kd in Kds[:]:
+    for Cn in Cns[:]:
         #Cn = Kd
-        pars.append([N, imod, Ne, lf, kar, C0, karg, lam, Kd, qs, Cn, id])
+        pars.append([N, imod, Ne, lf, kar, C0, karg, lam, Kds, q, Cn, id])
         # pars1.append([N, 1, 2, lf, kar, C0, karg, lam, Kd, qs, Cn])
         # pars2.append([N, 3, 2, lf, kar, C0, karg, lam, Kd, qs, Cn])
     par_nm = ["N", "imod", "Ne", "lf", "kar", "C0", "karg", "lam", "Kd", "q", "Cn", "id"]
     par_dg = [0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0]  # number of digit for each
-    mod = "q"
+    mod = "Kd"
 
-    # test Q ana
-    Qij_stat_ana("../data/scratch_local", [100,1,1,0.0,50,0.0,0.0,6.0,10.0,[0.0],4.0,0], par_nm, par_dg, mod, tau_c=6)
+    #test Q ana
+    Qij_stat_ana("../data/scratch_local", [101,1,1,0.0,50,0.0,0.0,6.0,10.0,[0.0],4.0,0], par_nm, par_dg, "q", 1,tau_c=6)
     #config_plot_xyz("../data/scratch_local/"+"State_N91_imod2_Ne2_lf0.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q0.0_Cn4.0_id0_init.csv", mesh=1, rod=1, piwall=0, tag=ctag, Format="png")
     #config_plot_xyz("../data/scratch_local/"+"State_N91_imod2_Ne2_lf0.0_kar50_C00.0_karg0.0_lam6.0_Kd4.0_q0.0_Cn4.0_id0.csv", mesh=1, rod=1, piwall=0, tag=ctag, Format="png")
-
     return 0
 
     # run test plot
@@ -117,14 +120,15 @@ def main():
         #O_stat_ana(foldername, pars[i], par_nm, par_dg,mode=mod, thermN=5000, CnequalsKc=0, tau_c=6)
         #Os_pars_plot(foldername, [pars[i]], par_nm, par_dg, mode=mod, subfix="Cn%d"%Cn)
         #O_stat_ana_multi(foldername, pars[i], par_nm, par_dg, mode=mod, nmulti=13, thermN=5000, CnequalsKc=0, tau_c=6)
-        if 0:
-            pass
+
+        if 1:
+            Qij_stat_ana(foldername, pars[i], par_nm, par_dg, mode=mod, thermN=100, tau_c=6)
             #Gij_stat_ana(foldername, pars[i], par_nm, par_dg, mode=mod, tau_c=6)
             # rhor_ave_plot(foldername, pars[i], par_nm, par_dg, mode=mod, del_r=0.1, tag="", leg_num=5)
 
         if 0:
-            for q in qs[::1]:
-                if 1:
+            for q in qs[::2]:
+                if 0:
                     print("plotting O vs MC steps")
                     filename = foldername + "/O_MC_N%.0f_imod%.0f_Ne%.0f_lf%.1f_kar%.0f_C0%.1f_karg%.1f_lam%.1f_Kd%.1f_q%.1f_Cn%.1f_id%d.csv" %(N, imod, Ne, lf, kar, C0, karg, lam, Kd, q, Cn, id)
                     if os.path.exists(filename):
@@ -191,8 +195,9 @@ def main():
 
     colors = None
     alphas = None
-    # Geig_pars_plot(foldername, pars, par_nm, par_dg, mode=mod)
-    #Os_pars_plot(foldername, pars, par_nm, par_dg, mode=mod)
+    #Geig_pars_plot(foldername, pars, par_nm, par_dg, mode=mod)
+    Qeig_pars_plot(foldername, pars, par_nm, par_dg, mode=mod)
+    Os_pars_plot(foldername, pars, par_nm, par_dg, mode=mod)
     # additional test
 
 

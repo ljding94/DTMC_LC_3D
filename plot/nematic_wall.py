@@ -29,8 +29,34 @@ def tilt_Kds_Cn_data_get():
     labels = list(map(str, Cns))
     legendtitle=r"$l_f=%.0f, C$"%lf
 
-    #return [Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle]
-    return [Kds, p2uu_aves,p2uu_errs,labels, colors, markers,legendtitle] # trying p2uu
+    return [Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle]
+    #return [Kds, p2uu_aves,p2uu_errs,labels, colors, markers,legendtitle] # trying p2uu
+
+def tilt_Kds_Cn_Qdata_get():
+    foldername = "../data/Ne2/Oct8_2023"
+    lf = 25
+    Cns = [2,4,6,8]
+    datas, labels, colors, markers = [], [], [], []
+    #colors = ["red", "purple", "blue", "royalblue"]
+    colors = ["blue", "orange", "purple", "red"]
+    markers = ["v", "s", "p", "h", "o"]
+    for i in range(len(Cns)):
+        fname = foldername + "/Qij_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kds_q0.0_Cn%.1f_id0_ana.csv" % (lf,Cns[i])
+        datas.append(np.loadtxt(fname, skiprows=1, delimiter=",", unpack=True))
+
+    datas = np.transpose(np.array(datas), axes=(1, 0, 2))
+    Kds, S_aves, S_errs = datas[0], datas[7], datas[9] # test using p2uu
+    # normalize Kd by Cn
+    KdCns=[]
+    for i in range(len(Cns)):
+        KdCns.append(Kds[i]/Cns[i])
+
+    labels = list(map(str, Cns))
+    legendtitle=r"$l_f=%.0f, C$"%lf
+
+    return [Kds, S_aves,S_errs,labels, colors, markers,legendtitle]
+    #return [Kds, p2uu_aves,p2uu_errs,labels, colors, markers,legendtitle] # trying p2uu
+
 
 
 def tilt_Kds_config_data_get():
@@ -89,6 +115,30 @@ def tilt_Kds_lf_data_get():
 
     #return [Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle]
     return [Kds, p2uu_aves,p2uu_errs,labels, colors, markers,legendtitle] # trying p2uu
+
+def tilt_Kds_lf_Qdata_get():
+    foldername = "../data/Ne2/Oct8_2023"
+    Cn=4.0
+    lfs = [15,25,35]
+    datas, labels, colors, markers = [], [], [], []
+    #colors = ["red", "green", "blue", "royalblue"]
+    colors = ["blue", "orange", "purple", "red"]
+    markers = ["v", "s", "p", "h", "o"]
+    for i in range(len(lfs)):
+        fname = foldername + "/Qij_N300_imod3_Ne2_lf%.1f_kar50_C00.0_karg0.0_lam6.0_Kds_q0.0_Cn%.1f_id0_ana.csv" % (lfs[i],Cn)
+        datas.append(np.loadtxt(fname, skiprows=1, delimiter=",", unpack=True))
+
+    datas = np.transpose(np.array(datas), axes=(1, 0, 2))
+    Kds, S_aves, S_errs = datas[0], datas[7], datas[9]
+    # normalize Kd by lf
+    Kdlfs=[]
+    for i in range(len(lfs)):
+        Kdlfs.append(Kds[i]/lfs[i])
+    labels = list(map(str, lfs))
+    legendtitle=r"$C=%.0f,l_f$"%Cn
+
+    return [Kds, S_aves,S_errs,labels, colors, markers,legendtitle]
+
 
 
 def nematic_Kd_plot(LineWidth, FontSize, LabelSize):
@@ -218,12 +268,13 @@ def walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize):
     n = 2 # date inteval
     # smectic to nematic
     ## tilt drops as Kd increases
-    Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle = tilt_Kds_Cn_data_get()
+    #Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle = tilt_Kds_Cn_data_get()
+    Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle = tilt_Kds_Cn_Qdata_get()
     for i in range(len(Kds)):
         axCn_Kd.errorbar(Kds[i][ni::n],un2_aves[i][ni::n],un2_errs[i][ni::n], ls=":", color=colors[i],mfc="None",marker=markers[i],ms=msize,label=labels[i])
     axCn_Kd.tick_params(which="both",direction="in", top="on", right="on",labelbottom=False, labelleft=True,labelsize=LabelSize)
     #axCn_Kd.set_ylabel(r"$\left<(\vu{u}\cdot\vu{n})^2\right>$", fontsize=FontSize)
-    axCn_Kd.set_ylabel(r"$\left<\frac{3}{2}(\vu{u}\cdot\vu{u})-\frac{1}{2}\right>$", fontsize=FontSize)
+    axCn_Kd.set_ylabel(r"$\left<S\right>$", fontsize=FontSize)
     axCn_Kd.set_ylim(0.42,0.98)
     axCn_Kd.xaxis.set_major_locator(MultipleLocator(1))
     axCn_Kd.xaxis.set_minor_locator(MultipleLocator(0.5))
@@ -235,19 +286,20 @@ def walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize):
     axCn_Kd.text(x1,y1, r"(b)", fontsize=FontSize,transform=axCn_Kd.transAxes)
 
     ## critical Kd depends on the edge seperation distance
-    Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle = tilt_Kds_lf_data_get()
+    #Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle = tilt_Kds_lf_data_get()
+    Kds, un2_aves,un2_errs,labels, colors, markers,legendtitle = tilt_Kds_lf_Qdata_get() # actually S
     for i in range(len(Kds)):
         axlf_Kd.errorbar(Kds[i][ni::n],un2_aves[i][ni::n],un2_errs[i][ni::n], ls=":", color=colors[i],mfc="None",marker=markers[i],ms=msize,label=labels[i])
     axlf_Kd.tick_params(which="both",direction="in", top="on", right="on",labelbottom=True, labelleft=True,labelsize=LabelSize)
     axlf_Kd.set_ylabel(r"$\left<(\vu{u}\cdot\vu{n})^2\right>$", fontsize=FontSize)
-    axlf_Kd.set_ylabel(r"$\left<\frac{3}{2}(\vu{u}\cdot\vu{u})-\frac{1}{2}\right>$", fontsize=FontSize)
+    axlf_Kd.set_ylabel(r"$\left<S\right>$", fontsize=FontSize)
     #axlf_Kd.set_ylim(0.35,1.0)
     axlf_Kd.xaxis.set_major_locator(MultipleLocator(1))
     axlf_Kd.xaxis.set_minor_locator(MultipleLocator(0.5))
     axlf_Kd.yaxis.set_major_locator(MultipleLocator(0.1))
     axlf_Kd.yaxis.set_minor_locator(MultipleLocator(0.05))
     axlf_Kd.set_xlabel(r"$\epsilon_{LL}$",fontsize=FontSize)
-    axlf_Kd.legend(title=legendtitle,loc="upper right",ncol=1,columnspacing=0.5,handlelength=0.5,handletextpad=0.1,frameon=False,fontsize=FontSize)
+    axlf_Kd.legend(title=legendtitle,loc="right",ncol=1,columnspacing=0.5,handlelength=0.5,handletextpad=0.1,frameon=False,fontsize=FontSize)
     x1, y1 = 0.85, 0.1
     axlf_Kd.text(x1,y1, r"(c)", fontsize=FontSize,transform=axlf_Kd.transAxes)
 
@@ -255,13 +307,16 @@ def walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize):
     qs, un2_aves, un2_errs, labels, colors, markers, legendtitle = tilt_qs_Cn_data_get()
     for i in range(len(qs)):
         axCn_q.errorbar(qs[i][ni::n], un2_aves[i][ni::n], un2_errs[i][ni::n], ls=":", color=colors[i], mfc="None", marker=markers[i], ms=msize, label=labels[i])
-    axCn_q.tick_params(which="both", direction="in", top="on", right="on", labelbottom=False, labelleft=False, labelsize=LabelSize)
+    axCn_q.tick_params(which="both", direction="in", top="on", right="on", labelbottom=False, labelleft=True, labelsize=LabelSize)
     #axCn_q.set_ylabel(r"$(\vu{u}\cdot\vu{n})^2$", fontsize=FontSize)
     axCn_q.set_ylim(0.42, 0.98)
     axCn_q.xaxis.set_major_locator(MultipleLocator(0.5))
     axCn_q.xaxis.set_minor_locator(MultipleLocator(0.25))
     #axCn_q.yaxis.set_major_locator(MultipleLocator(0.1))
     #axCn_q.yaxis.set_minor_locator(MultipleLocator(0.05))
+    axCn_q.set_ylabel(r"$\left<(\vu{u}\cdot\vu{n})^2\right>$", fontsize=FontSize)
+    axCn_q.yaxis.set_label_position("right")
+    axCn_q.yaxis.tick_right()
     #axCn_q.set_xlabel(r"$q$", fontsize=FontSize)
     axCn_q.legend(title=legendtitle, ncol=3, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
     x1, y1 = 0.85, 0.1
@@ -271,12 +326,17 @@ def walls_Cn_lf_vs_Kd_q(LineWidth, FontSize, LabelSize):
     qs, un2_aves, un2_errs, labels, colors, markers, legendtitle = tilt_qs_lf_data_get()
     for i in range(len(qs)):
         axlf_q.errorbar(qs[i][ni::n], un2_aves[i][ni::n], un2_errs[i][ni::n], ls=":", color=colors[i], mfc="None", marker=markers[i], ms=msize, label=labels[i])
-    axlf_q.tick_params(which="both", direction="in", top="on", right="on", labelbottom=True, labelleft=False, labelsize=LabelSize)
+    axlf_q.tick_params(which="both", direction="in", top="on", right="on", labelbottom=True, labelleft=True, labelsize=LabelSize)
     # axlf_q.set_ylabel(r"$(\vu{u}\cdot\vu{n})^2$", fontsize=FontSize)
     # axlf_q.set_ylim(0.35,1.0)
     axlf_q.xaxis.set_major_locator(MultipleLocator(0.5))
     axlf_q.xaxis.set_minor_locator(MultipleLocator(0.25))
     axlf_q.set_xlabel(r"$k_c$", fontsize=FontSize)
+    #axlf_q.set_ylabel(r"$\left<(\vu{u}\cdot\vu{n})^2\right>$", fontsize=FontSize)
+    axlf_q.set_ylabel(r"$\left<(\vu{u}\cdot\vu{n})^2\right>$", fontsize=FontSize)
+    axlf_q.yaxis.set_label_position("right")
+    axlf_q.yaxis.tick_right()
+
     axlf_q.legend(title=legendtitle, loc="upper right", ncol=1, columnspacing=0.5, handlelength=0.5, handletextpad=0.1, frameon=False, fontsize=FontSize)
     x1, y1 = 0.85, 0.1
     axlf_q.text(x1, y1, r"(e)", fontsize=FontSize, transform=axlf_q.transAxes)

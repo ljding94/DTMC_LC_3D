@@ -241,6 +241,45 @@ def Geig_pars_plot(foldername, pars, par_nm, par_dg, mode):
     plt.close()
 
 
+def Qeig_pars_plot(foldername, pars, par_nm, par_dg, mode):
+    colors, alphas = None, None
+    data, O_label = [], []
+    xLabel = mode
+    cpar_ind = find_cpar_ind(par_nm, mode)
+    for i in range(len(pars)):
+        par = pars[i]
+        par_dealing = par[:]
+        f2rtail = "/Qij"
+        label = ""
+        for j in range(len(par)):
+            if j == cpar_ind:
+                f2rtail += "_" + par_nm[j] + "s"
+            else:
+                f2rtail += "_" + par_nm[j] + "%.*f" % (par_dg[j], par_dealing[j])
+                label += par_nm[j] + "%.*f," % (par_dg[j], par_dealing[j])
+        f2rtail += "_ana.csv"
+        filename = foldername + f2rtail
+        data.append(np.loadtxt(filename, skiprows=1, delimiter=",", unpack=True))
+        O_label.append(label)
+    data = np.transpose(np.array(data), axes=(1, 0, 2))
+    cpar, Qeig0_ave, Qeig0_tau, Qeig0_err, Qeig1_ave, Qeig1_tau, Qeig1_err, Qeig2_ave, Qeig2_tau, Qeig2_err  = data
+
+    ppi = 72
+    plt.figure()
+    plt.rc("text", usetex=True)
+    fig, axs = plt.subplots(3, 1, figsize=(246 / ppi * 1, 246 / ppi * 0.6 * 3), sharex=True, sharey=False)
+
+    O_cpar_plot(axs[0], Qeig0_ave, Qeig0_err, O_label, "Qeig0", r"$\lambda_0^Q$", cpar, colors, alphas)
+    O_cpar_plot(axs[1], Qeig1_ave, Qeig1_err, O_label, "Qeig1", r"$\lambda_1^Q$", cpar, colors, alphas)
+    O_cpar_plot(axs[2], Qeig2_ave, Qeig2_err, O_label, "Qeig2", r"$\lambda_2^Q = S$", cpar, colors, alphas)
+    axs[0].set_xlabel(xLabel)
+    # axs[0].set_ylim = (ylim_min,ylim_max)
+    # axs[0].xaxis.set_minor_locator(MultipleLocator(0.5))
+    lgd = axs[0].legend(loc="upper center", bbox_to_anchor=(0.5, 0.7 + 0.25 * 4))
+    plt.tight_layout(pad=0.5)
+    plt.savefig(foldername + "/Qij_" + mode + ".pdf", format="pdf", bbox_extra_artists=(lgd,), bbox_inches="tight", transparent=True)
+    plt.close()
+
 def rhor_ave_plot(foldername, par, par_nm, par_dg, mode, del_r, tag="", leg_num=5):
     # plot density distribution from the center of mass
     rhor_all = []

@@ -774,10 +774,6 @@ std::vector<double> dtmc_lc::Qij_m()
             for (int j=0; j<3; j++)
             {
                 Qij[3*i+j] += mesh[n].u[i]*mesh[n].u[j];
-                if(j==i)
-                {
-                    Qij[3*i+j] -= 1/3;
-                }
             }
         }
     }
@@ -786,6 +782,7 @@ std::vector<double> dtmc_lc::Qij_m()
     {
         Qij[k] /= N;
     }
+    Qij[0] -= 1.0/3; Qij[4] -= 1.0/3; Qij[8] -= 1.0/3;
     return Qij;
 }
 

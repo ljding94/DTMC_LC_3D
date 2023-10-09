@@ -708,7 +708,7 @@ def Gij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
             )
 
 
-def Qij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
+def Qij_stat_ana(foldername, par, par_nm, par_dg, mode, thermN, tau_c=6):
     Qeig0_ave, Qeig0_tau, Qeig0_err = [], [], []
     Qeig1_ave, Qeig1_tau, Qeig1_err = [], [], []
     Qeig2_ave, Qeig2_tau, Qeig2_err = [], [], []
@@ -723,7 +723,7 @@ def Qij_stat_ana(foldername, par, par_nm, par_dg, mode, tau_c=6):
             f2rtail += "_" + par_nm[j] + "%.*f" % (par_dg[j], par_dealing[j])
         f2rtail += ".csv"
         file2read = foldername + f2rtail
-        Qdata = np.loadtxt(file2read, skiprows=1, usecols=range(9), delimiter=",", unpack=True)
+        Qdata = np.loadtxt(file2read, skiprows=1+thermN, usecols=range(9), delimiter=",", unpack=True)
         # get edge-edge distance Dedge
 
         # get eigenvalues of Qij
